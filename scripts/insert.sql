@@ -29,13 +29,13 @@ VALUES
 GO
 
 -- Inserting random data for [dbo].[Criteria]
-INSERT INTO [dbo].[Criteria] (Criteria_Number, Title, Description)
+INSERT INTO [dbo].[Criteria] (Title, Description)
 VALUES 
-('1', 'Criterion 1', 'Description of Criterion 1'),
-('2', 'Criterion 2', 'Description of Criterion 2'),
-('3', 'Criterion 3', 'Description of Criterion 3'),
-('4', 'Criterion 4', 'Description of Criterion 4'),
-('5', 'Criterion 5', 'Description of Criterion 5');
+('Criterion 1', 'Description of Criterion 1'),
+('Criterion 2', 'Description of Criterion 2'),
+('Criterion 3', 'Description of Criterion 3'),
+('Criterion 4', 'Description of Criterion 4'),
+('Criterion 5', 'Description of Criterion 5');
 GO
 
 -- Inserting random data for [dbo].[Has]
