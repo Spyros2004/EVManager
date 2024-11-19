@@ -101,7 +101,7 @@ CREATE TABLE [dbo].[Vehicle]
     [CO2_Emissions] INT NOT NULL CHECK ([CO2_Emissions] <= 50), 
     [Brand] VARCHAR(50) NOT NULL, 
     [Price] DECIMAL(15, 2) NOT NULL CHECK ([Price] <= 80000), 
-    [Engine_Fuel] VARCHAR(10) NOT NULL CHECK ([Engine_Fuel] IN ('diesel', 'petrol')), 
+    [Engine_Fuel] VARCHAR(20) NOT NULL CHECK ([Engine_Fuel] IN ('diesel', 'petrol','electricity')), 
     [Document_ID] INT NOT NULL,
     CONSTRAINT [PK_VEHICLE] PRIMARY KEY ([Vehicle_ID] ASC)
 )
