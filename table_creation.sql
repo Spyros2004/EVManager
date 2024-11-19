@@ -131,7 +131,7 @@ CREATE TABLE [dbo].[Criteria]
 CREATE TABLE [dbo].[Has]
 (
     [Category_Number] INT NOT NULL,
-    [Criteria_Number] VARCHAR(10) NOT NULL, 
+    [Criteria_Number] INT NOT NULL, 
     CONSTRAINT [PK_HAS] PRIMARY KEY ([Category_Number], [Criteria_Number] ASC)
 )
 
