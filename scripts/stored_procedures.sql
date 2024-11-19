@@ -154,40 +154,34 @@ END
 GO
 
 -- Stored Procedure for User Login
-CREATE PROCEDURE LoginUser
-    @Username NVARCHAR(50),
-    @Password NVARCHAR(255)
+CREATE PROCEDURE [dbo].[LoginUser]
+    @Username NVARCHAR(50)
 AS
 BEGIN
     BEGIN TRY
-        -- Verify user credentials (Username + Password)
-        DECLARE @UserID INT;
-        DECLARE @UserStatus NVARCHAR(20);
+        -- Declare variables to hold the password and status
+        DECLARE @Password NVARCHAR(255);
+        DECLARE @Status NVARCHAR(20);
         
-        SELECT @UserID = User_ID, @UserStatus = Status
+        -- Fetch the password and status for the given username
+        SELECT @Password = [Password], @Status = [Status]
         FROM [dbo].[User]
-        WHERE [Username] = @Username AND [Password] = @Password;
-
-        IF @UserID IS NULL
+        WHERE [Username] = @Username;
+        
+        -- Return the password and status as output
+        IF @Password IS NULL
         BEGIN
-            RAISERROR('Invalid Username or Password.', 16, 1);
+            RAISERROR('Invalid Username', 16, 1);
             RETURN;
         END
+        
+        -- Return the values
+        SELECT @Password AS Password, @Status AS Status;
 
-        -- Check user status (can be extended for more statuses)
-        IF @UserStatus = 'approved'
-        BEGIN
-            PRINT 'Login successful.';
-        END
-        ELSE
-        BEGIN
-            PRINT 'User not approved or is inactive.';
-            RETURN;
-        END
     END TRY
     BEGIN CATCH
-        -- Handle error
-        PRINT 'An error occurred during login.';
+        -- Handle errors
+        PRINT 'An error occurred during the login process';
         THROW;
     END CATCH
 END
