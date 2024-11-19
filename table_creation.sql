@@ -121,7 +121,7 @@ CREATE TABLE [dbo].[Applicant]
 
 CREATE TABLE [dbo].[Criteria]
 (
-    [Criteria_Number] VARCHAR(10) NOT NULL,
+    [Criteria_Number] INT NOT NULL IDENTITY(1,1),
     [Title] VARCHAR(255) NOT NULL,
     [Description] VARCHAR(255) NOT NULL,
     UNIQUE ([Title]),
