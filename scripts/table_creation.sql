@@ -108,11 +108,9 @@ CREATE TABLE [dbo].[Vehicle]
 
 CREATE TABLE [dbo].[User_Session]
 (
-    [Session_ID] INT NOT NULL IDENTITY(1,1),
+    [Session_ID] UNIQUEIDENTIFIERNOT NULL,
     [User_ID] INT NOT NULL,
-    [Session_Token] VARCHAR(255) NOT NULL,
     [Login_Time] DATETIME NOT NULL DEFAULT GETDATE(),
-    UNIQUE([Session_Token]),
     CONSTRAINT [PK_USER_SESSION] PRIMARY KEY ([Session_ID] ASC)
 )
 
