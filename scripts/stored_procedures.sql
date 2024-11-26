@@ -114,15 +114,13 @@ BEGIN
 END
 GO
 
--- Stored Procedure for User Sign Up
-CREATE PROCEDURE SignUpUser
+CREATE PROCEDURE [dbo].SignUpUser
     @First_Name NVARCHAR(50),
     @Last_Name NVARCHAR(50),
     @Username NVARCHAR(50),
     @Email NVARCHAR(100),
     @Password NVARCHAR(255),
     @User_Type NVARCHAR(20),
-    @Status NVARCHAR(20) = 'pending', -- Default to 'pending'
     @Identification NVARCHAR(20) = NULL,   -- Only required if user is an applicant
     @Company_Private NVARCHAR(20) = NULL,  -- Only required if user is an applicant
     @Gender CHAR(1) = NULL,                -- Only required if user is an applicant
@@ -132,19 +130,19 @@ BEGIN
     -- Check if Username or Email already exists
     IF EXISTS (SELECT 1 FROM [dbo].[User] WHERE [Username] = @Username)
     BEGIN
-        RAISERROR('Username already exists. Please choose a different one.', 16, 1);
+        THROW 50001, 'Username already exists. Please choose a different one.', 1;
         RETURN;
     END
 
     IF EXISTS (SELECT 1 FROM [dbo].[User] WHERE [Email] = @Email)
     BEGIN
-        RAISERROR('Email already exists. Please use a different one.', 16, 1);
+        THROW 50002, 'Email already exists. Please use a different one.', 1;
         RETURN;
     END
 
     -- Hash the password using SHA-512
-    DECLARE @HashedPassword VARBINARY(512);
-    SET @HashedPassword = HASHBYTES('SHA2_512', CONVERT(NVARCHAR(255), @Password));
+    DECLARE @HashedPassword VARBINARY(512); -- SHA2_512 outputs 64 bytes
+    SET @HashedPassword = HASHBYTES('SHA2_512', @Password);
 
     -- Start a transaction for the user and applicant inserts
     BEGIN TRANSACTION;
@@ -154,7 +152,7 @@ BEGIN
         INSERT INTO [dbo].[User] 
             ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status])
         VALUES
-            (@First_Name, @Last_Name, @Username, @Email, @HashedPassword, @User_Type, @Status);
+            (@First_Name, @Last_Name, @Username, @Email, @HashedPassword, @User_Type, 'pending');
 
         -- Retrieve the User_ID of the newly inserted user using SCOPE_IDENTITY()
         DECLARE @User_ID INT;
@@ -166,9 +164,7 @@ BEGIN
             -- Check if all required fields for Applicant are provided
             IF @Identification IS NULL OR @Company_Private IS NULL OR @Gender IS NULL OR @BirthDate IS NULL
             BEGIN
-                RAISERROR('For applicants, all fields (Identification, Company_Private, Gender, BirthDate) are required.', 16, 1);
-                ROLLBACK TRANSACTION;
-                RETURN;
+                THROW 50003, 'For applicants, all fields (Identification, Company_Private, Gender, BirthDate) are required.', 1;
             END
 
             -- Insert the applicant details into the Applicant table
@@ -185,13 +181,11 @@ BEGIN
     END TRY
     BEGIN CATCH
         -- Handle error and rollback transaction
-        PRINT 'An error occurred during sign-up.';
         ROLLBACK TRANSACTION;
         THROW;
     END CATCH
-END
+END;
 GO
-
 
 -- Stored Procedure for User Login
 CREATE PROCEDURE [dbo].[LoginUser]
