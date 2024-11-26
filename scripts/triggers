@@ -8,8 +8,7 @@ BEGIN
     -- Update the Status to 'approved' for new records where User_Type is 'Admin' or 'Applicant'
     UPDATE [dbo].[User]
     SET [Status] = 'approved'
-    FROM [dbo].[User] u
-    INNER JOIN inserted i ON u.User_ID = i.User_ID
-    WHERE i.User_Type IN ('Admin', 'Applicant');
+    FROM [dbo].[User] U, INSERTED I
+    WHERE U.User_ID = I.User_ID AND I.User_Type IN ('Admin', 'Applicant');
 END
 GO
