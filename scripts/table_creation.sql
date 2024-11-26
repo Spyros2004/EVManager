@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[User]
     [Username] VARCHAR(50) NOT NULL, 
     [Email] VARCHAR(100) NOT NULL, 
     [Password] VARCHAR(255) NOT NULL, 
-    [User_Type] VARCHAR(20) NOT NULL CHECK ([User_Type] IN ('Admin', 'TOM', 'AA', 'User', 'Applicant')), 
+    [User_Type] VARCHAR(20) NOT NULL CHECK ([User_Type] IN ('Admin', 'TOM', 'AA', 'Applicant')), 
     [Status] VARCHAR(20) NOT NULL CHECK ([Status] IN ('pending', 'approved', 'suspended', 'deactivated', 'rejected')), 
     UNIQUE ([Username]),
     UNIQUE ([Email]),
