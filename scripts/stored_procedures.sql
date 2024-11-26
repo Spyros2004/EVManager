@@ -1,37 +1,41 @@
 -- 1. Drop Procedure for selecting all records from User table
-DROP PROCEDURE IF EXISTS GetUser
+DROP PROCEDURE IF EXISTS GetUser;
 GO
 
 -- 2. Drop Procedure for selecting all records from Sponsorship_Category table
-DROP PROCEDURE IF EXISTS GetSponsorship
+DROP PROCEDURE IF EXISTS GetSponsorshipCategory;
 GO
 
 -- 3. Drop Procedure for selecting all records from Applicant table
-DROP PROCEDURE IF EXISTS GetApplicant
+DROP PROCEDURE IF EXISTS GetApplicant;
 GO
 
--- 4. Drop Procedure for selecting all records from Criteria table
-DROP PROCEDURE IF EXISTS GetCriteria
+-- 4. Drop Procedure for selecting all records from Criterion table
+DROP PROCEDURE IF EXISTS GetCriterion;
 GO
 
--- 5. Drop Procedure for selecting all records from Has table
-DROP PROCEDURE IF EXISTS GetHas
+-- 5. Drop Procedure for selecting all records from Category_Has_Criterion table
+DROP PROCEDURE IF EXISTS GetCategoryHasCriterion;
 GO
 
 -- 6. Drop Procedure for selecting all records from Application table
-DROP PROCEDURE IF EXISTS GetApplication
+DROP PROCEDURE IF EXISTS GetApplication;
 GO
 
 -- 7. Drop Procedure for selecting all records from Document table
-DROP PROCEDURE IF EXISTS GetDocument
+DROP PROCEDURE IF EXISTS GetDocument;
 GO
 
--- 8. Drop Procedure for selecting all records from Change table
-DROP PROCEDURE IF EXISTS GetChange
+-- 8. Drop Procedure for selecting all records from Modification table
+DROP PROCEDURE IF EXISTS GetModification;
 GO
 
 -- 9. Drop Procedure for selecting all records from Vehicle table
-DROP PROCEDURE IF EXISTS GetVehicle
+DROP PROCEDURE IF EXISTS GetVehicle;
+GO
+
+-- 10. Drop Procedure for selecting all records from User_Session table
+DROP PROCEDURE IF EXISTS GetUserSession;
 GO
 
 -- 10. Drop Procedure for Sign Up
@@ -51,7 +55,7 @@ END
 GO
 
 -- 2. Stored Procedure for selecting all records from Sponsorship_Category table
-CREATE PROCEDURE GetSponsorship
+CREATE PROCEDURE GetSponsorshipCategory
 AS
 BEGIN
     SELECT * FROM [dbo].[Sponsorship_Category];
@@ -66,19 +70,19 @@ BEGIN
 END
 GO
 
--- 4. Stored Procedure for selecting all records from Criteria table
-CREATE PROCEDURE GetCriteria
+-- 4. Stored Procedure for selecting all records from Criterion table
+CREATE PROCEDURE GetCriterion
 AS
 BEGIN
-    SELECT * FROM [dbo].[Criteria];
+    SELECT * FROM [dbo].[Criterion];
 END
 GO
 
--- 5. Stored Procedure for selecting all records from Has table
-CREATE PROCEDURE GetHas
+-- 5. Stored Procedure for selecting all records from Category_Has_Criterion table
+CREATE PROCEDURE GetCategoryHasCriterion
 AS
 BEGIN
-    SELECT * FROM [dbo].[Has];
+    SELECT * FROM [dbo].[Category_Has_Criterion];
 END
 GO
 
@@ -98,11 +102,11 @@ BEGIN
 END
 GO
 
--- 8. Stored Procedure for selecting all records from Change table
-CREATE PROCEDURE GetChange
+-- 8. Stored Procedure for selecting all records from Modification table
+CREATE PROCEDURE GetModification
 AS
 BEGIN
-    SELECT * FROM [dbo].[Change];
+    SELECT * FROM [dbo].[Modification];
 END
 GO
 
@@ -111,6 +115,14 @@ CREATE PROCEDURE GetVehicle
 AS
 BEGIN
     SELECT * FROM [dbo].[Vehicle];
+END
+GO
+
+-- 10. Stored Procedure for selecting all records from User_Session table
+CREATE PROCEDURE GetUserSession
+AS
+BEGIN
+    SELECT * FROM [dbo].[User_Session];
 END
 GO
 
