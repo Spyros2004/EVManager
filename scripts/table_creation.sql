@@ -26,7 +26,7 @@ CREATE TABLE [dbo].[Sponsorship_Category]
     [Description] NVARCHAR(255) NOT NULL, 
     [Amount] DECIMAL(15, 2) NOT NULL CHECK ([Amount] > 0), 
     [Total_Positions] INT NOT NULL CHECK ([Total_Positions] > 0), 
-    [Remaining_Positions] INT NOT NULL,
+    [Remaining_Positions] INT NOT NULL DEFAULT 0,
     CONSTRAINT [PK_SPONSORSHIP_CATEGORY] PRIMARY KEY ([Category_Number] ASC)
 )
 
