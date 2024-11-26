@@ -1,10 +1,10 @@
 -- Insert some users into the User table
 INSERT INTO [dbo].[User] ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status]) 
 VALUES 
-('John', 'Doe', 'johndoe', 'johndoe@example.com', 'hashedpassword1', 'Applicant', 'pending'),
-('Alice', 'Smith', 'alicesmith', 'alicesmith@example.com', 'hashedpassword2', 'Admin', 'approved'),
-('Bob', 'Brown', 'bobbrown', 'bobbrown@example.com', 'hashedpassword3', 'TOM', 'suspended'),
-('Charlie', 'Davis', 'charliedavis', 'charliedavis@example.com', 'hashedpassword4', 'AA', 'deactivated');
+('John', 'Doe', 'johndoe', 'johndoe@example.com', HASHBYTES('SHA2_512', '1234'), 'Applicant', 'pending'),
+('Alice', 'Smith', 'alicesmith', 'alicesmith@example.com', HASHBYTES('SHA2_512', '1234'), 'Admin', 'approved'),
+('Bob', 'Brown', 'bobbrown', 'bobbrown@example.com', HASHBYTES('SHA2_512', '1234'), 'TOM', 'suspended'),
+('Charlie', 'Davis', 'charliedavis', 'charliedavis@example.com', HASHBYTES('SHA2_512', '1234'), 'AA', 'deactivated');
 
 -- Insert some categories into the Sponsorship_Category table
 INSERT INTO [dbo].[Sponsorship_Category] ([Description], [Amount], [Total_Positions], [Remaining_Positions]) 
