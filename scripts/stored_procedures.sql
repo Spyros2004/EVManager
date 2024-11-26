@@ -225,12 +225,11 @@ BEGIN
             THROW 50001, 'Incorrect Password', 1;
         END
 
-        -- Generate a new Session_ID as a uniqueidentifier (not using SessionToken)
         SET @Session_ID = NEWID(); -- Generate unique session ID
 
         -- Insert a new session record into the User_Session table
         INSERT INTO [dbo].[User_Session] (Session_ID, User_ID, Login_Time)
-        VALUES (@Session_ID, @User_ID, GETDATE());
+        VALUES (@Session_ID, @User_ID, DEFAULT);
 
     END TRY
     BEGIN CATCH
