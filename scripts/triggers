@@ -1,4 +1,7 @@
 DROP TRIGGER [dbo].[Update_Status_On_User_Type]
+DROP TRIGGER [dbo].[SetRemainingPositions]
+
+
 
 CREATE TRIGGER [dbo].[Update_Status_On_User_Type]
 ON [dbo].[User]
@@ -11,4 +14,17 @@ BEGIN
     FROM [dbo].[User] U, INSERTED I
     WHERE U.User_ID = I.User_ID AND I.User_Type IN ('Admin', 'Applicant');
 END
+GO
+
+
+CREATE TRIGGER SetRemainingPositions
+ON Sponsorship_Category
+AFTER INSERT
+AS
+BEGIN
+    -- Update Remaining_Positions to be the same as Total_Positions for the inserted record(s)
+    UPDATE Sponsorship_Category
+    SET Remaining_Positions = Total_Positions
+    WHERE Category_Number IN (SELECT Category_Number FROM INSERTED);
+END;
 GO
