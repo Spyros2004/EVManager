@@ -187,36 +187,55 @@ BEGIN
 END;
 GO
 
--- Stored Procedure for User Login
 CREATE PROCEDURE [dbo].[LoginUser]
-    @Username NVARCHAR(50)
+    @Username NVARCHAR(50),
+    @Password NVARCHAR(255), -- Plain text password from PHP
+    @Session_ID UNIQUEIDENTIFIER OUTPUT -- Output parameter for the session ID
 AS
 BEGIN
     BEGIN TRY
-        -- Declare variables to hold the password and status
-        DECLARE @Password NVARCHAR(255);
-        DECLARE @Status NVARCHAR(20);
-        
-        -- Fetch the password and status for the given username
-        SELECT @Password = [Password], @Status = [Status]
+        -- Declare variables to hold the stored password hash, status, and user ID
+        DECLARE @StoredPassword VARBINARY(512);
+        DECLARE @Status VARCHAR(20);
+        DECLARE @User_ID INT;
+
+        -- Fetch the password hash, status, and user ID for the given username
+        SELECT @StoredPassword = [Password], @Status = [Status], @User_ID = [User_ID]
         FROM [dbo].[User]
         WHERE [Username] = @Username;
-        
-        -- Return the password and status as output
-        IF @Password IS NULL
+
+        -- Check if the username exists
+        IF @StoredPassword IS NULL
         BEGIN
-            RAISERROR('Invalid Username', 16, 1);
-            RETURN;
+            -- Throw an error for invalid username
+            THROW 50000, 'Invalid Username', 1;
         END
-        
-        -- Return the values
-        SELECT @Password AS Password, @Status AS Status;
+
+        -- Check if the user's status is "pending"
+        IF @Status = 'pending'
+        BEGIN
+            -- Throw an error if the user is in "pending" status
+            THROW 50002, 'Account is pending approval. Please wait for admin approval.', 1;
+        END
+
+        -- Compare the stored hashed password with the provided password
+        IF @StoredPassword != HASHBYTES('SHA2_512', @Password)
+        BEGIN
+            -- Throw an error for incorrect password
+            THROW 50001, 'Incorrect Password', 1;
+        END
+
+        -- Generate a new Session_ID as a uniqueidentifier (not using SessionToken)
+        SET @Session_ID = NEWID(); -- Generate unique session ID
+
+        -- Insert a new session record into the User_Session table
+        INSERT INTO [dbo].[User_Session] (Session_ID, User_ID, Login_Time)
+        VALUES (@Session_ID, @User_ID, GETDATE());
 
     END TRY
     BEGIN CATCH
-        -- Handle errors
-        PRINT 'An error occurred during the login process';
-        THROW;
+        -- Handle errors and rethrow the error
+        THROW; -- Re-throws the original error
     END CATCH
 END
 GO
