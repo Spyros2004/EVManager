@@ -141,7 +141,7 @@ BEGIN
     END
 
     -- Hash the password using SHA-512
-    DECLARE @HashedPassword VARBINARY(512); -- SHA2_512 outputs 64 bytes
+    DECLARE @HashedPassword VARBINARY(512);
     SET @HashedPassword = HASHBYTES('SHA2_512', @Password);
 
     -- Start a transaction for the user and applicant inserts
@@ -152,7 +152,7 @@ BEGIN
         INSERT INTO [dbo].[User] 
             ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status])
         VALUES
-            (@First_Name, @Last_Name, @Username, @Email, @HashedPassword, @User_Type, 'pending');
+            (@First_Name, @Last_Name, @Username, @Email, @HashedPassword, @User_Type, DEFAULT);
 
         -- Retrieve the User_ID of the newly inserted user using SCOPE_IDENTITY()
         DECLARE @User_ID INT;
