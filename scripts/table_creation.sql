@@ -8,8 +8,8 @@ GO
 CREATE TABLE [dbo].[User]
 (
     [User_ID] INT NOT NULL IDENTITY(1,1), 
-    [First_Name] VARCHAR(50) NOT NULL, 
-    [Last_Name] VARCHAR(50) NOT NULL, 
+    [First_Name] NVARCHAR(50) NOT NULL, 
+    [Last_Name] NVARCHAR(50) NOT NULL, 
     [Username] VARCHAR(50) NOT NULL, 
     [Email] VARCHAR(100) NOT NULL, 
     [Password] VARBINARY(512) NOT NULL, 
@@ -23,7 +23,7 @@ CREATE TABLE [dbo].[User]
 CREATE TABLE [dbo].[Sponsorship_Category]
 (
     [Category_Number] INT NOT NULL IDENTITY(1,1),
-    [Description] VARCHAR(255) NOT NULL, 
+    [Description] NVARCHAR(255) NOT NULL, 
     [Amount] DECIMAL(15, 2) NOT NULL CHECK ([Amount] > 0), 
     [Total_Positions] INT NOT NULL CHECK ([Total_Positions] > 0), 
     [Remaining_Positions] INT NOT NULL,
@@ -33,37 +33,36 @@ CREATE TABLE [dbo].[Sponsorship_Category]
 CREATE TABLE [dbo].[Applicant]
 (
     [Applicant_ID] INT NOT NULL IDENTITY(1,1), 
-	[Identification] VARCHAR(20) NOT NULL,
+    [Identification] VARCHAR(20) NOT NULL,
     [Company_Private] VARCHAR(20) NOT NULL CHECK ([Company_Private] IN ('company', 'private')),
     [Gender] CHAR(1) NOT NULL CHECK ([Gender] IN ('M', 'F', 'O')),
     [BirthDate] DATE NOT NULL,
     [User_ID] INT NOT NULL,
-	UNIQUE([Identification]),
+    UNIQUE([Identification]),
     CONSTRAINT [PK_APPLICANT] PRIMARY KEY ([Applicant_ID] ASC)
 )
 
-CREATE TABLE [dbo].[Criteria]
+CREATE TABLE [dbo].[Criterion]
 (
-    [Criteria_Number] INT NOT NULL IDENTITY(1,1),
-    [Title] VARCHAR(255) NOT NULL,
-    [Description] VARCHAR(255) NOT NULL,
+    [Criterion_Number] INT NOT NULL IDENTITY(1,1),
+    [Title] NVARCHAR(255) NOT NULL,
+    [Description] NVARCHAR(255) NOT NULL,
     UNIQUE ([Title]),
-    CONSTRAINT [PK_CRITERIA] PRIMARY KEY ([Criteria_Number] ASC)
+    CONSTRAINT [PK_CRITERIA] PRIMARY KEY ([Criterion_Number] ASC)
 )
 
-CREATE TABLE [dbo].[Has]
+CREATE TABLE [dbo].[CategoryHasCriterion]
 (
     [Category_Number] INT NOT NULL,
-    [Criteria_Number] INT NOT NULL, 
-    CONSTRAINT [PK_HAS] PRIMARY KEY ([Category_Number], [Criteria_Number] ASC)
+    [Criterion_Number] INT NOT NULL, 
+    CONSTRAINT [PK_HAS] PRIMARY KEY ([Category_Number], [Criterion_Number] ASC)
 )
 
 CREATE TABLE [dbo].[Application]
 (
     [Application_ID] INT NOT NULL IDENTITY(1,1),
-    [Application_Date] DATE NOT NULL,
+    [Application_Date] DATE NOT NULL DEFAULT GETDATE(),
     [Discarder_Car_LPN] CHAR(6), 
-    [Attempt] INT NOT NULL DEFAULT 1,
     [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('pending', 'approved', 'rejected', 'under_review', 'in_progress')), 
     [Applicant_ID] INT NOT NULL,
     [Category_Number] INT NOT NULL,
@@ -76,32 +75,31 @@ CREATE TABLE [dbo].[Document]
     [Document_ID] INT NOT NULL IDENTITY(1,1),
     [URL] VARCHAR(255) NOT NULL, 
     [Document_Type] VARCHAR(50) NOT NULL CHECK ([Document_Type] IN ('type1', 'type2', 'type3')),
-    [Reason] VARCHAR(255) NOT NULL,
+    [Reason] NVARCHAR(255) NOT NULL,
     [Application_ID] INT NOT NULL,
     [User_ID] INT NOT NULL,
     UNIQUE ([URL]),
     CONSTRAINT [PK_DOCUMENT] PRIMARY KEY ([Document_ID] ASC)
 )
 
-CREATE TABLE [dbo].[Change]
+CREATE TABLE [dbo].[Modification]
 (
-    [Log_ID] INT NOT NULL IDENTITY(1,1),
-    [Modification_Date] DATE NOT NULL,
+    [Modification_ID] INT NOT NULL IDENTITY(1,1),
+    [Modification_Date] DATE NOT NULL DEFAULT GETDATE(),
     [New_Status] VARCHAR(20) NOT NULL CHECK ([New_Status] IN ('approved', 'rejected', 'under_review')),
-    [Reason] VARCHAR(255) NOT NULL, 
+    [Reason] NVARCHAR(255) NOT NULL, 
     [User_ID] INT NOT NULL,
     [Application_ID] INT NOT NULL,
-    CONSTRAINT [PK_CHANGE] PRIMARY KEY ([Log_ID] ASC)
+    CONSTRAINT [PK_CHANGE] PRIMARY KEY ([Modification_ID] ASC)
 )
 
 CREATE TABLE [dbo].[Vehicle]
 (
     [Vehicle_ID] INT NOT NULL IDENTITY(1,1), 
-    [Vehicle_Year] INT NOT NULL,
-    [Vehicle_Month] INT NOT NULL CHECK ([Vehicle_Month] >= 1 AND [Vehicle_Month] <= 12), 
+    [Vehicle_Date] DATE NOT NULL,
     [Vehicle_Type] VARCHAR(20) NOT NULL CHECK ([Vehicle_Type] IN ('electric', 'hybrid')), 
     [CO2_Emissions] INT NOT NULL CHECK ([CO2_Emissions] <= 50), 
-    [Brand] VARCHAR(50) NOT NULL, 
+    [Manufacturer] VARCHAR(50) NOT NULL, 
     [Price] DECIMAL(15, 2) NOT NULL CHECK ([Price] <= 80000), 
     [Engine_Fuel] VARCHAR(20) NOT NULL CHECK ([Engine_Fuel] IN ('diesel', 'petrol','electricity')), 
     [Document_ID] INT NOT NULL,
@@ -115,7 +113,7 @@ CREATE TABLE [dbo].[User_Session]
     [Session_Token] VARCHAR(255) NOT NULL,
     [Login_Time] DATETIME NOT NULL DEFAULT GETDATE(),
     UNIQUE([Session_Token]),
-    CONSTRAINT [PK_USER_SESSION] PRIMARY KEY ([Session_ID] ASC),
+    CONSTRAINT [PK_USER_SESSION] PRIMARY KEY ([Session_ID] ASC)
 )
 
 --CREATE FOREIGN KEY CONSTRAINTS
@@ -124,13 +122,13 @@ FOREIGN KEY ([User_ID]) REFERENCES [dbo].[User] ([User_ID])
 ON DELETE CASCADE ON UPDATE CASCADE
 GO
 
-ALTER TABLE [dbo].[Has] WITH CHECK ADD CONSTRAINT [FK_HAS_SPONSORSHIP_CATEGORY]
+ALTER TABLE [dbo].[CategoryHasCriterion] WITH CHECK ADD CONSTRAINT [FK_HAS_SPONSORSHIP_CATEGORY]
 FOREIGN KEY ([Category_Number]) REFERENCES [dbo].[Sponsorship_Category] ([Category_Number])
 ON DELETE CASCADE ON UPDATE CASCADE
 GO
 
-ALTER TABLE [dbo].[Has] WITH CHECK ADD CONSTRAINT [FK_HAS_CRITERIA]
-FOREIGN KEY ([Criteria_Number]) REFERENCES [dbo].[Criteria] ([Criteria_Number])
+ALTER TABLE [dbo].[CategoryHasCriterion] WITH CHECK ADD CONSTRAINT [FK_HAS_CRITERIA]
+FOREIGN KEY ([Criterion_Number]) REFERENCES [dbo].[Criterion] ([Criterion_Number])
 ON DELETE CASCADE ON UPDATE CASCADE
 GO
 
@@ -154,12 +152,12 @@ FOREIGN KEY ([User_ID]) REFERENCES [dbo].[User] ([User_ID])
 ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Change] WITH CHECK ADD CONSTRAINT [FK_CHANGE_USER]
+ALTER TABLE [dbo].[Modification] WITH CHECK ADD CONSTRAINT [FK_MODIFICATION_USER]
 FOREIGN KEY ([User_ID]) REFERENCES [dbo].[User] ([User_ID])
 ON DELETE CASCADE ON UPDATE CASCADE
 GO
 
-ALTER TABLE [dbo].[Change] WITH CHECK ADD CONSTRAINT [FK_CHANGE_APPLICATION]
+ALTER TABLE [dbo].[Modification] WITH CHECK ADD CONSTRAINT [FK_MODIFICATION_APPLICATION]
 FOREIGN KEY ([Application_ID]) REFERENCES [dbo].[Application] ([Application_ID])
 ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
