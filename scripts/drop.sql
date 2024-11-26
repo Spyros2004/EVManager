@@ -39,6 +39,9 @@ IF EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[F
 ALTER TABLE [dbo].[Vehicle] DROP CONSTRAINT [FK_VEHICLE_DOCUMENT]
 GO
 
+IF EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_USER_SESSION_USER]') AND parent_object_id = OBJECT_ID(N'[dbo].[User_Session]'))
+ALTER TABLE [dbo].[User_Session] DROP CONSTRAINT [FK_USER_SESSION_USER];
+GO
 
 --DROP TABLES
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Applicant]') AND type in (N'U'))
@@ -75,4 +78,8 @@ GO
 
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Criteria]') AND type in (N'U'))
 DROP TABLE [dbo].[Criteria]
+GO
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[User_Session]') AND type in (N'U'))
+DROP TABLE [dbo].[User_Session];
 GO
