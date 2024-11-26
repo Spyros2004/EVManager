@@ -33,10 +33,12 @@ CREATE TABLE [dbo].[Sponsorship_Category]
 CREATE TABLE [dbo].[Applicant]
 (
     [Applicant_ID] INT NOT NULL IDENTITY(1,1), 
+	[Identification] VARCHAR(20) NOT NULL,
     [Company_Private] VARCHAR(20) NOT NULL CHECK ([Company_Private] IN ('company', 'private')),
     [Gender] CHAR(1) NOT NULL CHECK ([Gender] IN ('M', 'F', 'O')),
     [BirthDate] DATE NOT NULL,
     [User_ID] INT NOT NULL,
+	UNIQUE([Identification]),
     CONSTRAINT [PK_APPLICANT] PRIMARY KEY ([Applicant_ID] ASC)
 )
 
@@ -113,7 +115,7 @@ CREATE TABLE [dbo].[User_Session]
     [Session_Token] VARCHAR(255) NOT NULL,
     [Login_Time] DATETIME NOT NULL DEFAULT GETDATE(),
     UNIQUE([Session_Token]),
-    CONSTRAINT [PK_USER_SESSION] PRIMARY KEY ([Session_ID]),
+    CONSTRAINT [PK_USER_SESSION] PRIMARY KEY ([Session_ID] ASC),
 )
 
 --CREATE FOREIGN KEY CONSTRAINTS
