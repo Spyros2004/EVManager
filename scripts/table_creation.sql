@@ -51,7 +51,7 @@ CREATE TABLE [dbo].[Criterion]
     CONSTRAINT [PK_CRITERIA] PRIMARY KEY ([Criterion_Number] ASC)
 )
 
-CREATE TABLE [dbo].[CategoryHasCriterion]
+CREATE TABLE [dbo].[Category_Has_Criterion]
 (
     [Category_Number] INT NOT NULL,
     [Criterion_Number] INT NOT NULL, 
@@ -122,12 +122,12 @@ FOREIGN KEY ([User_ID]) REFERENCES [dbo].[User] ([User_ID])
 ON DELETE CASCADE ON UPDATE CASCADE
 GO
 
-ALTER TABLE [dbo].[CategoryHasCriterion] WITH CHECK ADD CONSTRAINT [FK_HAS_SPONSORSHIP_CATEGORY]
+ALTER TABLE [dbo].[Category_Has_Criterion] WITH CHECK ADD CONSTRAINT [FK_HAS_SPONSORSHIP_CATEGORY]
 FOREIGN KEY ([Category_Number]) REFERENCES [dbo].[Sponsorship_Category] ([Category_Number])
 ON DELETE CASCADE ON UPDATE CASCADE
 GO
 
-ALTER TABLE [dbo].[CategoryHasCriterion] WITH CHECK ADD CONSTRAINT [FK_HAS_CRITERIA]
+ALTER TABLE [dbo].[Category_Has_Criterion] WITH CHECK ADD CONSTRAINT [FK_HAS_CRITERIA]
 FOREIGN KEY ([Criterion_Number]) REFERENCES [dbo].[Criterion] ([Criterion_Number])
 ON DELETE CASCADE ON UPDATE CASCADE
 GO
