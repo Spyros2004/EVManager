@@ -62,6 +62,40 @@ GO
 DROP PROCEDURE IF EXISTS GetPendingUsers
 GO
 
+DROP PROCEDURE IF EXISTS AcceptOrRejectUser
+GO
+
+CREATE PROCEDURE AcceptOrRejectUser
+    @UserID INT,          -- ID of the user to be updated
+    @Accept BIT           -- TRUE (1) to approve, FALSE (0) to reject
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if the user exists
+    IF NOT EXISTS (SELECT 1 FROM [dbo].[User] WHERE User_ID = @UserID)
+    BEGIN
+        THROW 50001, 'User does not exist.', 1;
+    END
+
+    -- Update the user's status based on the @Accept flag
+    IF @Accept = 1
+    BEGIN
+        -- If the user is accepted, set their status to 'approved'
+        UPDATE [dbo].[User]
+        SET Status = 'approved'
+        WHERE User_ID = @UserID;
+    END
+    ELSE
+    BEGIN
+        -- If the user is rejected, set their status to 'rejected'
+        UPDATE [dbo].[User]
+        SET Status = 'rejected'
+        WHERE User_ID = @UserID;
+    END
+END
+GO
+
 CREATE PROCEDURE GetPendingUsers
 AS
 BEGIN
