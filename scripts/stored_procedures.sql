@@ -59,6 +59,28 @@ GO
 DROP PROCEDURE IF EXISTS [dbo].[LogoutUser]
 GO
 
+DROP PROCEDURE IF EXISTS GetPendingUsers
+GO
+
+CREATE PROCEDURE GetPendingUsers
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Query to fetch all users with status 'pending'
+    SELECT 
+        User_ID, 
+        First_Name, 
+        Last_Name, 
+        Username, 
+        Email, 
+        User_Type, 
+        Status
+    FROM [dbo].[User]
+    WHERE Status = 'pending';
+END
+GO
+
 CREATE PROCEDURE GetUsernameBySessionID
     @SessionID UNIQUEIDENTIFIER,
     @Username NVARCHAR(50) OUTPUT
