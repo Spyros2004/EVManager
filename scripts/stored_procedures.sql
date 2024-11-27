@@ -56,6 +56,9 @@ GO
 DROP PROCEDURE IF EXISTS GetUsernameBySessionID
 GO
 
+DROP PROCEDURE IF EXISTS [dbo].[LogoutUser]
+GO
+
 CREATE PROCEDURE GetUsernameBySessionID
     @SessionID UNIQUEIDENTIFIER,
     @Username NVARCHAR(50) OUTPUT
@@ -109,11 +112,6 @@ BEGIN
     INNER JOIN [dbo].[Sponsorship_Category] SC ON A.Category_Number = SC.Category_Number
     WHERE U.User_ID = @UserID;
 END;
-
-
-
-DROP PROCEDURE IF EXISTS [dbo].[LogoutUser]
-GO
     
 CREATE PROCEDURE [dbo].[LogoutUser]
     @Session_ID UNIQUEIDENTIFIER -- Input parameter for the session ID
