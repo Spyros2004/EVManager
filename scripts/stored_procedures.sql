@@ -50,6 +50,37 @@ GO
 DROP PROCEDURE IF EXISTS ApplyForSponsorship
 GO
 
+DROP PROCEDURE IF EXISTS GetApplicationsForUser
+
+CREATE PROCEDURE GetApplicationsForUser
+    @SessionID UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the User_ID from the session
+    DECLARE @UserID INT;
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- Ensure the User_ID was found
+    IF @UserID IS NULL
+    BEGIN
+        THROW 50000, 'Invalid Session ID', 1;
+        RETURN;
+    END
+
+    -- Fetch applications for the user
+    SELECT A.Application_ID, A.Application_Date, A.Current_Status, SC.Description AS Category_Description
+    FROM [dbo].[Application] A
+    INNER JOIN [dbo].[Applicant] AP ON A.Applicant_ID = AP.Applicant_ID
+    INNER JOIN [dbo].[User] U ON AP.User_ID = U.User_ID
+    INNER JOIN [dbo].[Sponsorship_Category] SC ON A.Category_Number = SC.Category_Number
+    WHERE U.User_ID = @UserID;
+END;
+
+
 
 DROP PROCEDURE IF EXISTS [dbo].[LogoutUser]
 GO
