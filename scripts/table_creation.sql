@@ -14,7 +14,7 @@ CREATE TABLE [dbo].[User]
     [Email] VARCHAR(100) NOT NULL, 
     [Password] VARBINARY(512) NOT NULL, 
     [User_Type] VARCHAR(20) NOT NULL CHECK ([User_Type] IN ('Admin', 'TOM', 'AA', 'Applicant')), 
-    [Status] VARCHAR(20) NOT NULL CHECK ([Status] IN ('pending', 'approved', 'suspended', 'deactivated', 'rejected')), 
+    [Status] VARCHAR(20) NOT NULL CHECK ([Status] IN ('pending', 'approved', 'suspended', 'deactivated', 'rejected')) DEFAULT 'pending', 
     UNIQUE ([Username]),
     UNIQUE ([Email]),
     CONSTRAINT [PK_USER] PRIMARY KEY ([User_ID] ASC)
