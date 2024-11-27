@@ -86,7 +86,7 @@ CREATE TABLE [dbo].[Modification]
 (
     [Modification_ID] INT NOT NULL IDENTITY(1,1),
     [Modification_Date] DATE NOT NULL DEFAULT GETDATE(),
-    [New_Status] VARCHAR(20) NOT NULL CHECK ([New_Status] IN ('approved', 'rejected', 'under_review')),
+    [New_Status] VARCHAR(20) NOT NULL CHECK ([New_Status] IN ('pending', 'approved', 'rejected', 'under_review', 'in_progress')),
     [Reason] NVARCHAR(255) NOT NULL, 
     [User_ID] INT NOT NULL,
     [Application_ID] INT NOT NULL,
