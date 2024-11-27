@@ -177,9 +177,9 @@ BEGIN
     BEGIN TRY
         -- Insert the new user into the User table
         INSERT INTO [dbo].[User] 
-            ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status])
+            ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type])
         VALUES
-            (@First_Name, @Last_Name, @Username, @Email, @HashedPassword, @User_Type, DEFAULT);
+            (@First_Name, @Last_Name, @Username, @Email, @HashedPassword, @User_Type);
 
         -- Retrieve the User_ID of the newly inserted user using SCOPE_IDENTITY()
         DECLARE @User_ID INT;
