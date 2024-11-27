@@ -364,7 +364,6 @@ BEGIN
 END
 GO
 
-
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
     @CategoryNumber INT,
@@ -402,17 +401,31 @@ BEGIN
         THROW 50001, 'No remaining positions in this category.', 1;
     END;
 
-    -- Insert the application
+    -- Start transaction for the critical section
+    BEGIN TRANSACTION;
 
-    INSERT INTO Application (Applicant_ID, Category_Number, Current_Status)
-    VALUES (@ApplicantID, @CategoryNumber, DEFAULT);
+    BEGIN TRY
+        -- Insert the application
+        INSERT INTO Application (Applicant_ID, Category_Number)
+        VALUES (@ApplicantID, @CategoryNumber);
 
-    -- Return the new Application ID
-    SET @ApplicationID = SCOPE_IDENTITY();
+        -- Return the new Application ID
+        SET @ApplicationID = SCOPE_IDENTITY();
 
-    -- Decrement Remaining_Positions
-    UPDATE Sponsorship_Category
-    SET Remaining_Positions = Remaining_Positions - 1
-    WHERE Category_Number = @CategoryNumber;
+        -- Decrement Remaining_Positions
+        UPDATE Sponsorship_Category
+        SET Remaining_Positions = Remaining_Positions - 1
+        WHERE Category_Number = @CategoryNumber;
+
+        -- Commit the transaction if all operations succeed
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Rollback the transaction if any error occurs
+        ROLLBACK TRANSACTION;
+
+        -- Re-throw the error for the application to handle
+        THROW;
+    END CATCH
 END;
 GO
