@@ -50,6 +50,7 @@ GO
 CREATE PROCEDURE GetUser
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[User];
 END
 GO
@@ -58,6 +59,7 @@ GO
 CREATE PROCEDURE GetSponsorshipCategory
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[Sponsorship_Category];
 END
 GO
@@ -66,6 +68,7 @@ GO
 CREATE PROCEDURE GetApplicant
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[Applicant];
 END
 GO
@@ -74,6 +77,7 @@ GO
 CREATE PROCEDURE GetCriterion
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[Criterion];
 END
 GO
@@ -82,6 +86,7 @@ GO
 CREATE PROCEDURE GetCategoryHasCriterion
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[Category_Has_Criterion];
 END
 GO
@@ -90,6 +95,7 @@ GO
 CREATE PROCEDURE GetApplication
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[Application];
 END
 GO
@@ -98,6 +104,7 @@ GO
 CREATE PROCEDURE GetDocument
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[Document];
 END
 GO
@@ -106,6 +113,7 @@ GO
 CREATE PROCEDURE GetModification
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[Modification];
 END
 GO
@@ -114,6 +122,7 @@ GO
 CREATE PROCEDURE GetVehicle
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[Vehicle];
 END
 GO
@@ -122,6 +131,7 @@ GO
 CREATE PROCEDURE GetUserSession
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT * FROM [dbo].[User_Session];
 END
 GO
@@ -139,6 +149,7 @@ CREATE PROCEDURE [dbo].SignUpUser
     @BirthDate DATE = NULL                 -- Only required if user is an applicant
 AS
 BEGIN
+    SET NOCOUNT ON;
     -- Check if Username or Email already exists
     IF EXISTS (SELECT 1 FROM [dbo].[User] WHERE [Username] = @Username)
     BEGIN
@@ -205,6 +216,7 @@ CREATE PROCEDURE [dbo].[LoginUser]
     @Session_ID UNIQUEIDENTIFIER OUTPUT -- Output parameter for the session ID
 AS
 BEGIN
+    SET NOCOUNT ON;
     BEGIN TRY
         -- Declare variables to hold the stored password hash, status, and user ID
         DECLARE @StoredPassword VARBINARY(512);
