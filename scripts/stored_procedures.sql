@@ -50,6 +50,34 @@ GO
 DROP PROCEDURE IF EXISTS ApplyForSponsorship
 GO
 
+
+DROP PROCEDURE IF EXISTS [dbo].[LogoutUser]
+GO
+    
+CREATE PROCEDURE [dbo].[LogoutUser]
+    @Session_ID UNIQUEIDENTIFIER -- Input parameter for the session ID
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Attempt to delete the session from the User_Session table
+    BEGIN TRY
+        DELETE FROM [dbo].[User_Session]
+        WHERE [Session_ID] = @Session_ID;
+
+        -- If no session is found to delete, you can raise an error or just proceed
+        IF @@ROWCOUNT = 0
+        BEGIN
+            THROW 50000, 'No active session found for this session ID.', 1;
+        END
+    END TRY
+    BEGIN CATCH
+        -- Handle errors and rethrow the original error
+        THROW; -- Re-throws the original error
+    END CATCH
+END
+GO
+
 -- 1. Stored Procedure for selecting all records from User table
 CREATE PROCEDURE GetUser
 AS
