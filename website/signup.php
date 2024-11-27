@@ -74,8 +74,98 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #e6ffe6, #f0fff0);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            margin: 0;
+        }
+        .signup-container {
+    background: #ffffff;
+    padding: 60px;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    max-height: 80vh; /* Καθορισμένο μέγιστο ύψος για το κουτί */
+    overflow-y: auto; /* Προσθήκη κύλισης στο κουτί όταν το περιεχόμενο υπερβαίνει το ύψος */
+}
+
+        h2 {
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        select {
+            width: calc(100% - 20px);
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+            box-sizing: border-box;
+        }
+        button[type="submit"]:hover {
+            background: #218838;
+        }
+        .applicant-fields {
+            display: none;
+        }
+        .signup-container .input-group {
+            position: relative;
+        }
+        .signup-container .input-group i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 21px;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        select {
+            padding-left: 50px;
+        }
+        @media (max-width: 600px) {
+            .signup-container {
+                padding: 30px;
+            }
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            input[type="date"],
+            select,
+            button[type="submit"] {
+                padding: 12px;
+            }
+        }
+    </style>
     <script>
-        // JavaScript to show additional fields if 'Applicant' is selected
         function toggleApplicantFields() {
             var userType = document.getElementById("user_type").value;
             var applicantFields = document.getElementById("applicantFields");
@@ -89,58 +179,103 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
 </head>
 <body>
-    <h2>Sign Up</h2>
-    
-    <!-- Sign-Up Form -->
-    <form action="signup.php" method="POST">
-        <label for="first_name">First Name:</label>
-        <input type="text" id="first_name" name="first_name" value="<?php echo htmlspecialchars($firstName); ?>" required><br><br>
+    <div class="signup-container">
+        <h2>Sign Up</h2>
+        
+      <!-- Sign-Up Form -->
+<form action="signup.php" method="POST" onsubmit="return validateForm()">
+    <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="first_name" name="first_name" placeholder="First Name" required>
+    </div>
 
-        <label for="last_name">Last Name:</label>
-        <input type="text" id="last_name" name="last_name" value="<?php echo htmlspecialchars($lastName); ?>" required><br><br>
+    <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="last_name" name="last_name" placeholder="Last Name" required>
+    </div>
 
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($username); ?>" required><br><br>
+    <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="username" name="username" placeholder="Username" required>
+    </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" required><br><br>
+    <div class="input-group">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="email" name="email" placeholder="Email" required>
+    </div>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
+    <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" name="password" placeholder="Password" required>
+    </div>
 
-        <label for="user_type">User Type:</label>
+    <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+    </div>
+
+    <div class="input-group">
+        <i class="fas fa-user-tag"></i>
         <select id="user_type" name="user_type" onchange="toggleApplicantFields()" required>
-            <option value="">Select Type</option>
+            <option value="">Select User Type</option>
             <option value="TOM">TOM</option>
             <option value="AA">AA</option>
             <option value="Applicant">Applicant</option>
-        </select><br><br>
+        </select>
+    </div>
 
-        <!-- Applicant Fields (hidden initially) -->
-        <div id="applicantFields" style="display:<?php echo ($userType == "Applicant" ? "block" : "none"); ?>;">
-            <label for="identification">Identification:</label>
-            <input type="text" id="identification" name="identification" value="<?php echo htmlspecialchars($identification); ?>"><br><br>
-
-            <label for="company_private">Company Private:</label>
-            <select id="company_private" name="company_private">
-                <option value="">Select Company Type</option>
-                <option value="company" <?php echo ($companyPrivate == "company" ? "selected" : ""); ?>>Company</option>
-                <option value="private" <?php echo ($companyPrivate == "private" ? "selected" : ""); ?>>Private</option>
-            </select><br><br>
-
-            <label for="gender">Gender:</label>
-            <select id="gender" name="gender">
-                <option value="">Select Gender</option>
-                <option value="M" <?php echo ($gender == "M" ? "selected" : ""); ?>>Male</option>
-                <option value="F" <?php echo ($gender == "F" ? "selected" : ""); ?>>Female</option>
-                <option value="O" <?php echo ($gender == "O" ? "selected" : ""); ?>>Other</option>
-            </select><br><br>
-
-            <label for="birth_date">Birth Date:</label>
-            <input type="date" id="birth_date" name="birth_date" value="<?php echo htmlspecialchars($birthDate); ?>"><br><br>
+    <!-- Applicant Fields (hidden initially) -->
+    <div id="applicantFields" class="applicant-fields">
+        <div class="input-group">
+            <i class="fas fa-id-card"></i>
+            <input type="text" id="identification" name="identification" placeholder="Identification">
         </div>
 
-        <button type="submit">Sign Up</button>
-    </form>
+        <div class="input-group">
+            <i class="fas fa-building"></i>
+            <select id="company_private" name="company_private">
+                <option value="">Select Company Type</option>
+                <option value="company">Company</option>
+                <option value="private">Private</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-venus-mars"></i>
+            <select id="gender" name="gender">
+                <option value="">Select Gender</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-birthday-cake"></i>
+            <input type="date" id="birth_date" name="birth_date" placeholder="Birth Date">
+        </div>
+    </div>
+
+    <button type="submit">Sign Up</button>
+</form>
+<br>
+         <!-- Create Account Link -->
+         <p style="text-align: center; font-size: 0.9em; color: black;">
+            <a href="login.php" style="text-decoration: underline; font-weight: bold; color: black;">Έχεις ήδη λογαριασμό? Σύνδεση</a>
+        </p>
+
+    </div>
+<script>
+    function validateForm() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirm_password").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match. Please make sure both passwords are the same.");
+            return false; // Μην υποβάλλεις τη φόρμα αν οι κωδικοί δεν ταιριάζουν
+        }
+        return true;
+    }
+</script>
 </body>
 </html>
