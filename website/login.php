@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Handle SQL execution error (including custom error messages from the stored procedure)
         $sqlErrors = sqlsrv_errors();
         foreach ($sqlErrors as $error) {
-            if ($error['code'] == '50001') {
+            if ($error['code'] == '50001'|| $error['code']=='50000') {
                 // This error corresponds to "Incorrect Password" error in stored procedure
                 $errorMessage = "Incorrect username or password.";
             } elseif ($error['code'] == '50002') {
@@ -93,33 +93,130 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Close the connection
 sqlsrv_close($conn);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Σύνδεση για Αιτήσεις Επιχορηγήσεων</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #e6ffe6, #f0fff0);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            margin: 0;
+        }
+        .login-container {
+            background: #ffffff;
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 40px; /* Μεγαλύτερο κενό από το αρχικό */
+            color: #333;
+            font-weight: 600;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 18px;
+            margin: 25px 0; /* Περισσότερο κενό ανάμεσα στα πεδία */
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 18px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 18px;
+            margin-top: 30px; /* Προστέθηκε μεγαλύτερο κενό πάνω από το κουμπί */
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+            box-sizing: border-box;
+        }
+        input[type="submit"]:hover {
+            background: #218838;
+        }
+        .error-message {
+            color: #ff4d4d;
+            margin-bottom: 20px;
+            background: #ffe5e5;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .login-container .input-group {
+            position: relative;
+        }
+        .login-container .input-group i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 21px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            padding-left: 55px;
+        }
+        @media (max-width: 600px) {
+            .login-container {
+                padding: 30px;
+            }
+            input[type="text"],
+            input[type="password"],
+            input[type="submit"] {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Login to your account</h2>
+    <div class="login-container">
+        <h2>Σύνδεση στο λογαριασμό σου</h2> <!-- Τίτλος λίγο πιο πάνω -->
 
-    <!-- Display any error message -->
-    <?php if ($errorMessage): ?>
-        <div style="color: red;">
-            <strong>Error:</strong> <?php echo htmlspecialchars($errorMessage); ?>
-        </div>
-    <?php endif; ?>
+        <!-- Display any error message -->
+        <?php if ($errorMessage): ?>
+            <div class="error-message">
+                <strong>Error:</strong> <?php echo htmlspecialchars($errorMessage); ?>
+            </div>
+        <?php endif; ?>
 
-    <!-- Login Form -->
-    <form method="POST" action="">
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required><br><br>
+        <!-- Login Form -->
+        <form method="POST" action="">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" name="username" id="username" placeholder="Username" required>
+            </div>
 
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" required><br><br>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" id="password" placeholder="Password" required>
+            </div>
 
-        <input type="submit" value="Login">
-    </form>
+            <input type="submit" value="Login">
+        </form>
+        <br>
+        <br>
+         <!-- Create Account Link -->
+         <p style="text-align: center; font-size: 0.9em; color: black;">
+            <a href="signup.php" style="text-decoration: underline; font-weight: bold; color: black;">Δημιουργία Λογαριασμού</a>
+        </p>
+    </div>
 </body>
 </html>
