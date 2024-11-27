@@ -35,14 +35,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     @Company_Private = ?, 
                     @Gender = ?, 
                     @BirthDate = ?";
-        
+
         // Prepare the SQL statement
         $stmt = sqlsrv_prepare($conn, $sql, array(
             $firstName, 
             $lastName, 
             $username, 
             $email, 
-            $hashedPassword, 
+            $password, 
             $userType, 
             $identification, 
             $companyPrivate, 
