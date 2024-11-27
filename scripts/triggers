@@ -1,7 +1,31 @@
-DROP TRIGGER [dbo].[UpdateStatusOnUserType]
-DROP TRIGGER [dbo].[SetRemainingPositions]
+DROP TRIGGER IF EXISTS [dbo].[UpdateStatusOnUserType]
+GO
+DROP TRIGGER IF EXISTS [dbo].[SetRemainingPositions]
+GO
+DROP TRIGGER IF EXISTS [dbo].[InsertModificationAfterApplicationInsert]
+GO
 
-
+CREATE TRIGGER [dbo].[InsertModificationAfterApplicationInsert]
+ON [dbo].[Application]
+AFTER INSERT
+AS
+BEGIN
+    -- Insert a record into the Modification table when a new Application is inserted
+    INSERT INTO [dbo].[Modification] 
+        (New_Status, Reason, User_ID, Application_ID)
+    SELECT 
+        'pending',                    -- Status for the new application (or use logic based on the app's status)
+        'Application Submitted',       -- Reason for the modification
+        U.User_ID,                    -- User who submitted the application (assuming the user is logged in)
+        I.Application_ID              -- ID of the newly inserted application
+    FROM 
+        INSERTED I
+    JOIN
+        [dbo].[Applicant] A ON A.Applicant_ID = I.Applicant_ID
+    JOIN
+        [dbo].[User] U ON U.User_ID = A.User_ID;  -- Get the User_ID from the Applicant table
+END
+GO
 
 CREATE TRIGGER [dbo].[UpdateStatusOnUserType]
 ON [dbo].[User]
