@@ -203,8 +203,6 @@ BEGIN
 
         -- Commit the transaction if everything is successful
         COMMIT TRANSACTION;
-
-        PRINT 'User successfully created.';
     END TRY
     BEGIN CATCH
         -- Handle error and rollback transaction
