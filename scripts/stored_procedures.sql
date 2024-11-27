@@ -46,6 +46,10 @@ GO
 DROP PROCEDURE IF EXISTS LoginUser
 GO
 
+-- 12. Drop procedure
+DROP PROCEDURE ApplyForSponsorship
+GO
+
 -- 1. Stored Procedure for selecting all records from User table
 CREATE PROCEDURE GetUser
 AS
@@ -261,4 +265,56 @@ BEGIN
         THROW; -- Re-throws the original error
     END CATCH
 END
+GO
+
+CREATE PROCEDURE ApplyForSponsorship
+    @SessionID UNIQUEIDENTIFIER,
+    @CategoryNumber INT,
+    @ApplicationID INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Retrieve User_ID from the session
+    DECLARE @UserID INT;
+    SELECT @UserID = User_ID
+    FROM User_Session
+    WHERE Session_ID = @SessionID;
+
+    -- Ensure the user exists and is an applicant
+    IF NOT EXISTS (
+        SELECT 1 FROM Applicant WHERE User_ID = @UserID
+    )
+    BEGIN
+        THROW 50000, 'User is not an applicant.', 1;
+    END
+
+    DECLARE @ApplicantID INT;
+    SELECT @ApplicantID = Applicant_ID
+    FROM Applicant
+    WHERE User_ID = @UserID;
+
+    -- Check if there are available positions in the category
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM Sponsorship_Category
+        WHERE Category_Number = @CategoryNumber AND Remaining_Positions > 0
+    )
+    BEGIN
+        THROW 50001, 'No remaining positions in this category.', 1;
+    END;
+
+    -- Insert the application
+
+    INSERT INTO Application (Applicant_ID, Category_Number, Current_Status)
+    VALUES (@ApplicantID, @CategoryNumber, DEFAULT);
+
+    -- Return the new Application ID
+    SET @ApplicationID = SCOPE_IDENTITY();
+
+    -- Decrement Remaining_Positions
+    UPDATE Sponsorship_Category
+    SET Remaining_Positions = Remaining_Positions - 1
+    WHERE Category_Number = @CategoryNumber;
+END;
 GO
