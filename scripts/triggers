@@ -1,9 +1,9 @@
-DROP TRIGGER [dbo].[Update_Status_On_User_Type]
+DROP TRIGGER [dbo].[UpdateStatusOnUserType]
 DROP TRIGGER [dbo].[SetRemainingPositions]
 
 
 
-CREATE TRIGGER [dbo].[Update_Status_On_User_Type]
+CREATE TRIGGER [dbo].[UpdateStatusOnUserType]
 ON [dbo].[User]
 AFTER INSERT
 AS
@@ -17,7 +17,7 @@ END
 GO
 
 
-CREATE TRIGGER SetRemainingPositions
+CREATE TRIGGER [dbo].[SetRemainingPositions]
 ON Sponsorship_Category
 AFTER INSERT
 AS
