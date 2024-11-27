@@ -51,6 +51,36 @@ DROP PROCEDURE IF EXISTS ApplyForSponsorship
 GO
 
 DROP PROCEDURE IF EXISTS GetApplicationsForUser
+GO
+
+DROP PROCEDURE IF EXISTS GetUsernameBySessionID
+GO
+
+CREATE PROCEDURE GetUsernameBySessionID
+    @SessionID UNIQUEIDENTIFIER,
+    @Username NVARCHAR(50) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the User_ID from the session
+    DECLARE @UserID INT;
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- Ensure the User_ID was found
+    IF @UserID IS NULL
+    BEGIN
+        THROW 50000, 'Invalid Session ID', 1;
+        RETURN;
+    END
+
+    -- Fetch the username for the User_ID
+    SELECT @Username = Username
+    FROM [dbo].[User]
+    WHERE User_ID = @UserID;
+END;
 
 CREATE PROCEDURE GetApplicationsForUser
     @SessionID UNIQUEIDENTIFIER
