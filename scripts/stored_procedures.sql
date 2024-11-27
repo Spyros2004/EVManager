@@ -84,6 +84,7 @@ BEGIN
     FROM [dbo].[User]
     WHERE User_ID = @UserID;
 END;
+GO
 
 CREATE PROCEDURE GetApplicationsForUser
     @SessionID UNIQUEIDENTIFIER
@@ -112,6 +113,7 @@ BEGIN
     INNER JOIN [dbo].[Sponsorship_Category] SC ON A.Category_Number = SC.Category_Number
     WHERE U.User_ID = @UserID;
 END;
+GO
     
 CREATE PROCEDURE [dbo].[LogoutUser]
     @Session_ID UNIQUEIDENTIFIER -- Input parameter for the session ID
