@@ -46,8 +46,8 @@ GO
 DROP PROCEDURE IF EXISTS LoginUser
 GO
 
--- 12. Drop procedure
-DROP PROCEDURE ApplyForSponsorship
+-- 12. Drop procedure for application
+DROP PROCEDURE IF EXISTS ApplyForSponsorship
 GO
 
 -- 1. Stored Procedure for selecting all records from User table
