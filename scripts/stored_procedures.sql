@@ -215,18 +215,20 @@ GO
 CREATE PROCEDURE [dbo].[LoginUser]
     @Username NVARCHAR(50),
     @Password NVARCHAR(255), -- Plain text password from PHP
-    @Session_ID UNIQUEIDENTIFIER OUTPUT -- Output parameter for the session ID
+    @Session_ID UNIQUEIDENTIFIER OUTPUT, -- Output parameter for the session ID
+    @UserTypeNumber INT OUTPUT -- Output parameter for the user type number
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        -- Declare variables to hold the stored password hash, status, and user ID
+        -- Declare variables to hold the stored password hash, status, user ID, and user type
         DECLARE @StoredPassword VARBINARY(512);
         DECLARE @Status VARCHAR(20);
         DECLARE @User_ID INT;
+        DECLARE @User_Type VARCHAR(20);
 
-        -- Fetch the password hash, status, and user ID for the given username
-        SELECT @StoredPassword = [Password], @Status = [Status], @User_ID = [User_ID]
+        -- Fetch the password hash, status, user type, and user ID for the given username
+        SELECT @StoredPassword = [Password], @Status = [Status], @User_Type = [User_Type], @User_ID = [User_ID]
         FROM [dbo].[User]
         WHERE [Username] = @Username;
 
@@ -257,6 +259,16 @@ BEGIN
         INSERT INTO [dbo].[User_Session] (Session_ID, User_ID, Login_Time)
         VALUES (@Session_ID, @User_ID, DEFAULT);
 
+        -- Set the user type number based on the User_Type
+        SET @UserTypeNumber = 
+            CASE 
+                WHEN @User_Type = 'Admin' THEN 1
+                WHEN @User_Type = 'TOM' THEN 2
+                WHEN @User_Type = 'AA' THEN 3
+                WHEN @User_Type = 'Applicant' THEN 4
+                ELSE 0 -- Default number for unknown user types
+            END;
+
     END TRY
     BEGIN CATCH
         -- Handle errors and rethrow the error
@@ -264,6 +276,7 @@ BEGIN
     END CATCH
 END
 GO
+
 
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
