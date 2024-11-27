@@ -36,16 +36,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($categoryNumber)) {
         $errorMessage = "Please select a sponsorship category.";
     } else {
-        $applicationID = null;
+        // Initialize applicationID as an integer
+        $applicationID = 0; // Initialize as 0 or null (if not set)
 
         // Call ApplyForSponsorship stored procedure
         $sql = "{CALL ApplyForSponsorship(?, ?, ?)}";
         $params = [
-            $sessionID,
-            $categoryNumber,
-            [&$applicationID, SQLSRV_PARAM_OUT]
+            [$sessionID, SQLSRV_PARAM_IN],             // Session ID
+            [$categoryNumber, SQLSRV_PARAM_IN],        // Category Number
+            [&$applicationID, SQLSRV_PARAM_OUT]       // Output parameter for application ID
         ];
 
+        // Execute the query
         $stmt = sqlsrv_query($conn, $sql, $params);
 
         if ($stmt === false) {
@@ -56,11 +58,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 } elseif ($error['code'] == 50001) {
                     $errorMessage = "No remaining positions in this category.";
                 } else {
-                    $errorMessage = "An unexpected error occurred.";
+                    $errorMessage = "An unexpected error occurred: " . $error['message'];
                 }
             }
         } else {
-            $successMessage = "Your application has been submitted successfully! Application ID: " . $applicationID;
+            // Check if the application ID was returned
+            if ($applicationID != 0) {
+                $successMessage = "Your application has been submitted successfully! Application ID: " . $applicationID;
+            } else {
+                $errorMessage = "An error occurred while processing your application.";
+            }
         }
     }
 }
