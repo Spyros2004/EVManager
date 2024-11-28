@@ -425,6 +425,7 @@ GO
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
     @CategoryNumber INT,
+    @LicensePlate CHAR(6) = NULL, -- Optional for non-category 1-4
     @ApplicationID INT OUTPUT
 AS
 BEGIN
@@ -442,7 +443,7 @@ BEGIN
     )
     BEGIN
         THROW 50000, 'User is not an applicant.', 1;
-    END
+    END;
 
     DECLARE @ApplicantID INT;
     SELECT @ApplicantID = Applicant_ID
@@ -459,13 +460,20 @@ BEGIN
         THROW 50001, 'No remaining positions in this category.', 1;
     END;
 
+    -- Validate license plate for categories 1-4
+    IF @CategoryNumber BETWEEN 1 AND 4 AND @LicensePlate IS NULL
+    BEGIN
+        THROW 50002, 'License plate is required for categories 1 through 4.', 1;
+    END;
+
     -- Start transaction for the critical section
     BEGIN TRANSACTION;
 
     BEGIN TRY
-        -- Insert the application
-        INSERT INTO Application (Applicant_ID, Category_Number)
-        VALUES (@ApplicantID, @CategoryNumber);
+        -- Insert the application with or without license plate
+        INSERT INTO Application (Applicant_ID, Category_Number, License_Plate)
+        VALUES (@ApplicantID, @CategoryNumber, 
+                CASE WHEN @CategoryNumber BETWEEN 1 AND 4 THEN @LicensePlate ELSE NULL END);
 
         -- Return the new Application ID
         SET @ApplicationID = SCOPE_IDENTITY();
