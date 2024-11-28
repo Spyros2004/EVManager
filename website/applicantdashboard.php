@@ -52,105 +52,168 @@ if ($stmtApplications === false) {
     die(print_r(sqlsrv_errors(), true));
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Applicant Dashboard</title>
+    <title>Το Προφίλ Σου</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
+            margin: 0;
+            padding: 0;
+        }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            background-color: #f1f1f1;
-            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #28a745; /* Changed to green */
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         .welcome {
-            font-size: 18px;
+            font-size: 22px;
+            font-weight: 700;
         }
-        .logout-btn, .new-app-btn {
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
             padding: 10px 20px;
-            background-color: red;
+            background-color: #007BFF;
             color: white;
             border: none;
+            border-radius: 20px;
             cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .new-app-btn {
-            background-color: green;
+        .btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .btn.logout {
+            background-color: #dc3545;
+        }
+        .btn.logout:hover {
+            background-color: #c82333;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .content {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            min-height: calc(100vh - 160px);
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
         }
         table, th, td {
-            border: 1px solid black;
+            border: 1px solid #ddd;
         }
         th, td {
-            padding: 10px;
-            text-align: left;
+            padding: 15px;
+            text-align: center;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+            font-weight: 700;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e1e7ee;
         }
         .no-applications {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 40px;
         }
         .no-applications a {
-            color: blue;
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .no-applications a:hover {
             text-decoration: underline;
-            cursor: pointer;
         }
     </style>
 </head>
 <body>
-
+    
     <div class="header">
-        <div class="welcome">Welcome, <?php echo htmlspecialchars($username); ?></div>
-        <button class="new-app-btn" onclick="window.location.href='makeapplication.php'">New Application</button>
-        <button class="logout-btn" onclick="window.location.href='logout.php'">Logout</button>
+        <div class="welcome">Καλωσήρθες, <?php echo htmlspecialchars($username); ?></div>
+        <div class="header-buttons">
+            <a href="logout.php" class="btn logout">Αποσύνδεση</a>
+        </div>
     </div>
 
-    <h1>Applicant Dashboard</h1>
+    <div class="content">
+        <h1 style="font-size: 2.5em;">Το Προφίλ Σου</h1>
+        
+        <a href="makeapplication.php" class="btn" style="margin: 20px auto; display: block; width: fit-content; padding: 15px 30px; font-size: 1.2em;">Νέα Αίτηση</a>
+        <br>
+        <h1>Οι Αιτήσεις Σου</h1>
+        <?php
+      
 
-    <h2>Your Applications</h2>
-    <?php
-    // Check if there are any rows returned
-    if (sqlsrv_has_rows($stmtApplications)) {
-        echo '<table>
-                <thead>
-                    <tr>
-                        <th>Application ID</th>
-                        <th>Application Date</th>
-                        <th>Current Status</th>
-                        <th>Category Description</th>
-                    </tr>
-                </thead>
-                <tbody>';
-        // Fetch and display data
-        while ($row = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($row['Application_ID']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['Application_Date']->format('Y-m-d')) . "</td>";
-            echo "<td>" . htmlspecialchars($row['Current_Status']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['Category_Description']) . "</td>";
-            echo "</tr>";
-        }
-        echo '</tbody></table>';
-    } else {
-        // No applications message
-        echo '<div class="no-applications">
-                <p>You do not have any applications yet.</p>
-                <a href="makeapplication.php">Click here to make a new application</a>
-              </div>';
-    }
+      echo '<table>
+      <thead style="background-color: #f0fff0 !important;">
+          <tr>
+              <th>Κωδικός Αίτησης</th>
+              <th>Ημερομηνία Αίτησης</th>
+              <th>Τρέχουσα Κατάσταση</th>
+              <th>Περιγραφή Κατηγορίας</th>
+          </tr>
+      </thead>
+      <tbody>';
 
-    // Free the statement resource for applications query
-    sqlsrv_free_stmt($stmtApplications);
+// Check if there are any rows returned
+if (sqlsrv_has_rows($stmtApplications)) {
+  // Fetch and display data
+  while ($row = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
+      echo "<tr>";
+      echo "<td>" . htmlspecialchars($row['Application_ID']) . "</td>";
+      echo "<td>" . htmlspecialchars($row['Application_Date']->format('Y-m-d')) . "</td>";
+      echo "<td>" . htmlspecialchars($row['Current_Status']) . "</td>";
+      echo "<td>" . htmlspecialchars($row['Category_Description']) . "</td>";
+      echo "</tr>";
+  }
+} else {
+  // No data, display a message in a table row
+  echo '<tr><td colspan="4" class="no-data-message">
+          Δεν έχετε καμία αίτηση ακόμα. <a href="makeapplication.php">Κάνε Αίτηση</a>
+        </td></tr>';
+}
 
-    // Close the database connection
-    sqlsrv_close($conn);
-    ?>
+// Close the table
+echo '</tbody></table>';
+
+
+        // Free the statement resource for applications query
+        sqlsrv_free_stmt($stmtApplications);
+
+        // Close the database connection
+        sqlsrv_close($conn);
+        ?>
+    </div>
 </body>
 </html>
