@@ -63,8 +63,10 @@ CREATE TABLE [dbo].[Application]
     [Application_ID] INT NOT NULL IDENTITY(1,1),
     [Application_Date] DATE NOT NULL DEFAULT GETDATE(),
     [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('pending', 'approved', 'rejected', 'under_review', 'in_progress')) DEFAULT 'pending', 
+    [License_Plate] CHAR(6),
     [Applicant_ID] INT NOT NULL,
     [Category_Number] INT NOT NULL,
+    UNIQUE([License_Plate]),
     CONSTRAINT [PK_APPLICATION] PRIMARY KEY ([Application_ID] ASC)
 )
 
