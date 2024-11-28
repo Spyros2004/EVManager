@@ -75,43 +75,118 @@ sqlsrv_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Table and View Records</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e6ffe6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+        h2 {
+            text-align: center;
+            color: #2e7d32;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        select {
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #388e3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #2e7d32;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #388e3c;
+            color: white;
+            padding: 15px;
+            text-transform: uppercase;
+            font-size: 1em;
+        }
+        td {
+            padding: 15px;
+            text-align: center;
+            background-color: #f1fff1;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <h2>Select a Table to View Records</h2>
+    <div class="container">
+        <h2>Select a Table to View Records</h2>
 
-    <!-- Dropdown form to choose the table -->
-    <form method="POST" action="">
-        <label for="table_name">Choose a Table:</label>
-        <select name="table_name" id="table_name" required>
-            <option value="">--Select a table--</option>
-            <?php foreach ($tables as $table): ?>
-                <option value="<?php echo $table; ?>" <?php if($table == $selectedTable) echo 'selected'; ?>>
-                    <?php echo $table; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-        <input type="submit" value="View Records">
-    </form>
-
-    <!-- Display records if a table is selected -->
-    <?php if (!empty($records)): ?>
-        <h3>Records in Table: <?php echo htmlspecialchars($selectedTable); ?></h3>
-        <table border="1">
-            <tr>
-                <?php foreach (array_keys($records[0]) as $column): ?>
-                    <th><?php echo htmlspecialchars($column); ?></th>
+        <!-- Dropdown form to choose the table -->
+        <form method="POST" action="">
+            <label for="table_name">Choose a Table:</label>
+            <select name="table_name" id="table_name" required>
+                <option value="">--Select a table--</option>
+                <?php foreach ($tables as $table): ?>
+                    <option value="<?php echo $table; ?>" <?php if($table == $selectedTable) echo 'selected'; ?>>
+                        <?php echo $table; ?>
+                    </option>
                 <?php endforeach; ?>
-            </tr>
-            <?php foreach ($records as $record): ?>
-                <tr>
-                    <?php foreach ($record as $field): ?>
-                        <td><?php echo htmlspecialchars($field); ?></td>
+            </select>
+            <input type="submit" value="View Records">
+        </form>
+
+        <!-- Display records if a table is selected -->
+        <?php if (!empty($records)): ?>
+            <h3>Records in Table: <?php echo htmlspecialchars($selectedTable); ?></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <?php foreach (array_keys($records[0]) as $column): ?>
+                            <th><?php echo htmlspecialchars($column); ?></th>
+                        <?php endforeach; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($records as $record): ?>
+                        <tr>
+                            <?php foreach ($record as $field): ?>
+                                <td><?php echo htmlspecialchars($field); ?></td>
+                            <?php endforeach; ?>
+                        </tr>
                     <?php endforeach; ?>
-                </tr>
-            <?php endforeach; ?>
-        </table>
-    <?php elseif ($selectedTable): ?>
-        <p>No records found in this table.</p>
-    <?php endif; ?>
+                </tbody>
+            </table>
+        <?php elseif ($selectedTable): ?>
+            <p>No records found in this table.</p>
+        <?php endif; ?>
+    </div>
 </body>
 </html>
