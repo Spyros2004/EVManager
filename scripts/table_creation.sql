@@ -5,6 +5,13 @@ SET ANSI_NULLS ON
 GO
 
 --CREATE TABLES
+CREATE TABLE [dbo].[Discarded_Car]
+(
+    [License_Plate] CHAR(6) NOT NULL,
+    [Application_ID] INT NOT NULL,
+    CONSTRAINT [PK_DISCARDED_CAR] PRIMARY KEY ([License_Plate] ASC)
+);
+
 CREATE TABLE [dbo].[User]
 (
     [User_ID] INT NOT NULL IDENTITY(1,1), 
@@ -65,10 +72,8 @@ CREATE TABLE [dbo].[Application]
     [Application_ID] INT NOT NULL IDENTITY(1,1),
     [Application_Date] DATE NOT NULL DEFAULT GETDATE(),
     [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('active', 'approved', 'rejected', 'under_review', 'in_progress')) DEFAULT 'pending', 
-    [License_Plate] CHAR(6),
     [Applicant_ID] INT NOT NULL,
     [Category_Number] INT NOT NULL,
-    UNIQUE([License_Plate]),
     CONSTRAINT [PK_APPLICATION] PRIMARY KEY ([Application_ID] ASC)
 )
 
@@ -117,6 +122,11 @@ CREATE TABLE [dbo].[User_Session]
 )
 
 --CREATE FOREIGN KEY CONSTRAINTS
+ALTER TABLE [dbo].[Discarded_Car] WITH CHECK ADD CONSTRAINT [FK_DISCARDED_CAR_APPLICATION]
+FOREIGN KEY ([Application_ID]) REFERENCES [dbo].[Application] ([Application_ID])
+ON DELETE CASCADE ON UPDATE CASCADE;
+GO
+
 ALTER TABLE [dbo].[Applicant] WITH CHECK ADD CONSTRAINT [FK_APPLICANT_USER]
 FOREIGN KEY ([User_ID]) REFERENCES [dbo].[User] ([User_ID])
 ON DELETE CASCADE ON UPDATE CASCADE
