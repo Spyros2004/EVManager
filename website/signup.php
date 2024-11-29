@@ -1,29 +1,39 @@
+
 <?php
-// Include the database connection file
+// Συμπερίληψη του αρχείου σύνδεσης με τη βάση δεδομένων
 include 'connection.php';
 
-// Initialize variables to store form data
+// Αρχικοποίηση μεταβλητών για την αποθήκευση δεδομένων φόρμας
 $firstName = $lastName = $username = $email = $password = $userType = '';
-$identification = $companyPrivate = $gender = $birthDate = '';
+$identification = $companyPrivate = $gender = $birthDate = $telephoneNumber = $address = '';
 
-// Check if form is submitted
+// Έλεγχος αν η φόρμα έχει υποβληθεί
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get form data
+    // Λήψη δεδομένων φόρμας
     $firstName = $_POST['first_name'];
     $lastName = $_POST['last_name'];
     $username = $_POST['username'];
     $email = $_POST['email'];
     $password = $_POST['password'];
+    $confirmPassword = $_POST['confirm_password'];
     $userType = $_POST['user_type'];
 
-    // Optionally get additional fields if user type is Applicant
-    $identification = isset($_POST['identification']) ? $_POST['identification'] : null;
-    $companyPrivate = isset($_POST['company_private']) ? $_POST['company_private'] : null;
-    $gender = isset($_POST['gender']) ? $_POST['gender'] : null;
-    $birthDate = isset($_POST['birth_date']) ? $_POST['birth_date'] : null;
+    // Προαιρετική λήψη πρόσθετων πεδίων αν ο τύπος χρήστη είναι "Αιτητής"
+    $identification = $_POST['identification'] ?? null;
+    $companyPrivate = $_POST['company_private'] ?? null;
+    $gender = $_POST['gender'] ?? null;
+    $birthDate = $_POST['birth_date'] ?? null;
+    $telephoneNumber = $_POST['telephone_number'] ?? null;
+    $address = $_POST['address'] ?? null;
+
+    // Έλεγχος αν οι κωδικοί ταιριάζουν
+    if ($password !== $confirmPassword) {
+        echo "<p>Σφάλμα: Οι κωδικοί δεν ταιριάζουν. Παρακαλώ προσπαθήστε ξανά.</p>";
+        exit();
+    }
 
     try {
-        // Prepare the SQL query
+        // Προετοιμασία του SQL ερωτήματος
         $sql = "EXEC [dbo].[SignUpUser] 
                     @First_Name = ?, 
                     @Last_Name = ?, 
@@ -34,47 +44,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     @Identification = ?, 
                     @Company_Private = ?, 
                     @Gender = ?, 
-                    @BirthDate = ?";
+                    @BirthDate = ?, 
+                    @Telephone_Number = ?, 
+                    @Address = ?";
 
-        // Prepare the SQL statement
+        // Προετοιμασία του SQL statement
         $stmt = sqlsrv_prepare($conn, $sql, array(
-            $firstName, 
-            $lastName, 
-            $username, 
-            $email, 
-            $password, 
-            $userType, 
-            $identification, 
-            $companyPrivate, 
-            $gender, 
-            $birthDate
+            $firstName,
+            $lastName,
+            $username,
+            $email,
+            $password,
+            $userType,
+            $identification,
+            $companyPrivate,
+            $gender,
+            $birthDate,
+            $telephoneNumber,
+            $address
         ));
 
-        // Execute the stored procedure
+        // Εκτέλεση της αποθηκευμένης διαδικασίας
         if (sqlsrv_execute($stmt)) {
-            // Redirect to login.php after successful registration
+            // Ανακατεύθυνση στο login.php μετά από επιτυχή εγγραφή
             header('Location: login.php');
-            exit(); // Ensure no further code is executed
+            exit();
         } else {
-            // If there is an error in executing the stored procedure, show error message
-            echo "<p>Error: Registration failed. Please try again.</p>";
-            // Optionally log the SQL error for debugging purposes
-            echo "<p>Error details: " . print_r(sqlsrv_errors(), true) . "</p>";
+            // Εμφάνιση μηνύματος σφάλματος αν αποτύχει η εγγραφή
+            echo "<p>Σφάλμα: Η εγγραφή απέτυχε. Παρακαλώ προσπαθήστε ξανά.</p>";
+            echo "<p>Λεπτομέρειες σφάλματος: " . print_r(sqlsrv_errors(), true) . "</p>";
         }
     } catch (Exception $e) {
-        // Handle any exceptions and show an error message
-        echo "<p>Error: " . $e->getMessage() . "</p>";
+        // Διαχείριση εξαιρέσεων και εμφάνιση μηνύματος σφάλματος
+        echo "<p>Σφάλμα: " . $e->getMessage() . "</p>";
     }
 }
 ?>
 
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Εγγραφή</title>
     <style>
         body {
             display: flex;
@@ -87,20 +101,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin: 0;
         }
         .signup-container {
-    background: #ffffff;
-    padding: 60px;
-    border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 600px;
-    text-align: center;
-    max-height: 80vh; /* Καθορισμένο μέγιστο ύψος για το κουτί */
-    overflow-y: auto; /* Προσθήκη κύλισης στο κουτί όταν το περιεχόμενο υπερβαίνει το ύψος */
-}
-
+            background: #ffffff;
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            text-align: left;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
         h2 {
+            text-align: center;
             margin-bottom: 25px;
             font-weight: 600;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
         }
         input[type="text"],
         input[type="email"],
@@ -109,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         select {
             width: calc(100% - 20px);
             padding: 15px;
-            margin: 15px 0;
+            margin-top: 5px;
             border: 1px solid #ddd;
             border-radius: 12px;
             font-size: 16px;
@@ -126,43 +145,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-size: 18px;
             transition: background 0.3s;
             box-sizing: border-box;
+            margin-top: 20px;
         }
         button[type="submit"]:hover {
             background: #218838;
         }
         .applicant-fields {
             display: none;
-        }
-        .signup-container .input-group {
-            position: relative;
-        }
-        .signup-container .input-group i {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #aaa;
-            font-size: 21px;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="date"],
-        select {
-            padding-left: 50px;
-        }
-        @media (max-width: 600px) {
-            .signup-container {
-                padding: 30px;
-            }
-            input[type="text"],
-            input[type="email"],
-            input[type="password"],
-            input[type="date"],
-            select,
-            button[type="submit"] {
-                padding: 12px;
-            }
         }
     </style>
     <script>
@@ -180,102 +169,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="signup-container">
-        <h2>Sign Up</h2>
-        
-      <!-- Sign-Up Form -->
-<form action="signup.php" method="POST" onsubmit="return validateForm()">
-    <div class="input-group">
-        <i class="fas fa-user"></i>
-        <input type="text" id="first_name" name="first_name" placeholder="First Name" required>
-    </div>
+        <h2>Εγγραφή</h2>
+        <form action="signup.php" method="POST">
+            <label for="first_name">Όνομα:</label>
+            <input type="text" id="first_name" name="first_name" required>
 
-    <div class="input-group">
-        <i class="fas fa-user"></i>
-        <input type="text" id="last_name" name="last_name" placeholder="Last Name" required>
-    </div>
+            <label for="last_name">Επώνυμο:</label>
+            <input type="text" id="last_name" name="last_name" required>
 
-    <div class="input-group">
-        <i class="fas fa-user"></i>
-        <input type="text" id="username" name="username" placeholder="Username" required>
-    </div>
+            <label for="username">Όνομα Χρήστη:</label>
+            <input type="text" id="username" name="username" required>
 
-    <div class="input-group">
-        <i class="fas fa-envelope"></i>
-        <input type="email" id="email" name="email" placeholder="Email" required>
-    </div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
 
-    <div class="input-group">
-        <i class="fas fa-lock"></i>
-        <input type="password" id="password" name="password" placeholder="Password" required>
-    </div>
+            <label for="password">Κωδικός:</label>
+            <input type="password" id="password" name="password" required>
 
-    <div class="input-group">
-        <i class="fas fa-lock"></i>
-        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
-    </div>
+            <label for="confirm_password">Επιβεβαίωση Κωδικού:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
 
-    <div class="input-group">
-        <i class="fas fa-user-tag"></i>
-        <select id="user_type" name="user_type" onchange="toggleApplicantFields()" required>
-            <option value="">Select User Type</option>
-            <option value="TOM">TOM</option>
-            <option value="AA">AA</option>
-            <option value="Applicant">Applicant</option>
-        </select>
-    </div>
-
-    <!-- Applicant Fields (hidden initially) -->
-    <div id="applicantFields" class="applicant-fields">
-        <div class="input-group">
-            <i class="fas fa-id-card"></i>
-            <input type="text" id="identification" name="identification" placeholder="Identification">
-        </div>
-
-        <div class="input-group">
-            <i class="fas fa-building"></i>
-            <select id="company_private" name="company_private">
-                <option value="">Select Company Type</option>
-                <option value="company">Company</option>
-                <option value="private">Private</option>
+            <label for="user_type">Τύπος Χρήστη:</label>
+            <select id="user_type" name="user_type" onchange="toggleApplicantFields()" required>
+                <option value="">Επιλέξτε Τύπο Χρήστη</option>
+                <option value="TOM">Λειτουργός Τμήματος</option>
+                <option value="AA">Αντιπρόσωπος Αυτοκινήτων</option>
+                <option value="Applicant">Αιτητής</option>
             </select>
-        </div>
 
-        <div class="input-group">
-            <i class="fas fa-venus-mars"></i>
-            <select id="gender" name="gender">
-                <option value="">Select Gender</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-                <option value="O">Other</option>
-            </select>
-        </div>
+            <div id="applicantFields" class="applicant-fields">
+                <label for="identification">Α.Π.Τ. / Αρ. Εταιρίας:</label>
+                <input type="text" id="identification" name="identification">
 
-        <div class="input-group">
-            <i class="fas fa-birthday-cake"></i>
-            <input type="date" id="birth_date" name="birth_date" placeholder="Birth Date">
-        </div>
-    </div>
+                <label for="company_private">Φυσικό/Νομικό Πρόσωπο:</label>
+                <select id="company_private" name="company_private">
+                    <option value="">Επιλέξτε Φυσικό/Νομικό Πρόσωπο</option>
+                    <option value="company">Νομικό Πρόσωπο</option>
+                    <option value="private">Φυσικό Πρόσωπο</option>
+                </select>
 
-    <button type="submit">Sign Up</button>
-</form>
-<br>
-         <!-- Create Account Link -->
-         <p style="text-align: center; font-size: 0.9em; color: black;">
-            <a href="login.php" style="text-decoration: underline; font-weight: bold; color: black;">Έχεις ήδη λογαριασμό? Σύνδεση</a>
+                <label for="gender">Φύλο:</label>
+                <select id="gender" name="gender">
+                    <option value="">Επιλέξτε Φύλο</option>
+                    <option value="M">Άνδρας</option>
+                    <option value="F">Γυναίκα</option>
+                    <option value="O">Άλλο</option>
+                </select>
+
+                <label for="birth_date">Ημ/νία Γέννησης ή Ημ/νία Ίδρυσης Εταιρίας:</label>
+                <input type="date" id="birth_date" name="birth_date">
+
+                <label for="telephone_number">Τηλέφωνο:</label>
+                <input type="text" id="telephone_number" name="telephone_number">
+
+                <label for="address">Διεύθυνση:</label>
+                <input type="text" id="address" name="address">
+            </div>
+
+            <button type="submit">Εγγραφή</button>
+        </form>
+        <p style="text-align: center; margin-top: 20px;">
+            Έχετε ήδη λογαριασμό; <a href="login.php">Σύνδεση</a>
         </p>
-
     </div>
-<script>
-    function validateForm() {
-        var password = document.getElementById("password").value;
-        var confirmPassword = document.getElementById("confirm_password").value;
-
-        if (password !== confirmPassword) {
-            alert("Passwords do not match. Please make sure both passwords are the same.");
-            return false; // Μην υποβάλλεις τη φόρμα αν οι κωδικοί δεν ταιριάζουν
-        }
-        return true;
-    }
-</script>
 </body>
 </html>
