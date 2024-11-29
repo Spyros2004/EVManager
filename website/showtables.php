@@ -11,18 +11,20 @@ if (!$conn) {
 $tableProcedures = [
     'Applicant' => 'GetApplicant',
     'Application' => 'GetApplication',
-    'Criterion' => 'GetCriterion', // Changed from 'Criteria' to 'Criterion'
+    'Criterion' => 'GetCriterion',
     'Document' => 'GetDocument',
-    'Category_Has_Criterion' => 'GetCategoryHasCriterion', // Fixed 'has' to 'Category_Has_Criterion'
-    'Modification' => 'GetModification', // Changed from 'Change' to 'Modification'
-    'Sponsorship' => 'GetSponsorshipCategory', // Ensure the name matches your procedure
+    'Category_Has_Criterion' => 'GetCategoryHasCriterion',
+    'Modification' => 'GetModification',
+    'Sponsorship' => 'GetSponsorshipCategory',
     'User' => 'GetUser',
     'Vehicle' => 'GetVehicle',
-    'User_Session' => 'GetUserSession' // Added User_Session here
+    'User_Session' => 'GetUserSession',
+    'Discarded_Car' => 'GetDiscardedCar'  // Added this line
 ];
 
+
 // Get the list of tables for the dropdown menu
-$tables = array_keys($tableProcedures); // Use the keys of $tableProcedures as table names for the dropdown
+$tables = array_keys($tableProcedures);
 
 // Initialize variables for handling form submission
 $selectedTable = '';
@@ -50,7 +52,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['table_name'])) {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             // Format DateTime fields as strings before adding them to records
             foreach ($row as $key => $value) {
-                // If the value is a DateTime object, format it as a string
                 if ($value instanceof DateTime) {
                     $row[$key] = $value->format('Y-m-d H:i:s');
                 }
@@ -142,6 +143,9 @@ sqlsrv_close($conn);
             text-align: center;
             background-color: #f1fff1;
             color: #333;
+            word-wrap: break-word; /* Breaks words that are too long for the cell width */
+            word-break: break-all; /* Forces the password to break lines if necessary */
+            max-width: 150px; /* Adjusted width for cells containing passwords */
         }
     </style>
 </head>
