@@ -306,10 +306,13 @@ CREATE PROCEDURE [dbo].SignUpUser
     @Identification NVARCHAR(20) = NULL,   -- Only required if user is an applicant
     @Company_Private NVARCHAR(20) = NULL,  -- Only required if user is an applicant
     @Gender CHAR(1) = NULL,                -- Only required if user is an applicant
-    @BirthDate DATE = NULL                 -- Only required if user is an applicant
+    @BirthDate DATE = NULL,                -- Only required if user is an applicant
+    @Telephone_Number INT = NULL,          -- Only required if user is an applicant
+    @Address NVARCHAR(255) = NULL          -- Only required if user is an applicant
 AS
 BEGIN
     SET NOCOUNT ON;
+
     -- Check if Username or Email already exists
     IF EXISTS (SELECT 1 FROM [dbo].[User] WHERE [Username] = @Username)
     BEGIN
@@ -345,16 +348,17 @@ BEGIN
         IF @User_Type = 'Applicant'
         BEGIN
             -- Check if all required fields for Applicant are provided
-            IF @Identification IS NULL OR @Company_Private IS NULL OR @Gender IS NULL OR @BirthDate IS NULL
+            IF @Identification IS NULL OR @Company_Private IS NULL OR @Gender IS NULL 
+               OR @BirthDate IS NULL OR @Telephone_Number IS NULL OR @Address IS NULL
             BEGIN
-                THROW 50003, 'For applicants, all fields (Identification, Company_Private, Gender, BirthDate) are required.', 1;
+                THROW 50003, 'For applicants, all fields (Identification, Company_Private, Gender, BirthDate, Telephone_Number, Address) are required.', 1;
             END
 
             -- Insert the applicant details into the Applicant table
             INSERT INTO [dbo].[Applicant] 
-                ([Identification], [Company_Private], [Gender], [BirthDate], [User_ID])
+                ([Identification], [Company_Private], [Gender], [BirthDate], [Telephone_Number], [Address], [User_ID])
             VALUES
-                (@Identification, @Company_Private, @Gender, @BirthDate, @User_ID);
+                (@Identification, @Company_Private, @Gender, @BirthDate, @Telephone_Number, @Address, @User_ID);
         END
 
         -- Commit the transaction if everything is successful
