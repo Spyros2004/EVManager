@@ -14,7 +14,7 @@ BEGIN
     INSERT INTO [dbo].[Modification] 
         (New_Status, Reason, User_ID, Application_ID)
     SELECT 
-        'pending',                    -- Status for the new application (or use logic based on the app's status)
+        'active',                    -- Status for the new application (or use logic based on the app's status)
         'Application Submitted',       -- Reason for the modification
         U.User_ID,                    -- User who submitted the application (assuming the user is logged in)
         I.Application_ID              -- ID of the newly inserted application
