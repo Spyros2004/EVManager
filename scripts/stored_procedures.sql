@@ -65,6 +65,17 @@ GO
 DROP PROCEDURE IF EXISTS AcceptOrRejectUser
 GO
 
+DROP PROCEDURE IF EXISTS GetDiscardedCar
+GO
+
+CREATE PROCEDURE GetDiscardedCar
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * FROM [dbo].[Discarded_Car];
+END
+GO
+
 CREATE PROCEDURE AcceptOrRejectUser
     @UserID INT,          -- ID of the user to be updated
     @Accept BIT           -- TRUE (1) to approve, FALSE (0) to reject
