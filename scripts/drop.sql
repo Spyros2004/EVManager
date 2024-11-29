@@ -1,6 +1,8 @@
 -- DROP CONSTRAINTS
 
 -- Drop foreign key constraints
+ALTER TABLE [dbo].[Discarded_Car] DROP CONSTRAINT [FK_DISCARDED_CAR_APPLICATION];
+GO
 ALTER TABLE [dbo].[User_Session] DROP CONSTRAINT [FK_USER_SESSION_USER]
 GO
 ALTER TABLE [dbo].[Vehicle] DROP CONSTRAINT [FK_VEHICLE_DOCUMENT]
@@ -45,4 +47,7 @@ GO
 DROP TABLE [dbo].[Sponsorship_Category]
 GO
 DROP TABLE [dbo].[User]
+GO
+
+DROP TABLE [dbo].[Discarded_Car];
 GO
