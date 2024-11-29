@@ -37,6 +37,8 @@ CREATE TABLE [dbo].[Applicant]
     [Company_Private] VARCHAR(20) NOT NULL CHECK ([Company_Private] IN ('company', 'private')),
     [Gender] CHAR(1) NOT NULL CHECK ([Gender] IN ('M', 'F', 'O')),
     [BirthDate] DATE NOT NULL,
+    [Telephone_Number] INT NOT NULL,
+    [Address] NVARCHAR(255) NOT NULL,
     [User_ID] INT NOT NULL,
     UNIQUE([Identification]),
     CONSTRAINT [PK_APPLICANT] PRIMARY KEY ([Applicant_ID] ASC)
