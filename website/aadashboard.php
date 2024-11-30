@@ -8,7 +8,7 @@ if (!isset($_SESSION['SessionID'])) {
 }
 
 // Check if the user is authorized to access this page (AA only)
-if ($_SESSION['UserTypeNumber'] != 2) {
+if ($_SESSION['UserTypeNumber'] != 3) {
     // Redirect unauthorized users to the login page
     header("Location: login.php");
     exit();
