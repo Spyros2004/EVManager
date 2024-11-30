@@ -1,4 +1,3 @@
-
 <?php
 // Συμπερίληψη του αρχείου σύνδεσης με τη βάση δεδομένων
 include 'connection.php';
@@ -6,8 +5,8 @@ include 'connection.php';
 // Αρχικοποίηση μεταβλητών για την αποθήκευση δεδομένων φόρμας
 $firstName = $lastName = $username = $email = $password = $userType = '';
 $identification = $companyPrivate = $gender = $birthDate = $telephoneNumber = $address = '';
+$errorMessage = '';
 
-// Έλεγχος αν η φόρμα έχει υποβληθεί
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Λήψη δεδομένων φόρμας
     $firstName = $_POST['first_name'];
@@ -15,7 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $email = $_POST['email'];
     $password = $_POST['password'];
-    $confirmPassword = $_POST['confirm_password'];
     $userType = $_POST['user_type'];
 
     // Προαιρετική λήψη πρόσθετων πεδίων αν ο τύπος χρήστη είναι "Αιτητής"
@@ -26,27 +24,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $telephoneNumber = $_POST['telephone_number'] ?? null;
     $address = $_POST['address'] ?? null;
 
-    // Έλεγχος αν οι κωδικοί ταιριάζουν
-    if ($password !== $confirmPassword) {
-        echo "<p>Σφάλμα: Οι κωδικοί δεν ταιριάζουν. Παρακαλώ προσπαθήστε ξανά.</p>";
-        exit();
-    }
-
     try {
         // Προετοιμασία του SQL ερωτήματος
         $sql = "EXEC [dbo].[SignUpUser] 
-                    @First_Name = ?, 
-                    @Last_Name = ?, 
-                    @Username = ?, 
-                    @Email = ?, 
-                    @Password = ?, 
-                    @User_Type = ?, 
-                    @Identification = ?, 
-                    @Company_Private = ?, 
-                    @Gender = ?, 
-                    @BirthDate = ?, 
-                    @Telephone_Number = ?, 
-                    @Address = ?";
+                        @First_Name = ?, 
+                        @Last_Name = ?, 
+                        @Username = ?, 
+                        @Email = ?, 
+                        @Password = ?, 
+                        @User_Type = ?, 
+                        @Identification = ?, 
+                        @Company_Private = ?, 
+                        @Gender = ?, 
+                        @BirthDate = ?, 
+                        @Telephone_Number = ?, 
+                        @Address = ?";
 
         // Προετοιμασία του SQL statement
         $stmt = sqlsrv_prepare($conn, $sql, array(
@@ -70,17 +62,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header('Location: login.php');
             exit();
         } else {
-            // Εμφάνιση μηνύματος σφάλματος αν αποτύχει η εγγραφή
-            echo "<p>Σφάλμα: Η εγγραφή απέτυχε. Παρακαλώ προσπαθήστε ξανά.</p>";
-            echo "<p>Λεπτομέρειες σφάλματος: " . print_r(sqlsrv_errors(), true) . "</p>";
+            // Αποθήκευση λεπτομερειών σφάλματος
+            $errors = sqlsrv_errors();
+            foreach ($errors as $error) {
+                if ($error['code'] === 50001) {
+                    $errorMessage = "Το όνομα χρήστη υπάρχει ήδη. Παρακαλώ δοκιμάστε άλλο.";
+                } elseif ($error['code'] === 50002) {
+                    $errorMessage = "Το email υπάρχει ήδη. Παρακαλώ χρησιμοποιήστε άλλο.";
+                } elseif ($error['code'] === 50003) {
+                    $errorMessage = "Για τους αιτητές, όλα τα πεδία (Α.Π.Τ., Φύλο, Ημ/νία, Τηλέφωνο, Διεύθυνση) είναι υποχρεωτικά.";
+                } elseif ($error['code'] === 50004) {
+                    $errorMessage = "Το αναγνωριστικό υπάρχει ήδη. Παρακαλώ δοκιμάστε άλλο.";
+                } elseif ($error['code'] === 50005) {
+                    $errorMessage = "Όλα τα πεδία για το χρήστη (Όνομα, Επώνυμο, Όνομα Χρήστη, Email, Κωδικός) είναι υποχρεωτικά.";
+                } else {
+                    $errorMessage = "Σφάλμα κατά την εγγραφή. Παρακαλώ προσπαθήστε ξανά.";
+                }
+            }
         }
     } catch (Exception $e) {
-        // Διαχείριση εξαιρέσεων και εμφάνιση μηνύματος σφάλματος
-        echo "<p>Σφάλμα: " . $e->getMessage() . "</p>";
+        $errorMessage = "Σφάλμα: " . $e->getMessage();
     }
 }
 ?>
-
 
 
 <!DOCTYPE html>
@@ -153,6 +157,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .applicant-fields {
             display: none;
         }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
     <script>
         function toggleApplicantFields() {
@@ -170,7 +180,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="signup-container">
         <h2>Εγγραφή</h2>
+
+        <!-- Εμφάνιση μηνύματος σφάλματος -->
+        <?php if (!empty($errorMessage)) : ?>
+            <p class="error-message"><?= htmlspecialchars($errorMessage) ?></p>
+        <?php endif; ?>
+
         <form action="signup.php" method="POST">
+        <label for="user_type">Εγγραφή ως:</label>
+            <select id="user_type" name="user_type" onchange="toggleApplicantFields()" required>
+                <option value="">Επιλέξτε Τύπο Χρήστη</option>
+                <option value="TOM">Λειτουργός Τμήματος</option>
+                <option value="AA">Αντιπρόσωπος Αυτοκινήτων</option>
+                <option value="Applicant">Αιτητής</option>
+            </select>
+
             <label for="first_name">Όνομα:</label>
             <input type="text" id="first_name" name="first_name" required>
 
@@ -186,17 +210,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label for="password">Κωδικός:</label>
             <input type="password" id="password" name="password" required>
 
-            <label for="confirm_password">Επιβεβαίωση Κωδικού:</label>
-            <input type="password" id="confirm_password" name="confirm_password" required>
-
-            <label for="user_type">Τύπος Χρήστη:</label>
-            <select id="user_type" name="user_type" onchange="toggleApplicantFields()" required>
-                <option value="">Επιλέξτε Τύπο Χρήστη</option>
-                <option value="TOM">Λειτουργός Τμήματος</option>
-                <option value="AA">Αντιπρόσωπος Αυτοκινήτων</option>
-                <option value="Applicant">Αιτητής</option>
-            </select>
-
+          
             <div id="applicantFields" class="applicant-fields">
                 <label for="identification">Α.Π.Τ. / Αρ. Εταιρίας:</label>
                 <input type="text" id="identification" name="identification">
