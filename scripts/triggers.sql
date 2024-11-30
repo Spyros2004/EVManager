@@ -75,7 +75,7 @@ BEGIN
     WHERE Category_Number = @CategoryNumber;
 
     -- Generate the tracking number in the format: ΓCategoryNumber.Number (e.g., Γ13.0001)
-    SET @TrackingNumber = CONCAT(N'Γ', @CategoryNumber, '.', FORMAT(@CategoryCount, '0000'));
+    SET @TrackingNumber = CONCAT(N'Γ', FORMAT(@CategoryCount, '00'), '.', FORMAT(@CategoryCount, '0000'));
 
     -- Update the newly inserted application with the generated tracking number
     UPDATE Application
