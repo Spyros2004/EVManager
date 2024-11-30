@@ -457,8 +457,6 @@ BEGIN
 END
 GO
 
-
-
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
     @CategoryNumber INT,
@@ -542,8 +540,6 @@ BEGIN
                 SET @DocumentType = N'Αρχείο - Βεβαίωση Τμήματος Κοινωνικής Ενσωμάτωσης ατόμων με αναπηρίες';
             ELSE IF @CategoryNumber = 5
                 SET @DocumentType = N'Αρχείο - Ταυτότητα Πολυτέκνων';
-            ELSE
-                SET @DocumentType = N'Application Document'; -- Default document type
 
             -- Insert into Document table
             INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
