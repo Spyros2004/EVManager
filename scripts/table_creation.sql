@@ -82,8 +82,7 @@ CREATE TABLE [dbo].[Document]
 (
     [Document_ID] INT NOT NULL IDENTITY(1,1),
     [URL] VARCHAR(255) NOT NULL, 
-    [Document_Type] VARCHAR(50) NOT NULL CHECK ([Document_Type] IN ('type1', 'type2', 'type3')),
-    [Reason] NVARCHAR(255) NOT NULL,
+    [Document_Type] NVARCHAR(100) NOT NULL,
     [Application_ID] INT NOT NULL,
     [User_ID] INT NOT NULL,
     UNIQUE ([URL]),
