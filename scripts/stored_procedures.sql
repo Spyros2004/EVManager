@@ -489,6 +489,98 @@ BEGIN
     FROM Applicant
     WHERE User_ID = @UserID;
 
+    -- Check if the applicant has 2 applications with expired status
+    IF (
+        SELECT COUNT(*) 
+        FROM Application 
+        WHERE Applicant_ID = @ApplicantID AND Current_Status = 'expired'
+    ) >= 2
+    BEGIN
+        THROW 50004, 'Applicant has 2 applications with expired status.', 1;
+    END;
+
+    -- Check if the applicant has 2 applications with declined status
+    IF (
+        SELECT COUNT(*) 
+        FROM Application 
+        WHERE Applicant_ID = @ApplicantID AND Current_Status = 'declined'
+    ) >= 2
+    BEGIN
+        THROW 50005, 'Applicant has 2 applications with declined status.', 1;
+    END;
+
+    -- Check if the applicant is private and attempting category 1-12 but already has an active/accepted application
+    IF (
+        EXISTS (
+            SELECT 1 
+            FROM Applicant 
+            WHERE Applicant_ID = @ApplicantID AND Company_Private = 'Private'
+        )
+        AND @CategoryNumber BETWEEN 1 AND 12
+        AND EXISTS (
+            SELECT 1 
+            FROM Application 
+            WHERE Applicant_ID = @ApplicantID 
+              AND Category_Number BETWEEN 1 AND 12 
+              AND Current_Status IN ('active', 'accepted')
+        )
+    )
+    BEGIN
+        THROW 50006, 'Private applicant cannot submit a category 1-12 application when an active/accepted application already exists.', 1;
+    END;
+
+    -- Check if the applicant is private and attempting category 13 but already has an active/accepted application
+    IF (
+        EXISTS (
+            SELECT 1 
+            FROM Applicant 
+            WHERE Applicant_ID = @ApplicantID AND Company_Private = 'Private'
+        )
+        AND @CategoryNumber = 13
+        AND EXISTS (
+            SELECT 1 
+            FROM Application 
+            WHERE Applicant_ID = @ApplicantID 
+              AND Category_Number = 13 
+              AND Current_Status IN ('active', 'accepted')
+        )
+    )
+    BEGIN
+        THROW 50007, 'Private applicant cannot submit a category 13 application when an active/accepted application already exists.', 1;
+    END;
+
+    -- Check if the applicant is a company and chooses an invalid category (3, 4, 7, 8)
+    IF (
+        EXISTS (
+            SELECT 1 
+            FROM Applicant 
+            WHERE Applicant_ID = @ApplicantID AND Company_Private = 'Company'
+        )
+        AND @CategoryNumber IN (3, 4, 7, 8)
+    )
+    BEGIN
+        THROW 50008, 'Company applicants cannot apply for categories 3, 4, 7, or 8.', 1;
+    END;
+
+    -- Check if the applicant is a company and already has 20 applications of specific categories with active/accepted status
+    IF (
+        EXISTS (
+            SELECT 1 
+            FROM Applicant 
+            WHERE Applicant_ID = @ApplicantID AND Company_Private = 'Company'
+        )
+        AND (
+            SELECT COUNT(*) 
+            FROM Application 
+            WHERE Applicant_ID = @ApplicantID 
+              AND Category_Number IN (1, 2, 5, 6, 9, 10, 11, 12, 13)
+              AND Current_Status IN ('active', 'accepted')
+        ) >= 20
+    )
+    BEGIN
+        THROW 50009, 'Company applicants cannot have more than 20 applications of categories 1, 2, 5, 6, 9-13 with active/accepted status.', 1;
+    END;
+
     -- Check if there are available positions in the category
     IF NOT EXISTS (
         SELECT 1 
@@ -570,4 +662,3 @@ BEGIN
     END CATCH
 END;
 GO
-
