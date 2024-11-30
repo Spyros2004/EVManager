@@ -457,6 +457,9 @@ BEGIN
 END
 GO
 
+DROP PROCEDURE IF EXISTS ApplyForSponsorship;
+GO
+
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
     @CategoryNumber INT,
@@ -530,10 +533,11 @@ BEGIN
             VALUES (@LicensePlate, @ApplicationID);
         END
 
-        -- Insert document record with category-specific document type
+        -- Insert document record with dynamically constructed URL
         IF @Document IS NOT NULL
         BEGIN
             DECLARE @DocumentType NVARCHAR(255);
+            DECLARE @URL NVARCHAR(255);
 
             -- Determine document type based on the category
             IF @CategoryNumber IN (3, 7)
@@ -541,9 +545,12 @@ BEGIN
             ELSE IF @CategoryNumber = 5
                 SET @DocumentType = N'Αρχείο - Ταυτότητα Πολυτέκνων';
 
+            -- Construct the URL dynamically
+            SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @UserID);
+
             -- Insert into Document table
             INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
-            VALUES (@Document, @DocumentType, @ApplicationID, @UserID);
+            VALUES (@URL, @DocumentType, @ApplicationID, @UserID);
         END
 
         -- Decrement Remaining_Positions for the category
@@ -563,3 +570,4 @@ BEGIN
     END CATCH
 END;
 GO
+
