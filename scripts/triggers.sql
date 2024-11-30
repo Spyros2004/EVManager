@@ -1,3 +1,5 @@
+DROP TRIGGER IF EXISTS [dbo].[DecrementSponsorshipPositions]
+GO
 DROP TRIGGER IF EXISTS [dbo].[SetTrackingNumber]
 GO
 DROP TRIGGER IF EXISTS [dbo].[UpdateStatusOnUserType]
@@ -86,3 +88,21 @@ BEGIN
     WHERE Application_ID = @ApplicationID;
 END;
 GO
+
+CREATE TRIGGER DecrementSponsorshipPositions
+ON Application
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @CategoryNumber INT;
+
+    -- Retrieve the Category Number for the newly inserted application
+    SELECT @CategoryNumber = Category_Number
+    FROM inserted;
+
+    -- Decrement Remaining_Positions in the Sponsorship_Category table for the given category
+    UPDATE Sponsorship_Category
+    SET Remaining_Positions = Remaining_Positions - 1
+    WHERE Category_Number = @CategoryNumber;
+
+END;
