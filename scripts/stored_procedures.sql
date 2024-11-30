@@ -633,7 +633,7 @@ BEGIN
         END
 
         -- Insert document record with dynamically constructed URL
-        IF @Document IS NOT NULL
+        IF @Document IS NOT NULL AND @CategoryNumber IN (3, 5, 7)
         BEGIN
             DECLARE @DocumentType NVARCHAR(255);
             DECLARE @URL NVARCHAR(255);
