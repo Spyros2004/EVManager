@@ -19,7 +19,6 @@ include 'connection.php';
 
 // Get the session ID from the current session
 $sessionID = $_SESSION['SessionID'];
-var_dump($_SESSION['SessionID']); // This will help you see the SessionID value in the browser
 
 
 // Fetch the username
