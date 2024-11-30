@@ -1,22 +1,22 @@
 <?php
-// Συμπερίληψη του αρχείου σύνδεσης με τη βάση δεδομένων
+// Include database connection
 include 'connection.php';
 
-// Έναρξη συνεδρίας
+// Start session
 session_start();
 
-// Έλεγχος αν ο χρήστης είναι συνδεδεμένος
+// Check if user is logged in
 if (!isset($_SESSION['SessionID'])) {
     header("Location: login.php");
     exit();
 }
 
-// Αρχικοποίηση μηνυμάτων
+// Initialize messages
 $errorMessage = '';
 $successMessage = '';
 $sponsorshipCategories = [];
 
-// Ανάκτηση κατηγοριών επιχορηγήσεων μέσω της αποθηκευμένης διαδικασίας
+// Fetch sponsorship categories using stored procedure
 $sql = "{CALL GetSponsorshipCategory()}";
 $stmt = sqlsrv_query($conn, $sql);
 
@@ -31,19 +31,32 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     ];
 }
 
-// Επεξεργασία της αίτησης
+// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $categoryNumber = $_POST['category'];
     $licensePlate = isset($_POST['license_plate']) ? $_POST['license_plate'] : null;
     $sessionID = $_SESSION['SessionID'];
-    $trackingNumber = ''; // Αρχικοποίηση της εξόδου
+    $trackingNumber = ''; // Initialize output
     $document = isset($_POST['document']) ? $_POST['document'] : null;
 
-    // Έλεγχος αν επιλέχθηκε κατηγορία
+    // Validate category selection
     if (empty($categoryNumber)) {
         $errorMessage = "Παρακαλώ επιλέξτε κατηγορία.";
-    } else {
-        // Κλήση της αποθηκευμένης διαδικασίας ApplyForSponsorship
+    }
+    
+    // Validate license plate if required
+    if (empty($licensePlate) && in_array($categoryNumber, range(1, 4))) {
+        $errorMessage = "Η πινακίδα είναι απαραίτητη για τις κατηγορίες 1 έως 4.";
+    }
+    
+    // Validate document if required
+    $requiresDocumentCategories = [3, 5, 7];
+    if (empty($document) && in_array($categoryNumber, $requiresDocumentCategories)) {
+        $errorMessage = "Το αρχείο είναι απαραίτητο για αυτή την κατηγορία.";
+    }
+    
+    // If there are no validation errors, proceed with the stored procedure
+    if (empty($errorMessage)) {
         $sql = "{CALL ApplyForSponsorship(?, ?, ?, ?, ?)}";
         $params = [
             [&$sessionID, SQLSRV_PARAM_IN],
@@ -71,10 +84,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
         } else {
-            // Έλεγχος αν επιστράφηκε αριθμός παρακολούθησης
+            // Check if tracking number was returned
             if (!empty($trackingNumber)) {
                 $successMessage = "Η αίτηση σας υποβλήθηκε επιτυχώς! Αριθμός παρακολούθησης: " . $trackingNumber;
-                header("Location: applicantdashboard.php"); // Ανακατεύθυνση μετά την επιτυχή υποβολή
+                header("Location: applicantdashboard.php"); // Redirect after successful submission
                 exit();
             } else {
                 $errorMessage = "Παρουσιάστηκε σφάλμα κατά την επεξεργασία της αίτησης.";
@@ -83,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Κλείσιμο της σύνδεσης με τη βάση
+// Close the database connection
 sqlsrv_close($conn);
 ?>
 
@@ -101,17 +114,17 @@ sqlsrv_close($conn);
             const uploadFileField = document.getElementById("upload-file-field");
             const selectedCategory = parseInt(categorySelect.value);
 
-            // Κατηγορίες που απαιτούν αρχείο
+            // Categories that require a document
             const requiresDocumentCategories = [3, 5, 7];
 
-            // Εμφάνιση/Απόκρυψη πεδίου πινακίδας για κατηγορίες 1-4
+            // Show/hide license plate field for categories 1-4
             if (selectedCategory >= 1 && selectedCategory <= 4) {
                 licensePlateField.style.display = "block";
             } else {
                 licensePlateField.style.display = "none";
             }
 
-            // Εμφάνιση/Απόκρυψη πεδίου αρχείου για συγκεκριμένες κατηγορίες
+            // Show/hide document field for specific categories
             if (requiresDocumentCategories.includes(selectedCategory)) {
                 uploadFileField.style.display = "block";
             } else {
@@ -128,7 +141,7 @@ sqlsrv_close($conn);
                 return;
             }
 
-            // Δημιουργία αρχείου
+            // Create document file
             documentField.value = "G" + category + "_" + Date.now() + ".pdf";
             alert("Το αρχείο δημιουργήθηκε: " + documentField.value);
         }
@@ -137,7 +150,7 @@ sqlsrv_close($conn);
 <body>
     <h2>Υποβολή Αίτησης Επιχορήγησης</h2>
 
-    <!-- Εμφάνιση μηνυμάτων -->
+    <!-- Display messages -->
     <?php if ($errorMessage): ?>
         <div style="color: red;">
             <strong>Σφάλμα:</strong> <?php echo htmlspecialchars($errorMessage); ?>
@@ -149,7 +162,7 @@ sqlsrv_close($conn);
         </div>
     <?php endif; ?>
 
-    <!-- Φόρμα Αίτησης -->
+    <!-- Application Form -->
     <form method="POST" action="">
         <label for="category">Επιλέξτε Κατηγορία:</label>
         <br>
