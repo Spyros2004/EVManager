@@ -1,3 +1,16 @@
+DROP PROCEDURE IF EXISTS dbo.CheckIsAA;
+GO
+
+DROP PROCEDURE IF EXISTS dbo.CheckIsAdmin;
+GO
+
+DROP PROCEDURE IF EXISTS dbo.CheckIsTOM;
+GO
+
+DROP PROCEDURE IF EXISTS dbo.CheckIsApplicant;
+GO
+
+
 -- 1. Drop Procedure for selecting all records from User table
 DROP PROCEDURE IF EXISTS GetUser;
 GO
@@ -669,4 +682,132 @@ BEGIN
         THROW;
     END CATCH;
 END;
+GO
+
+CREATE PROCEDURE dbo.CheckIsAA
+    @SessionID UNIQUEIDENTIFIER,
+    @IsAA BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @UserID INT;
+    DECLARE @UserType VARCHAR(20);
+
+    -- Retrieve the User ID associated with the session ID
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- If no user is found with the given session ID, set output to 0
+    IF @UserID IS NULL
+    BEGIN
+        SET @IsAA = 0;
+        RETURN;
+    END
+
+    -- Retrieve the User Type associated with the user ID
+    SELECT @UserType = User_Type
+    FROM [dbo].[User]
+    WHERE User_ID = @UserID;
+
+    -- Set output parameter based on the user type
+    SET @IsAA = CASE WHEN @UserType = 'AA' THEN 1 ELSE 0 END;
+END
+GO
+
+CREATE PROCEDURE dbo.CheckIsAdmin
+    @SessionID UNIQUEIDENTIFIER,
+    @IsAdmin BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @UserID INT;
+    DECLARE @UserType VARCHAR(20);
+
+    -- Retrieve the User ID associated with the session ID
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- If no user is found with the given session ID, set output to 0
+    IF @UserID IS NULL
+    BEGIN
+        SET @IsAdmin = 0;
+        RETURN;
+    END
+
+    -- Retrieve the User Type associated with the user ID
+    SELECT @UserType = User_Type
+    FROM [dbo].[User]
+    WHERE User_ID = @UserID;
+
+    -- Set output parameter based on the user type
+    SET @IsAdmin = CASE WHEN @UserType = 'Admin' THEN 1 ELSE 0 END;
+END
+GO
+
+CREATE PROCEDURE dbo.CheckIsTOM
+    @SessionID UNIQUEIDENTIFIER,
+    @IsTOM BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @UserID INT;
+    DECLARE @UserType VARCHAR(20);
+
+    -- Retrieve the User ID associated with the session ID
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- If no user is found with the given session ID, set output to 0
+    IF @UserID IS NULL
+    BEGIN
+        SET @IsTOM = 0;
+        RETURN;
+    END
+
+    -- Retrieve the User Type associated with the user ID
+    SELECT @UserType = User_Type
+    FROM [dbo].[User]
+    WHERE User_ID = @UserID;
+
+    -- Set output parameter based on the user type
+    SET @IsTOM = CASE WHEN @UserType = 'TOM' THEN 1 ELSE 0 END;
+END
+GO
+
+CREATE PROCEDURE dbo.CheckIsApplicant
+    @SessionID UNIQUEIDENTIFIER,
+    @IsApplicant BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @UserID INT;
+    DECLARE @UserType VARCHAR(20);
+
+    -- Retrieve the User ID associated with the session ID
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- If no user is found with the given session ID, set output to 0
+    IF @UserID IS NULL
+    BEGIN
+        SET @IsApplicant = 0;
+        RETURN;
+    END
+
+    -- Retrieve the User Type associated with the user ID
+    SELECT @UserType = User_Type
+    FROM [dbo].[User]
+    WHERE User_ID = @UserID;
+
+    -- Set output parameter based on the user type
+    SET @IsApplicant = CASE WHEN @UserType = 'Applicant' THEN 1 ELSE 0 END;
+END
 GO
