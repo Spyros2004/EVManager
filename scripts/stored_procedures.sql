@@ -185,7 +185,7 @@ BEGIN
     END
 
     -- Fetch applications for the user
-    SELECT A.Application_ID, A.Application_Date, A.Current_Status, SC.Description AS Category_Description
+    SELECT A.Tracking_Number, A.Application_Date, A.Current_Status, SC.Description AS Category_Description
     FROM [dbo].[Application] A
     INNER JOIN [dbo].[Applicant] AP ON A.Applicant_ID = AP.Applicant_ID
     INNER JOIN [dbo].[User] U ON AP.User_ID = U.User_ID
