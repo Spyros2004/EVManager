@@ -71,10 +71,12 @@ CREATE TABLE [dbo].[Category_Has_Criterion]
 CREATE TABLE [dbo].[Application]
 (
     [Application_ID] INT NOT NULL IDENTITY(1,1),
+    [Tracking_Number] NVARCHAR(20) NOT NULL,
     [Application_Date] DATE NOT NULL DEFAULT GETDATE(),
     [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('active', 'approved', 'rejected', 'under_review', 'in_progress')) DEFAULT 'pending', 
     [Applicant_ID] INT NOT NULL,
     [Category_Number] INT NOT NULL,
+    UNIQUE([Tracking_Number]),
     CONSTRAINT [PK_APPLICATION] PRIMARY KEY ([Application_ID] ASC)
 )
 
