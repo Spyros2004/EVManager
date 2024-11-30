@@ -7,6 +7,13 @@ if (!isset($_SESSION['SessionID'])) {
     exit();
 }
 
+// Check if the user is authorized to access this page (Admin only)
+if ($_SESSION['UserTypeNumber'] != 1) {
+    // Redirect unauthorized users to the login page
+    header("Location: login.php");
+    exit();
+}
+
 // Include the database connection file
 include 'connection.php';
 
