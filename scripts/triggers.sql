@@ -1,3 +1,5 @@
+DROP TRIGGER IF EXISTS SetTrackingNumber
+GO
 DROP TRIGGER IF EXISTS [dbo].[UpdateStatusOnUserType]
 GO
 DROP TRIGGER IF EXISTS [dbo].[SetRemainingPositions]
@@ -50,5 +52,37 @@ BEGIN
     UPDATE Sponsorship_Category
     SET Remaining_Positions = Total_Positions
     WHERE Category_Number IN (SELECT Category_Number FROM INSERTED);
+END;
+GO
+
+CREATE TRIGGER SetTrackingNumber
+ON Application
+AFTER INSERT
+AS
+BEGIN
+	SET NOCOUNT ON;
+    DECLARE @CategoryNumber INT, @CategoryTitle NVARCHAR(20), @CategoryCount INT, @TrackingNumber NCHAR(8), @ApplicationID INT;
+
+    -- Retrieve the Category Number for the newly inserted application
+    SELECT @CategoryNumber = Category_Number, @ApplicationID = Application_ID
+    FROM inserted;
+
+    -- Fetch the Category Title based on the Category Number from Sponsorship_Category table
+    SELECT @CategoryTitle = Title
+    FROM Sponsorship_Category
+    WHERE Category_Number = @CategoryNumber;
+
+    -- Get the next available count for the category
+    SELECT @CategoryCount = COUNT(*) + 1
+    FROM Application
+    WHERE Category_Number = @CategoryNumber;
+
+    -- Generate the tracking number in the format: CategoryTitle.Number (e.g., Γ01.0001)
+    SET @TrackingNumber = CONCAT(@CategoryTitle, '.', FORMAT(@CategoryCount, '0000'));
+
+    -- Update the newly inserted application with the generated tracking number
+    UPDATE Application
+    SET Tracking_Number = @TrackingNumber
+    WHERE Application_ID = @ApplicationID;
 END;
 GO
