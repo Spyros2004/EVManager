@@ -460,12 +460,15 @@ GO
 DROP PROCEDURE IF EXISTS ApplyForSponsorship;
 GO
 
+DROP PROCEDURE IF EXISTS ApplyForSponsorship
+GO
+
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
     @CategoryNumber INT,
     @LicensePlate CHAR(6) = NULL, -- Optional for non-category 1-4
     @Document NVARCHAR(255) = NULL, -- File name for the required document (if applicable)
-    @ApplicationID INT OUTPUT
+    @TrackingNumber NVARCHAR(8) OUTPUT -- Tracking number to be returned
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -616,6 +619,7 @@ BEGIN
         );
 
         -- Retrieve the newly created Application ID
+        DECLARE @ApplicationID INT;
         SET @ApplicationID = SCOPE_IDENTITY();
 
         -- Insert the license plate into Discarded_Car if it's a category 1-4 application
@@ -645,20 +649,19 @@ BEGIN
             VALUES (@URL, @DocumentType, @ApplicationID, @UserID);
         END
 
-        -- Decrement Remaining_Positions for the category
-        UPDATE Sponsorship_Category
-        SET Remaining_Positions = Remaining_Positions - 1
-        WHERE Category_Number = @CategoryNumber;
-
         -- Commit the transaction if all operations succeed
-        COMMIT TRANSACTION;
+        COMMIT;
+
+        -- Capture the tracking number from the inserted record
+        SELECT @TrackingNumber = TrackingNumber
+        FROM Application
+        WHERE Application_ID = @ApplicationID;
+
     END TRY
     BEGIN CATCH
-        -- Rollback the transaction if any error occurs
-        ROLLBACK TRANSACTION;
-
-        -- Re-throw the error for the application to handle
+        -- Rollback if there is an error
+        ROLLBACK;
         THROW;
-    END CATCH
+    END CATCH;
 END;
 GO
