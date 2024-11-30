@@ -1,4 +1,4 @@
-DROP TRIGGER IF EXISTS SetTrackingNumber
+DROP TRIGGER IF EXISTS [dbo].[SetTrackingNumber]
 GO
 DROP TRIGGER IF EXISTS [dbo].[UpdateStatusOnUserType]
 GO
