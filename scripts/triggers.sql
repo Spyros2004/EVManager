@@ -75,7 +75,7 @@ BEGIN
     WHERE Category_Number = @CategoryNumber;
 
     -- Get the next available count for the category
-    SELECT @CategoryCount = COUNT(*) + 1
+    SELECT @CategoryCount = COUNT(*)
     FROM Application
     WHERE Category_Number = @CategoryNumber;
 
