@@ -638,7 +638,7 @@ BEGIN
                 SET @DocumentType = N'Αρχείο - Ταυτότητα Πολυτέκνων';
 
             -- Construct the URL dynamically
-            SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @UserID);
+            SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @UserID, '.pdf');
 
             -- Insert into Document table
             INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
