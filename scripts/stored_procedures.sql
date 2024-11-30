@@ -1,18 +1,5 @@
-CREATE PROCEDURE GetSponsorshipCategory
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Select only categories 1-8 and 10-14
-    SELECT * 
-    FROM [dbo].[Sponsorship_Category]
-    WHERE Category_Number BETWEEN 1 AND 8
-       OR Category_Number BETWEEN 10 AND 14;
-END
+DROP PROCEDURE IF EXISTS dbo.ShowSponsorships
 GO
-
-
-
 
 DROP PROCEDURE IF EXISTS dbo.CheckIsAA;
 GO
@@ -94,6 +81,19 @@ DROP PROCEDURE IF EXISTS AcceptOrRejectUser
 GO
 
 DROP PROCEDURE IF EXISTS GetDiscardedCar
+GO
+
+CREATE PROCEDURE showSponsorships
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Select only categories 1-8 and 10-14
+    SELECT * 
+    FROM [dbo].[Sponsorship_Category]
+    WHERE Category_Number BETWEEN 1 AND 8
+       OR Category_Number BETWEEN 10 AND 14;
+END
 GO
 
 CREATE PROCEDURE GetDiscardedCar
