@@ -7,11 +7,20 @@ if (!isset($_SESSION['SessionID'])) {
     exit();
 }
 
+// Check if the user is authorized to access this page (Applicant only)
+if ($_SESSION['UserTypeNumber'] != 4) {
+    // Redirect unauthorized users to the login page
+    header("Location: login.php");
+    exit();
+}
+
 // Include the database connection
 include 'connection.php';
 
 // Get the session ID from the current session
 $sessionID = $_SESSION['SessionID'];
+var_dump($_SESSION['SessionID']); // This will help you see the SessionID value in the browser
+
 
 // Fetch the username
 $username = ''; // Placeholder for the username
@@ -206,7 +215,6 @@ if (sqlsrv_has_rows($stmtApplications)) {
 
 // Close the table
 echo '</tbody></table>';
-
 
         // Free the statement resource for applications query
         sqlsrv_free_stmt($stmtApplications);
