@@ -16,12 +16,18 @@ $errorMessage = '';
 $successMessage = '';
 $sponsorshipCategories = [];
 
-// Fetch sponsorship categories using stored procedure
-$sql = "{CALL GetSponsorshipCategory()}";
+// Fetch sponsorship categories using ShowSponsorships stored procedure
+$sql = "{CALL ShowSponsorships()}";
 $stmt = sqlsrv_query($conn, $sql);
 
 if ($stmt === false) {
-    die(print_r(sqlsrv_errors(), true));
+    // Handle SQL errors and display only the main error messages
+    $sqlErrors = sqlsrv_errors();
+    foreach ($sqlErrors as $error) {
+        $mainMessage = preg_replace('/^.*\]\s*/', '', $error['message']); // Extract main message after last `]`
+        $errorMessage .= htmlspecialchars($mainMessage) . "<br>";
+    }
+    die($errorMessage); // Stop execution if categories cannot be fetched
 }
 
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
@@ -34,27 +40,19 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $categoryNumber = $_POST['category'];
-    $licensePlate = isset($_POST['license_plate']) ? $_POST['license_plate'] : null;
+    $licensePlate = isset($_POST['license_plate']) ? strtoupper(trim($_POST['license_plate'])) : null;
     $sessionID = $_SESSION['SessionID'];
-    $trackingNumber = ''; // Initialize output
+    $trackingNumber = ''; // Output parameter
     $document = isset($_POST['document']) ? $_POST['document'] : null;
 
-    // Validate category selection
-    if (empty($categoryNumber)) {
-        $errorMessage = "Παρακαλώ επιλέξτε κατηγορία.";
-    }
-    
-    // Validate license plate if required
-    if (empty($licensePlate) && in_array($categoryNumber, range(1, 4))) {
-        $errorMessage = "Η πινακίδα είναι απαραίτητη για τις κατηγορίες 1 έως 4.";
-    }
-    
-    // Validate document if required
+    // Categories that require a document
     $requiresDocumentCategories = [3, 5, 7];
-    if (empty($document) && in_array($categoryNumber, $requiresDocumentCategories)) {
+
+    // Check if file upload is required and validate it
+    if (in_array($categoryNumber, $requiresDocumentCategories) && empty($document)) {
         $errorMessage = "Το αρχείο είναι απαραίτητο για αυτή την κατηγορία.";
     }
-    
+
     // If there are no validation errors, proceed with the stored procedure
     if (empty($errorMessage)) {
         $sql = "{CALL ApplyForSponsorship(?, ?, ?, ?, ?)}";
@@ -69,25 +67,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = sqlsrv_query($conn, $sql, $params);
 
         if ($stmt === false) {
+            // Handle SQL errors and display only the main error messages
             $sqlErrors = sqlsrv_errors();
             foreach ($sqlErrors as $error) {
-                if ($error['code'] == 50000) {
-                    $errorMessage = "Ο χρήστης δεν είναι αιτητής.";
-                } elseif ($error['code'] == 50001) {
-                    $errorMessage = "Δεν υπάρχουν διαθέσιμες θέσεις για αυτή την κατηγορία.";
-                } elseif ($error['code'] == 50002) {
-                    $errorMessage = "Η πινακίδα είναι απαραίτητη για τις κατηγορίες 1 έως 4.";
-                } elseif ($error['code'] == 50003) {
-                    $errorMessage = "Το αρχείο είναι απαραίτητο για αυτή την κατηγορία.";
-                } else {
-                    $errorMessage = "Παρουσιάστηκε απροσδόκητο σφάλμα: " . $error['message'];
-                }
+                $mainMessage = preg_replace('/^.*\]\s*/', '', $error['message']); // Extract main message after last `]`
+                $errorMessage .= htmlspecialchars($mainMessage) . "<br>";
             }
         } else {
             // Check if tracking number was returned
             if (!empty($trackingNumber)) {
                 $successMessage = "Η αίτηση σας υποβλήθηκε επιτυχώς! Αριθμός παρακολούθησης: " . $trackingNumber;
-                header("Location: applicantdashboard.php"); // Redirect after successful submission
+                header("Location: applicantdashboard.php");
                 exit();
             } else {
                 $errorMessage = "Παρουσιάστηκε σφάλμα κατά την επεξεργασία της αίτησης.";
@@ -95,11 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
-
-// Close the database connection
-sqlsrv_close($conn);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="el">
@@ -107,6 +93,133 @@ sqlsrv_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Υποβολή Αίτησης</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #e6f7ff, #ffffff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h2 {
+            color: #0056b3;
+            margin-bottom: 20px;
+        }
+
+        select, input[type="text"], input[type="submit"], button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        select {
+            background: #f9f9f9;
+        }
+
+        input[type="submit"] {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Υποβολή Αίτησης Επιχορήγησης</h2>
+
+        <!-- Display messages -->
+        <?php if ($errorMessage): ?>
+            <div class="message error">
+                <strong>Σφάλμα:</strong> <?php echo $errorMessage; ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($successMessage): ?>
+            <div class="message success">
+                <strong>Επιτυχία:</strong> <?php echo htmlspecialchars($successMessage); ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Application Form -->
+        <form method="POST" action="">
+            <label for="category">Επιλέξτε Κατηγορία:</label>
+            <select name="category" id="category" required onchange="toggleFields()">
+                <option value="">-- Επιλέξτε --</option>
+                <?php foreach ($sponsorshipCategories as $category): ?>
+                    <option value="<?php echo $category['Category_Number']; ?>">
+                        <?php echo "Γ" . $category['Category_Number'] . " - " . htmlspecialchars($category['Description']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <div id="license-plate-field" style="display: none;">
+                <label for="license_plate">Αριθμός Πινακίδας:</label>
+                <input type="text" name="license_plate" id="license_plate" maxlength="6">
+            </div>
+
+            <div id="upload-file-field" style="display: none;">
+                <button type="button" onclick="uploadFile()">Δημιουργία Αρχείου</button>
+                <input type="hidden" name="document" id="document">
+            </div>
+
+            <input type="submit" value="Υποβολή Αίτησης">
+        </form>
+
+        <!-- Back to Dashboard Button -->
+        <form action="applicantdashboard.php" method="get">
+            <button type="submit" class="back-button">Πίσω στον Πίνακα Ελέγχου</button>
+        </form>
+    </div>
     <script>
         function toggleFields() {
             const categorySelect = document.getElementById("category");
@@ -141,59 +254,10 @@ sqlsrv_close($conn);
                 return;
             }
 
-            // Create document file
+            // Simulate document creation
             documentField.value = "G" + category + "_" + Date.now() + ".pdf";
             alert("Το αρχείο δημιουργήθηκε: " + documentField.value);
         }
     </script>
-</head>
-<body>
-    <h2>Υποβολή Αίτησης Επιχορήγησης</h2>
-
-    <!-- Display messages -->
-    <?php if ($errorMessage): ?>
-        <div style="color: red;">
-            <strong>Σφάλμα:</strong> <?php echo htmlspecialchars($errorMessage); ?>
-        </div>
-    <?php endif; ?>
-    <?php if ($successMessage): ?>
-        <div style="color: green;">
-            <strong>Επιτυχία:</strong> <?php echo htmlspecialchars($successMessage); ?>
-        </div>
-    <?php endif; ?>
-
-    <!-- Application Form -->
-    <form method="POST" action="">
-        <label for="category">Επιλέξτε Κατηγορία:</label>
-        <br>
-        <select name="category" id="category" required onchange="toggleFields()">
-            <option value="">-- Επιλέξτε --</option>
-            <?php foreach ($sponsorshipCategories as $category): ?>
-                <?php if (
-                    in_array($category['Category_Number'], range(1, 8)) || 
-                    in_array($category['Category_Number'], range(10, 14))
-                ): ?>
-                    <option value="<?php echo $category['Category_Number']; ?>">
-                        <?php echo "Γ" . $category['Category_Number'] . " - " . htmlspecialchars($category['Description']); ?>
-                    </option>
-                <?php endif; ?>
-            <?php endforeach; ?>
-        </select>
-        <br><br>
-
-        <div id="license-plate-field" style="display: none;">
-            <label for="license_plate">Αριθμός Πινακίδας:</label>
-            <input type="text" name="license_plate" id="license_plate" maxlength="6">
-            <br><br>
-        </div>
-
-        <div id="upload-file-field" style="display: none;">
-            <button type="button" onclick="uploadFile()">Δημιουργία Αρχείου</button>
-            <input type="hidden" name="document" id="document">
-        </div>
-        <br><br>
-
-        <input type="submit" value="Υποβολή Αίτησης">
-    </form>
 </body>
 </html>
