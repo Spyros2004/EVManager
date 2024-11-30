@@ -6,6 +6,12 @@ if (!isset($_SESSION['SessionID'])) {
     header("Location: login.php");
     exit();
 }
+// Check if the user is authorized to access this page (Admin only)
+if ($_SESSION['UserTypeNumber'] != 2) {
+    // Redirect unauthorized users to the login page
+    header("Location: login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
