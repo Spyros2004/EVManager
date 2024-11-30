@@ -1,5 +1,7 @@
 DROP TRIGGER IF EXISTS [dbo].[DecrementSponsorshipPositions]
 GO
+DROP TRIGGER IF EXISTS [dbo].[IncrementSponsorshipPositions]
+GO
 DROP TRIGGER IF EXISTS [dbo].[SetTrackingNumber]
 GO
 DROP TRIGGER IF EXISTS [dbo].[UpdateStatusOnUserType]
@@ -9,6 +11,36 @@ GO
 DROP TRIGGER IF EXISTS [dbo].[InsertModificationAfterApplicationInsert]
 GO
 
+CREATE TRIGGER IncrementRemainingPositions
+ON Application
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if the status of the application has changed to 'rejected' or 'expired'
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN deleted d ON i.Application_ID = d.Application_ID
+        WHERE i.Current_Status IN ('rejected', 'expired')
+          AND d.Current_Status NOT IN ('rejected', 'expired')
+    )
+    BEGIN
+        -- Increase the remaining positions for the relevant category
+        UPDATE Sponsorship_Category
+        SET Remaining_Positions = Remaining_Positions + 1
+        WHERE Category_Number IN (
+            SELECT i.Category_Number
+            FROM inserted i
+            JOIN deleted d ON i.Application_ID = d.Application_ID
+            WHERE i.Current_Status IN ('rejected', 'expired')
+              AND d.Current_Status NOT IN ('rejected', 'expired')
+        );
+    END
+END;
+GO
+    
 CREATE TRIGGER [dbo].[InsertModificationAfterApplicationInsert]
 ON [dbo].[Application]
 AFTER INSERT
