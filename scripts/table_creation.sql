@@ -30,7 +30,6 @@ CREATE TABLE [dbo].[User]
 CREATE TABLE [dbo].[Sponsorship_Category]
 (
     [Category_Number] INT NOT NULL IDENTITY(1,1),
-    [Title] NVARCHAR(20) NOT NULL,
     [Description] NVARCHAR(255) NOT NULL, 
     [Amount] DECIMAL(15, 2) NOT NULL CHECK ([Amount] > 0), 
     [Total_Positions] INT NOT NULL CHECK ([Total_Positions] > 0), 
