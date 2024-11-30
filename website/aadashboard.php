@@ -6,6 +6,13 @@ if (!isset($_SESSION['SessionID'])) {
     header("Location: login.php");
     exit();
 }
+
+// Check if the user is authorized to access this page (AA only)
+if ($_SESSION['UserTypeNumber'] != 2) {
+    // Redirect unauthorized users to the login page
+    header("Location: login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,7 +20,7 @@ if (!isset($_SESSION['SessionID'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Applicant Dashboard</title>
+    <title>AA Dashboard</title>
     <style>
         .logout-btn {
             position: absolute;
@@ -32,7 +39,7 @@ if (!isset($_SESSION['SessionID'])) {
     <button class="logout-btn" onclick="window.location.href='logout.php'">Logout</button>
 
     <h1>Welcome to AA Dashboard</h1>
-    <!-- Applicant Dashboard Content -->
+    <!-- AA Dashboard Content -->
 
 </body>
 </html>
