@@ -13,4 +13,4 @@ if ($_SESSION['UserTypeNumber'] != 1) {
     header("Location: login.php");
     exit();
 }
-php?>
+?>
