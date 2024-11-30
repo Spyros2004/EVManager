@@ -10,7 +10,6 @@ GO
 DROP PROCEDURE IF EXISTS dbo.CheckIsApplicant;
 GO
 
-
 -- 1. Drop Procedure for selecting all records from User table
 DROP PROCEDURE IF EXISTS GetUser;
 GO
