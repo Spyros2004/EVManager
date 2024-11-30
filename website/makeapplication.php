@@ -11,6 +11,13 @@ if (!isset($_SESSION['SessionID'])) {
     exit();
 }
 
+// Check if the user is authorized to access this page (Applicant only)
+if ($_SESSION['UserTypeNumber'] != 4) {
+    // Redirect unauthorized users to the login page
+    header("Location: login.php");
+    exit();
+}
+
 // Initialize messages
 $errorMessage = '';
 $successMessage = '';
