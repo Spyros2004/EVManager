@@ -498,6 +498,12 @@ BEGIN
     FROM Applicant
     WHERE User_ID = @UserID;
 
+    -- Store Company_Private value in a variable for later use
+    DECLARE @CompanyPrivate VARCHAR(10);
+    SELECT @CompanyPrivate = Company_Private
+    FROM Applicant
+    WHERE Applicant_ID = @ApplicantID;
+
     -- Check if the applicant has 2 applications with expired status
     IF (
         SELECT COUNT(*) 
@@ -518,20 +524,96 @@ BEGIN
         THROW 50005, 'Applicant has 2 applications with declined status.', 1;
     END;
 
+    -- Check if the applicant is private and attempting category 1-13 but already has an active/accepted application
+    IF (
+        @CompanyPrivate = 'Private'
+        AND @CategoryNumber BETWEEN 1 AND 13
+        AND EXISTS (
+            SELECT 1 
+            FROM Application 
+            WHERE Applicant_ID = @ApplicantID 
+              AND Category_Number BETWEEN 1 AND 13
+              AND Current_Status IN ('active', 'accepted')
+        )
+    )
+    BEGIN
+        THROW 50006, 'Private applicant cannot submit a category 1-13 application when an active/accepted application already exists.', 1;
+    END;
+
+    -- Check if the applicant is private and attempting category 14 but already has an active/accepted application
+    IF (
+        @CompanyPrivate = 'Private'
+        AND @CategoryNumber = 14
+        AND EXISTS (
+            SELECT 1 
+            FROM Application 
+            WHERE Applicant_ID = @ApplicantID 
+              AND Category_Number = 14
+              AND Current_Status IN ('active', 'accepted')
+        )
+    )
+    BEGIN
+        THROW 50007, 'Private applicant cannot submit a category 14 application when an active/accepted application already exists.', 1;
+    END;
+
+    -- Check if the applicant is a company and chooses an invalid category (3, 4, 7, 8, 9)
+    IF (
+        @CompanyPrivate = 'Company'
+        AND @CategoryNumber IN (3, 4, 7, 8, 9)
+    )
+    BEGIN
+        THROW 50008, 'Company applicants cannot apply for categories 3, 4, 7, 8 or 9.', 1;
+    END;
+
+    -- Check if the applicant is a company and already has 20 applications of specific categories with active/accepted status
+    IF (
+        @CompanyPrivate = 'Company'
+        AND (
+            SELECT COUNT(*) 
+            FROM Application 
+            WHERE Applicant_ID = @ApplicantID 
+              AND Category_Number IN (1, 2, 5, 6, 10, 11, 12, 13, 14)
+              AND Current_Status IN ('active', 'accepted')
+        ) >= 20
+    )
+    BEGIN
+        THROW 50009, 'Company applicants cannot have more than 20 applications of categories 1, 2, 5, 6, 10-14 with active/accepted status.', 1;
+    END;
+
+    -- Check if there are available positions in the category
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM Sponsorship_Category
+        WHERE Category_Number = @CategoryNumber AND Remaining_Positions > 0
+    )
+    BEGIN
+        THROW 50001, 'No remaining positions in this category.', 1;
+    END;
+
     -- Validate license plate for categories 1-4
     IF @CategoryNumber BETWEEN 1 AND 4
-    BEGIN
-        IF @LicensePlate IS NULL
-        BEGIN
-            THROW 50002, 'License plate is required for categories 1 through 4.', 1;
-        END;
+	BEGIN
+		IF @LicensePlate IS NULL
+		BEGIN
+			THROW 50002, 'License plate is required for categories 1 through 4.', 1;
+		END
 
-        -- Check license plate format (first 3 chars are A-Z, last 3 chars are 0-9)
-        IF @LicensePlate NOT LIKE '[A-Z][A-Z][A-Z][0-9][0-9][0-9]'
-        BEGIN
-            THROW 50010, 'License plate must have the format: 3 letters followed by 3 digits (e.g., ABC123).', 1;
-        END;
-    END;
+		-- Check if the license plate format is valid
+		IF @LicensePlate NOT LIKE '[A-Z][A-Z][A-Z][0-9][0-9][0-9]'
+		BEGIN
+			THROW 50010, 'License plate must consist of 3 capital letters followed by 3 numbers.', 1;
+		END
+
+		-- Check if the license plate already exists in the system
+		IF EXISTS (
+			SELECT 1 
+			FROM Discarded_Car 
+			WHERE License_Plate = @LicensePlate
+		)
+		BEGIN
+			THROW 50011, 'The license plate is already in the system.', 1;
+		END
+	END
 
     -- Validate required documents for specific categories
     IF (@CategoryNumber = 3 OR @CategoryNumber = 4 OR @CategoryNumber = 7) AND @Document IS NULL
@@ -564,23 +646,32 @@ BEGIN
 
         -- Insert document record with dynamically constructed URL
         IF @Document IS NOT NULL AND @CategoryNumber IN (3, 5, 7)
-        BEGIN
-            DECLARE @DocumentType NVARCHAR(255);
-            DECLARE @URL NVARCHAR(255);
+		BEGIN
+			DECLARE @DocumentType NVARCHAR(255);
+			DECLARE @DocumentID INT;
+			DECLARE @URL NVARCHAR(255);
 
-            -- Determine document type based on the category
-            IF @CategoryNumber IN (3, 7)
-                SET @DocumentType = N'Αρχείο - Βεβαίωση Τμήματος Κοινωνικής Ενσωμάτωσης ατόμων με αναπηρίες';
-            ELSE IF @CategoryNumber = 5
-                SET @DocumentType = N'Αρχείο - Ταυτότητα Πολυτέκνων';
+			-- Determine document type based on the category
+			IF @CategoryNumber IN (3, 7)
+				SET @DocumentType = N'Αρχείο - Βεβαίωση Τμήματος Κοινωνικής Ενσωμάτωσης ατόμων με αναπηρίες';
+			ELSE IF @CategoryNumber = 5
+				SET @DocumentType = N'Αρχείο - Ταυτότητα Πολυτέκνων';
 
-            -- Construct the URL dynamically
-            SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @UserID, '.pdf');
+			-- Insert into Document table with a temporary placeholder URL (or an initial dummy value)
+			INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
+			VALUES ('', @DocumentType, @ApplicationID, @UserID);
 
-            -- Insert into Document table
-            INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
-            VALUES (@URL, @DocumentType, @ApplicationID, @UserID);
-        END
+			-- Retrieve the newly inserted Document_ID
+			SET @DocumentID = SCOPE_IDENTITY();
+
+			-- Construct the URL dynamically using Document_ID
+			SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @DocumentID, '.pdf');
+
+			-- Update the Document record with the constructed URL
+			UPDATE Document
+			SET URL = @URL
+			WHERE Document_ID = @DocumentID;
+		END
 
         -- Commit the transaction if all operations succeed
         COMMIT;
