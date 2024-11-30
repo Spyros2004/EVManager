@@ -85,7 +85,6 @@ CREATE TABLE [dbo].[Document]
     [Document_Type] NVARCHAR(100) NOT NULL,
     [Application_ID] INT NOT NULL,
     [User_ID] INT NOT NULL,
-    UNIQUE ([URL]),
     CONSTRAINT [PK_DOCUMENT] PRIMARY KEY ([Document_ID] ASC)
 )
 
