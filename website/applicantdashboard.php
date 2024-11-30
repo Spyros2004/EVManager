@@ -187,7 +187,7 @@ if ($stmtApplications === false) {
       echo '<table>
       <thead style="background-color: #f0fff0 !important;">
           <tr>
-              <th>Κωδικός Αίτησης</th>
+              <th>Αριθμός Αίτησης</th>
               <th>Ημερομηνία Αίτησης</th>
               <th>Τρέχουσα Κατάσταση</th>
               <th>Περιγραφή Κατηγορίας</th>
@@ -200,7 +200,7 @@ if (sqlsrv_has_rows($stmtApplications)) {
   // Fetch and display data
   while ($row = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
       echo "<tr>";
-      echo "<td>" . htmlspecialchars($row['Application_ID']) . "</td>";
+      echo "<td>" . htmlspecialchars($row['Tracking_Number']) . "</td>";
       echo "<td>" . htmlspecialchars($row['Application_Date']->format('Y-m-d')) . "</td>";
       echo "<td>" . htmlspecialchars($row['Current_Status']) . "</td>";
       echo "<td>" . htmlspecialchars($row['Category_Description']) . "</td>";
