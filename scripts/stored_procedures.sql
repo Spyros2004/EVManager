@@ -463,6 +463,9 @@ GO
 DROP PROCEDURE IF EXISTS ApplyForSponsorship
 GO
 
+DROP PROCEDURE IF EXISTS ApplyForSponsorship
+GO
+
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
     @CategoryNumber INT,
@@ -653,7 +656,7 @@ BEGIN
         COMMIT;
 
         -- Capture the tracking number from the inserted record
-        SELECT @TrackingNumber = TrackingNumber
+        SELECT @TrackingNumber = Tracking_Number
         FROM Application
         WHERE Application_ID = @ApplicationID;
 
@@ -661,6 +664,8 @@ BEGIN
     BEGIN CATCH
         -- Rollback if there is an error
         ROLLBACK;
+
+        -- Correct usage of THROW without parameters, which rethrows the error caught
         THROW;
     END CATCH;
 END;
