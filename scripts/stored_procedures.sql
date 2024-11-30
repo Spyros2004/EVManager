@@ -457,10 +457,13 @@ BEGIN
 END
 GO
 
+
+
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
     @CategoryNumber INT,
     @LicensePlate CHAR(6) = NULL, -- Optional for non-category 1-4
+    @Document NVARCHAR(255) = NULL, -- File name for the required document (if applicable)
     @ApplicationID INT OUTPUT
 AS
 BEGIN
@@ -501,19 +504,53 @@ BEGIN
         THROW 50002, 'License plate is required for categories 1 through 4.', 1;
     END;
 
+    -- Validate required documents for specific categories
+    IF (@CategoryNumber = 3 OR @CategoryNumber = 4 OR @CategoryNumber = 7) AND @Document IS NULL
+    BEGIN
+        THROW 50003, 'Document is required for these categories.', 1;
+    END;
+
     -- Start transaction for the critical section
     BEGIN TRANSACTION;
 
     BEGIN TRY
-        -- Insert the application with or without license plate
-        INSERT INTO Application (Applicant_ID, Category_Number, License_Plate)
-        VALUES (@ApplicantID, @CategoryNumber, 
-                CASE WHEN @CategoryNumber BETWEEN 1 AND 4 THEN @LicensePlate ELSE NULL END);
+        -- Insert the application with or without license plate, setting Current_Status to 'active'
+        INSERT INTO Application (Applicant_ID, Category_Number, Current_Status)
+        VALUES (
+            @ApplicantID, 
+            @CategoryNumber, 
+            'active'
+        );
 
-        -- Return the new Application ID
+        -- Retrieve the newly created Application ID
         SET @ApplicationID = SCOPE_IDENTITY();
 
-        -- Decrement Remaining_Positions
+        -- Insert the license plate into Discarded_Car if it's a category 1-4 application
+        IF @CategoryNumber BETWEEN 1 AND 4
+        BEGIN
+            INSERT INTO Discarded_Car (License_Plate, Application_ID)
+            VALUES (@LicensePlate, @ApplicationID);
+        END
+
+        -- Insert document record with category-specific document type
+        IF @Document IS NOT NULL
+        BEGIN
+            DECLARE @DocumentType NVARCHAR(255);
+
+            -- Determine document type based on the category
+            IF @CategoryNumber IN (3, 7)
+                SET @DocumentType = N'Αρχείο - Βεβαίωση Τμήματος Κοινωνικής Ενσωμάτωσης ατόμων με αναπηρίες';
+            ELSE IF @CategoryNumber = 5
+                SET @DocumentType = N'Αρχείο - Ταυτότητα Πολυτέκνων';
+            ELSE
+                SET @DocumentType = N'Application Document'; -- Default document type
+
+            -- Insert into Document table
+            INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
+            VALUES (@Document, @DocumentType, @ApplicationID, @UserID);
+        END
+
+        -- Decrement Remaining_Positions for the category
         UPDATE Sponsorship_Category
         SET Remaining_Positions = Remaining_Positions - 1
         WHERE Category_Number = @CategoryNumber;
