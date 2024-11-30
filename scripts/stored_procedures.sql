@@ -469,15 +469,6 @@ BEGIN
 END
 GO
 
-DROP PROCEDURE IF EXISTS ApplyForSponsorship;
-GO
-
-DROP PROCEDURE IF EXISTS ApplyForSponsorship
-GO
-
-DROP PROCEDURE IF EXISTS ApplyForSponsorship
-GO
-
 CREATE PROCEDURE ApplyForSponsorship
     @SessionID UNIQUEIDENTIFIER,
     @CategoryNumber INT,
