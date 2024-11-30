@@ -313,6 +313,14 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Check for NULL values in essential fields for User
+    IF @First_Name IS NULL OR @Last_Name IS NULL OR @Username IS NULL 
+        OR @Email IS NULL OR @Password IS NULL OR @User_Type IS NULL
+    BEGIN
+        THROW 50005, 'All user fields (First_Name, Last_Name, Username, Email, Password, User_Type) are required.', 1;
+        RETURN;
+    END
+
     -- Check if Username or Email already exists
     IF EXISTS (SELECT 1 FROM [dbo].[User] WHERE [Username] = @Username)
     BEGIN
@@ -324,6 +332,25 @@ BEGIN
     BEGIN
         THROW 50002, 'Email already exists. Please use a different one.', 1;
         RETURN;
+    END
+
+    -- Additional checks if the User_Type is 'Applicant'
+    IF @User_Type = 'Applicant'
+    BEGIN
+        -- Check if all required Applicant fields are provided
+        IF @Identification IS NULL OR @Company_Private IS NULL OR @Gender IS NULL 
+           OR @BirthDate IS NULL OR @Telephone_Number IS NULL OR @Address IS NULL
+        BEGIN
+            THROW 50003, 'For applicants, all fields (Identification, Company_Private, Gender, BirthDate, Telephone_Number, Address) are required.', 1;
+            RETURN;
+        END
+
+        -- Check if Identification already exists in Applicant table
+        IF EXISTS (SELECT 1 FROM [dbo].[Applicant] WHERE [Identification] = @Identification)
+        BEGIN
+            THROW 50004, 'Identification already exists for another user. Please provide a different Identification.', 1;
+            RETURN;
+        END
     END
 
     -- Hash the password using SHA-512
@@ -347,14 +374,6 @@ BEGIN
         -- If the user is an 'Applicant', insert into the Applicant table
         IF @User_Type = 'Applicant'
         BEGIN
-            -- Check if all required fields for Applicant are provided
-            IF @Identification IS NULL OR @Company_Private IS NULL OR @Gender IS NULL 
-               OR @BirthDate IS NULL OR @Telephone_Number IS NULL OR @Address IS NULL
-            BEGIN
-                THROW 50003, 'For applicants, all fields (Identification, Company_Private, Gender, BirthDate, Telephone_Number, Address) are required.', 1;
-            END
-
-            -- Insert the applicant details into the Applicant table
             INSERT INTO [dbo].[Applicant] 
                 ([Identification], [Company_Private], [Gender], [BirthDate], [Telephone_Number], [Address], [User_ID])
             VALUES
@@ -371,6 +390,7 @@ BEGIN
     END CATCH
 END;
 GO
+
 
 CREATE PROCEDURE [dbo].[LoginUser]
     @Username NVARCHAR(50),
