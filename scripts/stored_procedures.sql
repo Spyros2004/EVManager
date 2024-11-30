@@ -518,92 +518,19 @@ BEGIN
         THROW 50005, 'Applicant has 2 applications with declined status.', 1;
     END;
 
-    -- Check if the applicant is private and attempting category 1-13 but already has an active/accepted application
-    IF (
-        EXISTS (
-            SELECT 1 
-            FROM Applicant 
-            WHERE Applicant_ID = @ApplicantID AND Company_Private = 'Private'
-        )
-        AND @CategoryNumber BETWEEN 1 AND 13
-        AND EXISTS (
-            SELECT 1 
-            FROM Application 
-            WHERE Applicant_ID = @ApplicantID 
-              AND Category_Number BETWEEN 1 AND 13
-              AND Current_Status IN ('active', 'accepted')
-        )
-    )
-    BEGIN
-        THROW 50006, 'Private applicant cannot submit a category 1-13 application when an active/accepted application already exists.', 1;
-    END;
-
-    -- Check if the applicant is private and attempting category 14 but already has an active/accepted application
-    IF (
-        EXISTS (
-            SELECT 1 
-            FROM Applicant 
-            WHERE Applicant_ID = @ApplicantID AND Company_Private = 'Private'
-        )
-        AND @CategoryNumber = 14
-        AND EXISTS (
-            SELECT 1 
-            FROM Application 
-            WHERE Applicant_ID = @ApplicantID 
-              AND Category_Number = 14
-              AND Current_Status IN ('active', 'accepted')
-        )
-    )
-    BEGIN
-        THROW 50007, 'Private applicant cannot submit a category 14 application when an active/accepted application already exists.', 1;
-    END;
-
-    -- Check if the applicant is a company and chooses an invalid category (3, 4, 7, 8, 9)
-    IF (
-        EXISTS (
-            SELECT 1 
-            FROM Applicant 
-            WHERE Applicant_ID = @ApplicantID AND Company_Private = 'Company'
-        )
-        AND @CategoryNumber IN (3, 4, 7, 8, 9)
-    )
-    BEGIN
-        THROW 50008, 'Company applicants cannot apply for categories 3, 4, 7, 8 or 9.', 1;
-    END;
-
-    -- Check if the applicant is a company and already has 20 applications of specific categories with active/accepted status
-    IF (
-        EXISTS (
-            SELECT 1 
-            FROM Applicant 
-            WHERE Applicant_ID = @ApplicantID AND Company_Private = 'Company'
-        )
-        AND (
-            SELECT COUNT(*) 
-            FROM Application 
-            WHERE Applicant_ID = @ApplicantID 
-              AND Category_Number IN (1, 2, 5, 6, 10, 11, 12, 13, 14)
-              AND Current_Status IN ('active', 'accepted')
-        ) >= 20
-    )
-    BEGIN
-        THROW 50009, 'Company applicants cannot have more than 20 applications of categories 1, 2, 5, 6, 10-14 with active/accepted status.', 1;
-    END;
-
-    -- Check if there are available positions in the category
-    IF NOT EXISTS (
-        SELECT 1 
-        FROM Sponsorship_Category
-        WHERE Category_Number = @CategoryNumber AND Remaining_Positions > 0
-    )
-    BEGIN
-        THROW 50001, 'No remaining positions in this category.', 1;
-    END;
-
     -- Validate license plate for categories 1-4
-    IF @CategoryNumber BETWEEN 1 AND 4 AND @LicensePlate IS NULL
+    IF @CategoryNumber BETWEEN 1 AND 4
     BEGIN
-        THROW 50002, 'License plate is required for categories 1 through 4.', 1;
+        IF @LicensePlate IS NULL
+        BEGIN
+            THROW 50002, 'License plate is required for categories 1 through 4.', 1;
+        END;
+
+        -- Check license plate format (first 3 chars are A-Z, last 3 chars are 0-9)
+        IF @LicensePlate NOT LIKE '[A-Z][A-Z][A-Z][0-9][0-9][0-9]'
+        BEGIN
+            THROW 50010, 'License plate must have the format: 3 letters followed by 3 digits (e.g., ABC123).', 1;
+        END;
     END;
 
     -- Validate required documents for specific categories
