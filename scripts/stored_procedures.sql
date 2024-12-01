@@ -885,8 +885,8 @@ CREATE PROCEDURE dbo.AddVehicleAndDocument
     @Manufacturer VARCHAR(50),
     @Model VARCHAR(50),
     @Price INT,
-    @Document1 NVARCHAR(100),
-	@Document2 NVARCHAR(100)
+    @Document1 VARCHAR(100),
+	@Document2 VARCHAR(100)
 AS
 BEGIN
     SET NOCOUNT ON;
