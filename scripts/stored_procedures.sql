@@ -875,15 +875,14 @@ BEGIN
 END;
 GO
 
-
 CREATE PROCEDURE AddVehicleAndDocument
     @TrackingNumber NCHAR(8),
     @VehicleDate DATE,
     @VehicleType VARCHAR(20),
     @CO2Emissions INT,
     @Manufacturer VARCHAR(50),
+    @Model VARCHAR(50), -- New parameter for the vehicle model
     @Price INT,
-    @EngineFuel VARCHAR(20),
     @Document NVARCHAR(100)
 AS
 BEGIN
@@ -916,7 +915,8 @@ BEGIN
     BEGIN TRANSACTION;
 
     BEGIN TRY
-		DECLARE @URL VARCHAR(255);
+        DECLARE @URL VARCHAR(255);
+        
         -- Insert the document
         INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
         VALUES ('', N'Παραγγελία Αυτοκινήτου', @ApplicationID, @UserID);
@@ -924,17 +924,17 @@ BEGIN
         -- Retrieve the newly created Document_ID
         SET @DocumentID = SCOPE_IDENTITY();
 
-		-- Construct the URL dynamically using Document_ID
-		SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @DocumentID, '.pdf');
+        -- Construct the URL dynamically using Document_ID
+        SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @DocumentID, '.pdf');
 
-		-- Update the Document record with the constructed URL
-		UPDATE Document
-		SET URL = @URL
-		WHERE Document_ID = @DocumentID;
+        -- Update the Document record with the constructed URL
+        UPDATE Document
+        SET URL = @URL
+        WHERE Document_ID = @DocumentID;
 
-        -- Insert the vehicle details
-        INSERT INTO Vehicle (Vehicle_Date, Vehicle_Type, CO2_Emissions, Manufacturer, Price, Engine_Fuel, Document_ID)
-        VALUES (@VehicleDate, @VehicleType, @CO2Emissions, @Manufacturer, @Price, @EngineFuel, @DocumentID);
+        -- Insert the vehicle details, now including the Model column
+        INSERT INTO Vehicle (Vehicle_Date, Vehicle_Type, CO2_Emissions, Manufacturer, Model, Price, Document_ID)
+        VALUES (@VehicleDate, @VehicleType, @CO2Emissions, @Manufacturer, @Model, @Price, @DocumentID);
 
         -- Commit the transaction if all insert operations succeed
         COMMIT TRANSACTION;
