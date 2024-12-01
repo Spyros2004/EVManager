@@ -887,7 +887,7 @@ END;
 GO
 
 CREATE PROCEDURE dbo.AddVehicleAndDocument
-	@SessionID UNIQUEIDENTIFIER,
+    @SessionID UNIQUEIDENTIFIER,
     @TrackingNumber NCHAR(8),
     @VehicleDate DATE,
     @VehicleType VARCHAR(20),
@@ -896,7 +896,7 @@ CREATE PROCEDURE dbo.AddVehicleAndDocument
     @Model VARCHAR(50),
     @Price INT,
     @Document1 VARCHAR(100),
-	@Document2 VARCHAR(100)
+    @Document2 VARCHAR(100)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -996,8 +996,8 @@ BEGIN
         SET Current_Status = 'ordered'
         WHERE Application_ID = @ApplicationID;
 
-		INSERT INTO Modification (Modification_Date, New_Status, Reason, User_ID, Application_ID)
-		VALUES (GETDATE(), 'ordered', 'Order submitted and documents uploaded.', @UserID, @ApplicationID);
+	INSERT INTO Modification (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+	VALUES (GETDATE(), 'ordered', 'Order submitted and documents uploaded.', @UserID, @ApplicationID);
 
         -- Commit the transaction if all insert operations succeed
         COMMIT TRANSACTION;
