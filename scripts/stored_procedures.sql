@@ -1,3 +1,6 @@
+DROP PROCEDURE IF EXISTS AddVehicleAndDocument
+GO
+
 DROP PROCEDURE IF EXISTS dbo.ShowSponsorships
 GO
 
@@ -869,5 +872,79 @@ BEGIN
     JOIN Applicant AS A ON App.Applicant_ID = A.Applicant_ID
     JOIN [User] AS U ON A.User_ID = U.User_ID
     WHERE A.Identification = @Identification AND App.Tracking_Number = @TrackingNumber;
+END;
+GO
+
+
+CREATE PROCEDURE AddVehicleAndDocument
+    @TrackingNumber NCHAR(8),
+    @VehicleDate DATE,
+    @VehicleType VARCHAR(20),
+    @CO2Emissions INT,
+    @Manufacturer VARCHAR(50),
+    @Price INT,
+    @EngineFuel VARCHAR(20),
+    @Document NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Declare variables to store retrieved Application_ID and User_ID
+    DECLARE @ApplicationID INT;
+    DECLARE @UserID INT;
+    DECLARE @DocumentID INT;
+
+    -- Validate the application exists and is active
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM Application
+        WHERE Tracking_Number = @TrackingNumber AND Current_Status = 'active'
+    )
+    BEGIN
+        THROW 50001, 'No active application found for the provided Tracking Number.', 1;
+    END;
+
+    -- Retrieve Application_ID and User_ID
+    SELECT 
+        @ApplicationID = Application_ID,
+        @UserID = A.User_ID
+    FROM Application AS App
+    JOIN Applicant AS A ON App.Applicant_ID = A.Applicant_ID
+    WHERE App.Tracking_Number = @TrackingNumber;
+
+    -- Start transaction for insert operations
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+		DECLARE @URL VARCHAR(255);
+        -- Insert the document
+        INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
+        VALUES ('', N'Παραγγελία Αυτοκινήτου', @ApplicationID, @UserID);
+
+        -- Retrieve the newly created Document_ID
+        SET @DocumentID = SCOPE_IDENTITY();
+
+		-- Construct the URL dynamically using Document_ID
+		SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @DocumentID, '.pdf');
+
+		-- Update the Document record with the constructed URL
+		UPDATE Document
+		SET URL = @URL
+		WHERE Document_ID = @DocumentID;
+
+        -- Insert the vehicle details
+        INSERT INTO Vehicle (Vehicle_Date, Vehicle_Type, CO2_Emissions, Manufacturer, Price, Engine_Fuel, Document_ID)
+        VALUES (@VehicleDate, @VehicleType, @CO2Emissions, @Manufacturer, @Price, @EngineFuel, @DocumentID);
+
+        -- Commit the transaction if all insert operations succeed
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Rollback the transaction if any error occurs during inserts
+        ROLLBACK TRANSACTION;
+
+        -- Re-throw the error to propagate it to the calling application
+        THROW;
+    END CATCH;
 END;
 GO
