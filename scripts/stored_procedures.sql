@@ -1,6 +1,9 @@
 DROP PROCEDURE IF EXISTS dbo.ShowSponsorships
 GO
 
+DROP PROCEDURE IF EXISTS dbo.GetApplicationDetailsByIdentification
+GO
+
 DROP PROCEDURE IF EXISTS dbo.CheckIsAA;
 GO
 
@@ -834,4 +837,35 @@ BEGIN
     -- Set output parameter based on the user type
     SET @IsApplicant = CASE WHEN @UserType = 'Applicant' THEN 1 ELSE 0 END;
 END
+GO
+
+CREATE PROCEDURE GetApplicationDetailsByIdentification
+    @Identification VARCHAR(20),
+    @TrackingNumber NCHAR(8),
+    @FullName NVARCHAR(101) OUTPUT,
+    @ApplicationDate DATE OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate if the application exists for the given identification and tracking number
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Application AS App
+        JOIN Applicant AS A ON App.Applicant_ID = A.Applicant_ID
+        WHERE A.Identification = @Identification AND App.Tracking_Number = @TrackingNumber
+    )
+    BEGIN
+        THROW 50000, 'Application not found for the provided Identification and Tracking Number.', 1;
+    END;
+
+    -- Retrieve the required details
+    SELECT 
+        @FullName = CONCAT(U.First_Name, ' ', U.Last_Name),
+        @ApplicationDate = App.Application_Date
+    FROM Application AS App
+    JOIN Applicant AS A ON App.Applicant_ID = A.Applicant_ID
+    JOIN [User] AS U ON A.User_ID = U.User_ID
+    WHERE A.Identification = @Identification AND App.Tracking_Number = @TrackingNumber;
+END;
 GO
