@@ -1,6 +1,9 @@
 DROP PROCEDURE IF EXISTS PROCEDURE dbo.GetDocumentsByApplicationID
 GO
 
+DROP PROCEDURE IF EXISTS PROCEDURE dbo.GetApplicationLog
+GO
+
 DROP PROCEDURE IF EXISTS dbo.GetFullApplicationDetails
 GO
 
@@ -1217,5 +1220,34 @@ BEGIN
         Document
     WHERE 
         Application_ID = @ApplicationID;
+END;
+GO
+
+CREATE PROCEDURE dbo.GetApplicationLog
+    @ApplicationID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate if the application exists
+    IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
+    BEGIN
+        THROW 50000, 'No application found for the provided Application ID.', 1;
+    END;
+
+    -- Fetch all modifications related to the application
+    SELECT 
+        Modification_ID,
+        Modification_Date,
+        New_Status,
+        Reason,
+        User_ID,
+        Application_ID
+    FROM 
+        Modification
+    WHERE 
+        Application_ID = @ApplicationID
+    ORDER BY 
+        Modification_Date DESC; -- Sort modifications by most recent
 END;
 GO
