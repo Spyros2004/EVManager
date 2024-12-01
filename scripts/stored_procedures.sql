@@ -846,7 +846,8 @@ CREATE PROCEDURE dbo.GetApplicationDetailsByIdentification
     @Identification VARCHAR(20),
     @TrackingNumber NCHAR(8),
     @FullName NVARCHAR(101) OUTPUT,
-    @ApplicationDate DATE OUTPUT
+    @ApplicationDate DATE OUTPUT,
+    @CategoryNumber INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -867,15 +868,14 @@ BEGIN
     -- Retrieve the required details
     SELECT 
         @FullName = CONCAT(U.First_Name, ' ', U.Last_Name),
-        @ApplicationDate = App.Application_Date
+        @ApplicationDate = App.Application_Date,
+		@CategoryNumber = App.Category_Number
     FROM Application AS App
     JOIN Applicant AS A ON App.Applicant_ID = A.Applicant_ID
     JOIN [User] AS U ON A.User_ID = U.User_ID
     WHERE A.Identification = @Identification AND App.Tracking_Number = @TrackingNumber;
 END;
 GO
-
-
 
 CREATE PROCEDURE dbo.AddVehicleAndDocument
     @TrackingNumber NCHAR(8),
