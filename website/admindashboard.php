@@ -2,14 +2,12 @@
 // Start the session to check if the user is logged in
 session_start();
 if (!isset($_SESSION['SessionID'])) {
-    // Redirect to login page if the session is not set
     header("Location: login.php");
     exit();
 }
 
 // Check if the user is authorized to access this page (Admin only)
 if ($_SESSION['UserTypeNumber'] != 1) {
-    // Redirect unauthorized users to the login page
     header("Location: login.php");
     exit();
 }
@@ -17,24 +15,41 @@ if ($_SESSION['UserTypeNumber'] != 1) {
 // Include the database connection file
 include 'connection.php';
 
-// Handle POST requests for approving/rejecting applications
+// Handle POST requests for approving/rejecting users or applications
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $userId = isset($_POST['userId']) ? intval($_POST['userId']) : null;
     $applicationId = isset($_POST['applicationId']) ? intval($_POST['applicationId']) : null;
     $accept = isset($_POST['accept']) ? intval($_POST['accept']) : null;
 
-    if ($applicationId !== null && ($accept === 0 || $accept === 1)) {
-        // Determine the new status based on the action
-        $newStatus = $accept === 1 ? 'approved' : 'rejected';
+    if ($userId !== null && ($accept === 0 || $accept === 1)) {
+        // Use the stored procedure to update the user status
+        $sqlCallProcedure = "{CALL AcceptOrRejectUser(?, ?)}";
+        $params = [$userId, $accept];
 
-        // Prepare the SQL query to update the status
+        $stmt = sqlsrv_query($conn, $sqlCallProcedure, $params);
+
+        if ($stmt === false) {
+            echo "Error updating user status.";
+            die(print_r(sqlsrv_errors(), true));
+        } else {
+            echo $accept === 1 ? "User approved successfully." : "User rejected successfully.";
+        }
+
+        sqlsrv_free_stmt($stmt);
+        sqlsrv_close($conn);
+        exit();
+    }
+
+    if ($applicationId !== null && ($accept === 0 || $accept === 1)) {
+        // Update application status
+        $newStatus = $accept === 1 ? 'approved' : 'rejected';
         $sqlUpdate = "UPDATE Application SET Current_Status = ? WHERE Application_ID = ?";
         $params = [$newStatus, $applicationId];
 
-        // Execute the query
         $stmtUpdate = sqlsrv_query($conn, $sqlUpdate, $params);
 
         if ($stmtUpdate === false) {
-            echo "An error occurred: ";
+            echo "Error updating application status.";
             die(print_r(sqlsrv_errors(), true));
         } else {
             echo $accept === 1 ? "Application approved successfully." : "Application rejected successfully.";
@@ -43,17 +58,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         sqlsrv_free_stmt($stmtUpdate);
         sqlsrv_close($conn);
         exit();
-    } else {
-        echo "Invalid input.";
-        exit();
     }
+
+    echo "Invalid input.";
+    exit();
 }
 
 // Fetch pending user requests using the stored procedure
 $sqlUsers = "{CALL GetPendingUsers()}";
 $stmtUsers = sqlsrv_query($conn, $sqlUsers);
 
-// Check if the query was successful for users
 if ($stmtUsers === false) {
     die(print_r(sqlsrv_errors(), true));
 }
@@ -62,15 +76,11 @@ if ($stmtUsers === false) {
 $sqlApplications = "{CALL GetApplication()}";
 $stmtApplications = sqlsrv_query($conn, $sqlApplications);
 
-// Check if the query was successful for applications
 if ($stmtApplications === false) {
     die(print_r(sqlsrv_errors(), true));
 }
 
-// Prepare an array to hold pending applications
 $pendingApplications = [];
-
-// Loop through all fetched applications and filter by status
 while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
     if ($app['Current_Status'] === 'active') {
         $pendingApplications[] = $app;
@@ -86,6 +96,7 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
     <title>Admin Dashboard - Account & Application Requests</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* CSS styling */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #e6ffe6;
@@ -182,7 +193,7 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
         }
     </style>
     <script>
-        function handleApplication(applicationId, action) {
+        function handleRequest(id, actionType, action) {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -193,7 +204,7 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
                 }
             };
             var acceptFlag = (action === 'approve') ? 1 : 0;
-            xhr.send("applicationId=" + applicationId + "&accept=" + acceptFlag);
+            xhr.send(actionType + "=" + id + "&accept=" + acceptFlag);
         }
     </script>
 </head>
@@ -202,7 +213,6 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
     <button class="reports-btn" onclick="window.location.href='reports.php'">View Reports</button>
     <h1>Welcome to Admin Dashboard</h1>
     <div class="container">
-        <!-- User Requests Section -->
         <h2>Pending User Requests</h2>
         <table>
             <thead>
@@ -228,8 +238,8 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
                         <td><?php echo htmlspecialchars($row['User_Type']); ?></td>
                         <td><?php echo htmlspecialchars($row['Status']); ?></td>
                         <td>
-                            <button class="action-btn approve-btn" onclick="handleAction(<?php echo $row['User_ID']; ?>, 'approve')">Approve</button>
-                            <button class="action-btn reject-btn" onclick="handleAction(<?php echo $row['User_ID']; ?>, 'reject')">Reject</button>
+                            <button class="action-btn approve-btn" onclick="handleRequest(<?php echo $row['User_ID']; ?>, 'userId', 'approve')">Approve</button>
+                            <button class="action-btn reject-btn" onclick="handleRequest(<?php echo $row['User_ID']; ?>, 'userId', 'reject')">Reject</button>
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -237,7 +247,6 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
         </table>
     </div>
     <div class="container">
-        <!-- Application Requests Section -->
         <h2>Pending Application Requests</h2>
         <table>
             <thead>
@@ -261,8 +270,8 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
                         <td><?php echo htmlspecialchars($app['Category_Number']); ?></td>
                         <td><?php echo htmlspecialchars($app['Current_Status']); ?></td>
                         <td>
-                            <button class="action-btn approve-btn" onclick="handleApplication(<?php echo $app['Application_ID']; ?>, 'approve')">Approve</button>
-                            <button class="action-btn reject-btn" onclick="handleApplication(<?php echo $app['Application_ID']; ?>, 'reject')">Reject</button>
+                            <button class="action-btn approve-btn" onclick="handleRequest(<?php echo $app['Application_ID']; ?>, 'applicationId', 'approve')">Approve</button>
+                            <button class="action-btn reject-btn" onclick="handleRequest(<?php echo $app['Application_ID']; ?>, 'applicationId', 'reject')">Reject</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
