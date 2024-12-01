@@ -1,3 +1,6 @@
+DROP PROCEDURE IF EXISTS dbo.GetFullApplicationDetails
+GO
+
 DROP PROCEDURE IF EXISTS dbo.AcceptOrRejectApplication
 GO
 	
@@ -1123,5 +1126,60 @@ BEGIN
     -- Log the change
     INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
     VALUES (GETDATE(), 'active', @Reason, @UserID, @ApplicationID);
+END;
+GO
+
+CREATE PROCEDURE dbo.GetFullApplicationDetails
+    @ApplicationID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate if the application exists
+    IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
+    BEGIN
+        THROW 50000, 'No application found for the provided Application ID.', 1;
+    END;
+
+    -- Retrieve full details for the application
+    SELECT 
+        -- User Details
+        U.User_ID,
+        U.First_Name,
+        U.Last_Name,
+        U.Username,
+        U.Email,
+        U.User_Type,
+        U.Status AS User_Status,
+
+        -- Applicant Details
+        A.Applicant_ID,
+        A.Identification,
+        A.Company_Private,
+        A.Gender,
+        A.BirthDate,
+        A.Telephone_Number,
+        A.Address AS Applicant_Address,
+
+        -- Application Details
+        App.Application_ID,
+        App.Tracking_Number,
+        App.Application_Date,
+        App.Current_Status,
+        App.Category_Number,
+
+        -- Discarded Car Details (Nullable)
+        DC.License_Plate AS Discarded_Car_License_Plate
+
+    FROM 
+        Application AS App
+    INNER JOIN 
+        Applicant AS A ON App.Applicant_ID = A.Applicant_ID
+    INNER JOIN 
+        [User] AS U ON A.User_ID = U.User_ID
+    LEFT JOIN 
+        Discarded_Car AS DC ON App.Application_ID = DC.Application_ID
+    WHERE 
+        App.Application_ID = @ApplicationID;
 END;
 GO
