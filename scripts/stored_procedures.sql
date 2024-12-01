@@ -1,3 +1,6 @@
+DROP PROCEDURE IF EXISTS PROCEDURE dbo.GetDocumentsByApplicationID
+GO
+
 DROP PROCEDURE IF EXISTS dbo.GetFullApplicationDetails
 GO
 
@@ -1188,5 +1191,31 @@ BEGIN
         Discarded_Car AS DC ON App.Application_ID = DC.Application_ID
     WHERE 
         App.Application_ID = @ApplicationID;
+END;
+GO
+
+CREATE PROCEDURE dbo.GetDocumentsByApplicationID
+    @ApplicationID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate if the application exists
+    IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
+    BEGIN
+        THROW 50000, 'No application found for the provided Application ID.', 1;
+    END;
+
+    -- Retrieve all documents related to the application
+    SELECT 
+        Document_ID,
+        URL,
+        Document_Type,
+        Application_ID,
+        User_ID
+    FROM 
+        Document
+    WHERE 
+        Application_ID = @ApplicationID;
 END;
 GO
