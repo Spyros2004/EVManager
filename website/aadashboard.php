@@ -137,7 +137,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2>Application Details</h2>
         <p><strong>Full Name:</strong> <?= htmlspecialchars($applicationDetails['FullName']) ?></p>
         <p><strong>Application Date:</strong> <?= htmlspecialchars($applicationDetails['ApplicationDate']) ?></p>
-        <button onclick="window.location.href='add_car_order.php?trackingNumber=<?= urlencode($applicationDetails['TrackingNumber']) ?>'">Add Car Order</button>
+        <button onclick="window.location.href='add_car_order.php?trackingNumber=<?= urlencode($applicationDetails['TrackingNumber']) ?>'">
+    Add Car Order
+</button>
+
     </div>
 <?php endif; ?>
 
