@@ -72,7 +72,7 @@ CREATE TABLE [dbo].[Application]
     [Application_ID] INT NOT NULL IDENTITY(1,1),
     [Tracking_Number] NCHAR(8) NOT NULL DEFAULT N'ΓΧΧ.ΥΥΥΥ',
     [Application_Date] DATE NOT NULL DEFAULT GETDATE(),
-    [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('active', 'ordered,'approved by TOM', 'rejected', 'approved')) DEFAULT 'active', 
+    [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('active', 'ordered, 'checked', 'rejected', 'approved')) DEFAULT 'active', 
     [Applicant_ID] INT NOT NULL,
     [Category_Number] INT NOT NULL,
     CONSTRAINT [PK_APPLICATION] PRIMARY KEY ([Application_ID] ASC)
