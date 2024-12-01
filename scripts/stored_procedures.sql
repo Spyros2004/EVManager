@@ -1,3 +1,9 @@
+DROP PROCEDURE IF EXISTS dbo.AcceptOrRejectApplication
+GO
+	
+DROP PROCEDURE IF EXISTS dbo.ReactivateApplication
+GO
+
 DROP PROCEDURE IF EXISTS dbo.AddVehicleAndDocument
 GO
 
@@ -990,5 +996,132 @@ BEGIN
         -- Re-throw the error to propagate it to the calling application
         THROW;
     END CATCH;
+END;
+GO
+
+CREATE PROCEDURE dbo.AcceptOrRejectApplication
+    @ApplicationID INT,       -- ID of the application
+    @Action INT,              -- Action: 0 = Reject, 1 = Accept
+    @Reason NVARCHAR(255),    -- Reason for the action
+    @SessionID UNIQUEIDENTIFIER -- Session ID of the admin performing the action
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Retrieve the User_ID from the Session_ID
+    DECLARE @UserID INT;
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- Ensure a reason is provided for the action
+    IF @Reason IS NULL OR LEN(@Reason) = 0
+    BEGIN
+        THROW 50000, 'A reason is required for this action.', 1;
+    END
+
+    IF @Action = 1
+    BEGIN
+        -- Accept: Check if the application is in "checked" status
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'checked')
+        BEGIN
+            THROW 50001, 'The application must be in "checked" status to be accepted.', 1;
+        END
+
+        -- Update the application status to "accepted"
+        UPDATE [dbo].[Application]
+        SET Current_Status = 'accepted'
+        WHERE Application_ID = @ApplicationID;
+
+        -- Log the change
+        INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+        VALUES (GETDATE(), 'accepted', @Reason, @UserID, @ApplicationID);
+    END
+    ELSE IF @Action = 0
+    BEGIN
+        -- Reject: Check if the application is in "active", "ordered", or "checked" status
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status IN ('active', 'ordered', 'checked'))
+        BEGIN
+            THROW 50002, 'The application must be in "active", "ordered", or "checked" status to be rejected.', 1;
+        END
+
+        -- Update the application status to "rejected"
+        UPDATE [dbo].[Application]
+        SET Current_Status = 'rejected'
+        WHERE Application_ID = @ApplicationID;
+
+        -- Log the change
+        INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+        VALUES (GETDATE(), 'rejected', @Reason, @UserID, @ApplicationID);
+    END
+    ELSE
+    BEGIN
+        THROW 50003, 'Invalid action.', 1;
+    END
+END;
+GO
+
+
+CREATE PROCEDURE dbo.ReactivateApplication
+    @ApplicationID INT,       -- ID of the application
+    @Reason NVARCHAR(255),    -- Reason for reactivation
+    @SessionID UNIQUEIDENTIFIER -- Session ID of the admin performing the action
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Retrieve the User_ID from the Session_ID
+    DECLARE @UserID INT;
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- Ensure a reason is provided for the action
+    IF @Reason IS NULL OR LEN(@Reason) = 0
+    BEGIN
+        THROW 50000, 'A reason is required for this action.', 1;
+    END
+
+    -- Reactivate: Check if the application is in "rejected" status
+    IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'rejected')
+    BEGIN
+        THROW 50001, N'The application must be in "rejected" status to be reactivated.', 1;
+    END
+
+    -- Ensure the reactivating admin is not the same as the rejecting admin
+    DECLARE @RejectingUserID INT;
+    SELECT TOP 1 @RejectingUserID = User_ID
+    FROM [dbo].[Modification]
+    WHERE Application_ID = @ApplicationID AND New_Status = 'rejected'
+    ORDER BY Modification_Date DESC;
+
+    IF @RejectingUserID = @UserID
+    BEGIN
+        THROW 50001, 'You cannot reactivate an application you rejected.', 1;
+    END
+
+    -- Check if there are available positions in the sponsorship category
+    DECLARE @CategoryNumber INT;
+    SELECT @CategoryNumber = Category_Number
+    FROM [dbo].[Application]
+    WHERE Application_ID = @ApplicationID;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM [dbo].[Sponsorship_Category]
+        WHERE Category_Number = @CategoryNumber AND Remaining_Positions > 0
+    )
+    BEGIN
+        THROW 50002, 'There are no available positions in this category.', 1;
+    END
+
+    -- Update the application status to "active"
+    UPDATE [dbo].[Application]
+    SET Current_Status = 'active'
+    WHERE Application_ID = @ApplicationID;
+
+    -- Log the change
+    INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+    VALUES (GETDATE(), 'active', @Reason, @UserID, @ApplicationID);
 END;
 GO
