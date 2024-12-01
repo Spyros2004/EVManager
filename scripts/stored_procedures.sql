@@ -1,4 +1,4 @@
-DROP PROCEDURE IF EXISTS AddVehicleAndDocument
+DROP PROCEDURE IF EXISTS dbo.AddVehicleAndDocument
 GO
 
 DROP PROCEDURE IF EXISTS dbo.ShowSponsorships
