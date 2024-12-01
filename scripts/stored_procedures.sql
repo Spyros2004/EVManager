@@ -1,7 +1,7 @@
-DROP PROCEDURE IF EXISTS PROCEDURE dbo.GetDocumentsByApplicationID
+DROP PROCEDURE IF EXISTS dbo.GetDocumentsByApplicationID
 GO
 
-DROP PROCEDURE IF EXISTS PROCEDURE dbo.GetApplicationLog
+DROP PROCEDURE IF EXISTS dbo.GetApplicationLog
 GO
 
 DROP PROCEDURE IF EXISTS dbo.GetFullApplicationDetails
