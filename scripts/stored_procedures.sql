@@ -668,7 +668,7 @@ BEGIN
 		BEGIN
 			DECLARE @DocumentType NVARCHAR(255);
 			DECLARE @DocumentID INT;
-			DECLARE @URL NVARCHAR(255);
+			DECLARE @URL VARCHAR(255);
 
 			-- Determine document type based on the category
 			IF @CategoryNumber IN (3, 7)
