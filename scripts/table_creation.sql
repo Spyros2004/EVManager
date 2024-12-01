@@ -21,7 +21,7 @@ CREATE TABLE [dbo].[User]
     [Email] VARCHAR(100) NOT NULL, 
     [Password] VARBINARY(512) NOT NULL, 
     [User_Type] VARCHAR(20) NOT NULL CHECK ([User_Type] IN ('Admin', 'TOM', 'AA', 'Applicant')), 
-    [Status] VARCHAR(20) NOT NULL CHECK ([Status] IN ('pending', 'approved', 'suspended', 'deactivated', 'rejected')) DEFAULT 'pending', 
+    [Status] VARCHAR(20) NOT NULL CHECK ([Status] IN ('pending', 'approved', 'rejected')) DEFAULT 'pending', 
     UNIQUE ([Username]),
     UNIQUE ([Email]),
     CONSTRAINT [PK_USER] PRIMARY KEY ([User_ID] ASC)
@@ -72,7 +72,7 @@ CREATE TABLE [dbo].[Application]
     [Application_ID] INT NOT NULL IDENTITY(1,1),
     [Tracking_Number] NCHAR(8) NOT NULL DEFAULT N'ΓΧΧ.ΥΥΥΥ',
     [Application_Date] DATE NOT NULL DEFAULT GETDATE(),
-    [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('active', 'approved', 'rejected', 'under_review', 'in_progress')) DEFAULT 'pending', 
+    [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('active', 'ordered,'approved by TOM', 'rejected', 'approved')) DEFAULT 'active', 
     [Applicant_ID] INT NOT NULL,
     [Category_Number] INT NOT NULL,
     CONSTRAINT [PK_APPLICATION] PRIMARY KEY ([Application_ID] ASC)
