@@ -887,6 +887,7 @@ END;
 GO
 
 CREATE PROCEDURE dbo.AddVehicleAndDocument
+	@SessionID UNIQUEIDENTIFIER,
     @TrackingNumber NCHAR(8),
     @VehicleDate DATE,
     @VehicleType VARCHAR(20),
@@ -904,6 +905,10 @@ BEGIN
     DECLARE @ApplicationID INT;
     DECLARE @UserID INT;
     DECLARE @DocumentID INT;
+
+	SELECT @UserID = User_ID
+    FROM [User_Session]
+    WHERE Session_ID = @SessionID;
 
     -- Validate the application exists and is active
     IF NOT EXISTS (
@@ -927,11 +932,9 @@ BEGIN
 
     -- Retrieve Application_ID and User_ID
     SELECT 
-        @ApplicationID = Application_ID,
-        @UserID = A.User_ID
-    FROM Application AS App
-    JOIN Applicant AS A ON App.Applicant_ID = A.Applicant_ID
-    WHERE App.Tracking_Number = @TrackingNumber;
+        @ApplicationID = Application_ID
+    FROM Application AS A
+    WHERE A.Tracking_Number = @TrackingNumber;
 
     -- Validate Vehicle attributes
     IF @VehicleDate < GETDATE()
@@ -988,6 +991,13 @@ BEGIN
         SET URL = @URL
         WHERE Document_ID = @DocumentID;
 
+		-- Update application status to 'ordered'
+        UPDATE Application
+        SET Current_Status = 'ordered'
+        WHERE Application_ID = @ApplicationID;
+
+		INSERT INTO Modification (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+		VALUES (GETDATE(), 'ordered', 'Order submitted and documents uploaded.', @UserID, @ApplicationID);
 
         -- Commit the transaction if all insert operations succeed
         COMMIT TRANSACTION;
