@@ -253,6 +253,129 @@ button {
     }
 }
 
+/* Modal Background */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Modal Box */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Modal Box */
+.modal-box {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 50%;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    text-align: left;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: -10px;
+    margin-right: -10px;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+/* Popup Content Styling */
+.popup-content {
+    padding: 10px 20px;
+}
+
+.popup-content h2 {
+    text-align: center;
+    color: #2e7d32;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+/* Field Styling */
+
+.popup-label {
+    font-weight: bold;
+    color: #555;
+    min-width: 250px; /* Adjusted for long field names */
+    display: inline-block;
+}
+
+
+
+
+
+.popup-field a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.popup-field a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+/* General Styling */
+.popup-content h2 {
+    text-align: center;
+    color: #2e7d32;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    border-bottom: 2px solid #e6e6e6;
+    padding-bottom: 10px;
+}
+
+.popup-content p {
+    text-align: center;
+    font-size: 1em;
+    color: #555;
+}
+
+.popup-field {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.popup-label {
+    font-weight: bold;
+    color: #555;
+    min-width: 250px; /* Adjust for long field names */
+    display: inline-block;
+}
+
+.popup-value {
+    color: #333;
+    font-weight: normal;
+    margin-left: 20px; /* Extra space for better alignment */
+}
+
 
     </style>
     <script>
@@ -303,6 +426,28 @@ function handleUserRequest(userId, accept) {
     };
     xhr.send(`userId=${userId}&accept=${accept}`);
 }
+
+function viewDetails(applicationId) {
+        // AJAX call to fetch application details
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "getApplicationDetails.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // Display details in the modal
+                document.getElementById("modal-content").innerHTML = xhr.responseText;
+                document.getElementById("modal").style.display = "block";
+            }
+        };
+
+        xhr.send(`applicationId=${applicationId}`);
+    }
+
+    // Close the modal
+    function closeModal() {
+        document.getElementById("modal").style.display = "none";
+    }
 
 
     </script>
@@ -382,9 +527,14 @@ function handleUserRequest(userId, accept) {
                     <span>No actions available</span>
                 <?php endif; ?>
             </td>
+            <td>
+                <!-- New Check Button -->
+                <button class="btn-check" onclick="viewDetails(<?= $app['Application_ID'] ?>)">Check</button>
+            </td>
         </tr>
     <?php endforeach; ?>
 </tbody>
+
 </table>
 
     </div>
@@ -393,5 +543,15 @@ function handleUserRequest(userId, accept) {
     sqlsrv_free_stmt($stmtApplications);
     sqlsrv_close($conn);
     ?>
+
+    <!-- Modal -->
+<div id="modal" class="modal">
+    <div class="modal-box">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div id="modal-content">
+            <!-- Details will be dynamically loaded here -->
+        </div>
+    </div>
+</div>
 </body>
 </html>
