@@ -49,7 +49,6 @@ if (isset($_POST['search'])) {
             $mainMessage = preg_replace('/^.*\]\s*/', '', $error['message']); // Εξαγωγή του κύριου μηνύματος μετά το τελευταίο `]`
             $errorMessage .= htmlspecialchars($mainMessage);
         }
-        die($errorMessage); 
     } else {
         if (!empty($fullName) && !empty($applicationDate)) {
             $applicationDetails = [
@@ -67,6 +66,7 @@ if (isset($_POST['search'])) {
 
 // Διαχείριση υποβολής φόρμας προσθήκης παραγγελίας αυτοκινήτου
 if (isset($_POST['addOrder'])) {
+    $sessionID = $_SESSION['SessionID']; 
     $trackingNumber = trim($_POST['trackingNumber']);
     $vehicleDate = $_POST['vehicleDate'];
     $vehicleType = $_POST['vehicleType'];
@@ -82,8 +82,9 @@ if (isset($_POST['addOrder'])) {
         $errorMessage = "Ελέγξτε τις τιμές εισόδου σας και δοκιμάστε ξανά.";
     } else {
         // Κλήση της αποθηκευμένης διαδικασίας με τον σωστό αριθμό παραμέτρων
-        $sql = "{CALL dbo.AddVehicleAndDocument(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        $sql = "{CALL dbo.AddVehicleAndDocument(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         $params = [
+            $sessionID,  
             $trackingNumber,
             $vehicleDate,
             $vehicleType,
@@ -296,11 +297,9 @@ if (isset($_POST['addOrder'])) {
             <input type="number" id="price" name="price" min="0" max="80000" required>
 
             <label for="document1">Έγγραφο 1 (Παραγγελία Αυτοκινήτου):</label>
-            <input type="text" id="document1" name="document1" readonly>
             <button type="button" onclick="uploadFile('document1', 'document1')">Δημιουργία Εγγράφου 1</button>
 
             <label for="document2">Έγγραφο 2 (Πιστοποιητικό Συμμόρφωσης ΕΚ):</label>
-            <input type="text" id="document2" name="document2" readonly>
             <button type="button" onclick="uploadFile('document2', 'document2')">Δημιουργία Εγγράφου 2</button>
 
             <button type="submit" name="addOrder">Υποβολή</button>
