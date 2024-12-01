@@ -1144,13 +1144,10 @@ BEGIN
     -- Retrieve full details for the application
     SELECT 
         -- User Details
-        U.User_ID,
         U.First_Name,
         U.Last_Name,
         U.Username,
         U.Email,
-        U.User_Type,
-        U.Status AS User_Status,
 
         -- Applicant Details
         A.Applicant_ID,
@@ -1159,7 +1156,7 @@ BEGIN
         A.Gender,
         A.BirthDate,
         A.Telephone_Number,
-        A.Address AS Applicant_Address,
+        A.Address,
 
         -- Application Details
         App.Application_ID,
