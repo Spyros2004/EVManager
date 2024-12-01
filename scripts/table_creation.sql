@@ -106,7 +106,7 @@ CREATE TABLE [dbo].[Vehicle]
     [Vehicle_Type] VARCHAR(20) NOT NULL CHECK ([Vehicle_Type] IN ('electric', 'hybrid')), 
     [CO2_Emissions] INT NOT NULL CHECK ([CO2_Emissions] <= 50), 
     [Manufacturer] VARCHAR(50) NOT NULL, 
-    [Price] DECIMAL(15, 2) NOT NULL CHECK ([Price] <= 80000), 
+    [Price] ΙΝΤ NOT NULL CHECK ([Price] <= 80000 AND [Price] >= 0), 
     [Engine_Fuel] VARCHAR(20) NOT NULL CHECK ([Engine_Fuel] IN ('diesel', 'petrol','electricity')), 
     [Document_ID] INT NOT NULL,
     CONSTRAINT [PK_VEHICLE] PRIMARY KEY ([Vehicle_ID] ASC)
