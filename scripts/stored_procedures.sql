@@ -89,7 +89,7 @@ GO
 DROP PROCEDURE IF EXISTS GetDiscardedCar
 GO
 
-CREATE PROCEDURE showSponsorships
+CREATE PROCEDURE dbo.showSponsorships
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -842,7 +842,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE GetApplicationDetailsByIdentification
+CREATE PROCEDURE dbo.GetApplicationDetailsByIdentification
     @Identification VARCHAR(20),
     @TrackingNumber NCHAR(8),
     @FullName NVARCHAR(101) OUTPUT,
@@ -875,13 +875,13 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE AddVehicleAndDocument
+CREATE PROCEDURE dbo.AddVehicleAndDocument
     @TrackingNumber NCHAR(8),
     @VehicleDate DATE,
     @VehicleType VARCHAR(20),
     @CO2Emissions INT,
     @Manufacturer VARCHAR(50),
-    @Model VARCHAR(50), -- New parameter for the vehicle model
+    @Model VARCHAR(50),
     @Price INT,
     @Document NVARCHAR(100)
 AS
