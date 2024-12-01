@@ -848,15 +848,17 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Validate if the application exists for the given identification and tracking number
+    -- Validate if the application exists for the given identification, tracking number, and active status
     IF NOT EXISTS (
         SELECT 1
         FROM Application AS App
         JOIN Applicant AS A ON App.Applicant_ID = A.Applicant_ID
-        WHERE A.Identification = @Identification AND App.Tracking_Number = @TrackingNumber
+        WHERE A.Identification = @Identification 
+          AND App.Tracking_Number = @TrackingNumber
+          AND App.Current_Status = 'active'
     )
     BEGIN
-        THROW 50000, 'Application not found for the provided Identification and Tracking Number.', 1;
+        THROW 50000, 'No active application found for the provided Identification and Tracking Number.', 1;
     END;
 
     -- Retrieve the required details
