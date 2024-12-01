@@ -911,6 +911,22 @@ BEGIN
     JOIN Applicant AS A ON App.Applicant_ID = A.Applicant_ID
     WHERE App.Tracking_Number = @TrackingNumber;
 
+    -- Validate Vehicle attributes
+    IF @VehicleDate < GETDATE()
+    BEGIN
+        THROW 50002, 'Vehicle date cannot be earlier than today.', 1;
+    END;
+
+    IF @CO2Emissions > 50
+    BEGIN
+        THROW 50003, 'CO2 emissions must be less than or equal to 50.', 1;
+    END;
+
+    IF @Price > 80000
+    BEGIN
+        THROW 50004, 'Vehicle price must be less than or equal to 80,000.', 1;
+    END;
+
     -- Start transaction for insert operations
     BEGIN TRANSACTION;
 
