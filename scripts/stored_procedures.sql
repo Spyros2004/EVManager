@@ -875,6 +875,8 @@ BEGIN
 END;
 GO
 
+
+
 CREATE PROCEDURE dbo.AddVehicleAndDocument
     @TrackingNumber NCHAR(8),
     @VehicleDate DATE,
@@ -883,7 +885,8 @@ CREATE PROCEDURE dbo.AddVehicleAndDocument
     @Manufacturer VARCHAR(50),
     @Model VARCHAR(50),
     @Price INT,
-    @Document NVARCHAR(100)
+    @Document1 NVARCHAR(100),
+	@Document2 NVARCHAR(100)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -901,6 +904,16 @@ BEGIN
     )
     BEGIN
         THROW 50001, 'No active application found for the provided Tracking Number.', 1;
+    END;
+
+	IF @Document1 IS NULL OR @Document1 = ''
+    BEGIN
+        THROW 50005, 'Document1 cannot be NULL or empty.', 1;
+    END;
+
+    IF @Document2 IS NULL OR @Document2 = ''
+    BEGIN
+        THROW 50006, 'Document2 cannot be NULL or empty.', 1;
     END;
 
     -- Retrieve Application_ID and User_ID
@@ -941,7 +954,7 @@ BEGIN
         SET @DocumentID = SCOPE_IDENTITY();
 
         -- Construct the URL dynamically using Document_ID
-        SET @URL = CONCAT('Applications/Documents/', @Document, '/document', @DocumentID, '.pdf');
+        SET @URL = CONCAT('Applications/Documents/', @Document1, '/document', @DocumentID, '.pdf');
 
         -- Update the Document record with the constructed URL
         UPDATE Document
@@ -951,6 +964,21 @@ BEGIN
         -- Insert the vehicle details, now including the Model column
         INSERT INTO Vehicle (Vehicle_Date, Vehicle_Type, CO2_Emissions, Manufacturer, Model, Price, Document_ID)
         VALUES (@VehicleDate, @VehicleType, @CO2Emissions, @Manufacturer, @Model, @Price, @DocumentID);
+
+		INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
+        VALUES ('', N'Πιστοποιητικό Συμμόρφωσης ΕΚ', @ApplicationID, @UserID);
+
+        -- Retrieve the newly created Document_ID
+        SET @DocumentID = SCOPE_IDENTITY();
+
+        -- Construct the URL dynamically using Document_ID
+        SET @URL = CONCAT('Applications/Documents/', @Document2, '/document', @DocumentID, '.pdf');
+
+        -- Update the Document record with the constructed URL
+        UPDATE Document
+        SET URL = @URL
+        WHERE Document_ID = @DocumentID;
+
 
         -- Commit the transaction if all insert operations succeed
         COMMIT TRANSACTION;
