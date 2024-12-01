@@ -262,7 +262,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             // Simulate document creation
-            documentField.value = "G" + category + "_" + Date.now() + ".pdf";
+            documentField.value = "G" + category;
             alert("Το αρχείο δημιουργήθηκε: " + documentField.value);
         }
     </script>
