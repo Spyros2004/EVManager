@@ -115,10 +115,9 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
     <title>Admin Dashboard - Account & Application Requests</title>
     <style>
 /* General Styling */
-/* General Styling */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f8f5;
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f7f9fc;
     margin: 0;
     padding: 0;
     color: #333;
@@ -128,8 +127,9 @@ body {
 h1 {
     text-align: center;
     margin: 20px 0;
-    color: #2e7d32;
+    color: #0056b3;
     font-size: 2.5em;
+    font-weight: bold;
 }
 
 /* Container */
@@ -138,9 +138,9 @@ h1 {
     max-width: 1200px;
     margin: 30px auto;
     background: #ffffff;
-    padding: 20px 30px;
+    padding: 30px;
     border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Table Styling */
@@ -150,7 +150,7 @@ table {
     margin-top: 20px;
     border-radius: 8px;
     overflow: hidden;
-    background-color: #f9fff9;
+    background-color: #ffffff;
 }
 
 th, td {
@@ -160,7 +160,7 @@ th, td {
 }
 
 th {
-    background-color: #2e7d32;
+    background-color: #0056b3;
     color: white;
     text-transform: uppercase;
     font-size: 1em;
@@ -168,7 +168,15 @@ th {
 
 td {
     font-size: 0.95em;
-    color: #333;
+    color: #555;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #e9f5ff;
 }
 
 /* Buttons Styling */
@@ -180,25 +188,26 @@ button {
     border-radius: 5px;
     font-size: 1em;
     transition: background-color 0.3s, transform 0.2s;
+    margin-bottom: 10px;
 }
 
 /* Approve Button */
 .btn-approve {
-    background-color: #9bcd46; /* Lime Green (Λαχανί) */
+    background-color: #28a745;
     color: white;
 }
 .btn-approve:hover {
-    background-color: #74c686;
+    background-color: #218838;
     transform: scale(1.05);
 }
 
 /* Reject Button */
 .btn-reject {
-    background-color: #e63946; /* Red */
+    background-color: #dc3545;
     color: white;
 }
 .btn-reject:hover {
-    background-color: #cc2e3b;
+    background-color: #c82333;
     transform: scale(1.05);
 }
 
@@ -209,6 +218,16 @@ button {
 }
 .btn-reactivate:hover {
     background-color: #138496;
+    transform: scale(1.05);
+}
+
+/* Check Button */
+.btn-check {
+    background-color: #ffc107;
+    color: #333;
+}
+.btn-check:hover {
+    background-color: #e0a800;
     transform: scale(1.05);
 }
 
@@ -231,7 +250,7 @@ button {
 }
 
 .logout-btn:hover {
-    background-color: #b52b32;
+    background-color: #c82333;
 }
 
 .reports-btn {
@@ -263,20 +282,7 @@ button {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-/* Modal Box */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Modal Box */
@@ -285,10 +291,9 @@ button {
     margin: 10% auto;
     padding: 30px;
     border-radius: 15px;
-    width: 50%;
+    width: 60%;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     text-align: left;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Close Button */
@@ -315,23 +320,31 @@ button {
 
 .popup-content h2 {
     text-align: center;
-    color: #2e7d32;
+    color: #0056b3;
     margin-bottom: 20px;
     font-size: 1.5em;
+    border-bottom: 2px solid #e6e6e6;
+    padding-bottom: 10px;
 }
 
-/* Field Styling */
+.popup-field {
+    display: flex;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
 
 .popup-label {
     font-weight: bold;
     color: #555;
-    min-width: 250px; /* Adjusted for long field names */
+    min-width: 250px;
     display: inline-block;
+    margin-right: 10px;
 }
 
-
-
-
+.popup-value {
+    color: #333;
+    font-weight: normal;
+}
 
 .popup-field a {
     color: #007bff;
@@ -342,40 +355,13 @@ button {
     text-decoration: underline;
     color: #0056b3;
 }
-/* General Styling */
-.popup-content h2 {
-    text-align: center;
-    color: #2e7d32;
-    margin-bottom: 20px;
-    font-size: 1.5em;
-    border-bottom: 2px solid #e6e6e6;
-    padding-bottom: 10px;
-}
 
-.popup-content p {
-    text-align: center;
-    font-size: 1em;
-    color: #555;
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .modal-box {
+        width: 90%;
+    }
 }
-
-.popup-field {
-    display: flex;
-    margin-bottom: 10px;
-}
-
-.popup-label {
-    font-weight: bold;
-    color: #555;
-    min-width: 250px; /* Adjust for long field names */
-    display: inline-block;
-}
-
-.popup-value {
-    color: #333;
-    font-weight: normal;
-    margin-left: 20px; /* Extra space for better alignment */
-}
-
 
     </style>
     <script>
@@ -493,14 +479,15 @@ function viewDetails(applicationId) {
         <table>
     <thead>
         <tr>
-            <th>Application ID</th>
-            <th>Tracking Number</th>
-            <th>Application Date</th>
-            <th>Applicant ID</th>
-            <th>Category Number</th>
-            <th>Status</th>
-            <th>Reactivation</th> <!-- Νέα Στήλη -->
-            <th>Actions</th> <!-- Νέα Στήλη -->
+            <th>Αναγνωριστικο Αιτησης</th>
+            <th>Αριθμός Αίτησης</th>
+            <th>Ημερομηνία Καταχώρησης</th>
+            <th>Ταυτότητα Αιτητή/Αριθμός Εταιρείας</th>
+            <th>Κατηγορία</th>
+            <th>Κατάσταση</th>
+            <th>Επαναενεργοποίηση</th> <!-- Νέα Στήλη -->
+            <th>Έγκριση/Απόρριψη</th> <!-- Νέα Στήλη -->
+            <th>Έλεγχος</th> <!-- Νέα Στήλη -->
         </tr>
     </thead>
     <tbody>
