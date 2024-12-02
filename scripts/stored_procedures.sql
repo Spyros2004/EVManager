@@ -1,4 +1,7 @@
-DROP PROCEDURE IF EXISTS PROCEDURE dbo.UpdateDocument
+DROP PROCEDURE IF EXISTS dbo.GetOrderedApplications
+GO
+
+DROP PROCEDURE IF EXISTS dbo.UpdateDocument
 GO
 
 DROP PROCEDURE IF EXISTS dbo.GetDocumentsByApplicationID
@@ -1025,47 +1028,76 @@ CREATE PROCEDURE dbo.AcceptOrRejectApplication
     @ApplicationID INT,       -- ID of the application
     @Action INT,              -- Action: 0 = Reject, 1 = Accept
     @Reason NVARCHAR(255),    -- Reason for the action
-    @SessionID UNIQUEIDENTIFIER -- Session ID of the admin performing the action
+    @SessionID UNIQUEIDENTIFIER -- Session ID of the user performing the action
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Retrieve the User_ID from the Session_ID
+    -- Retrieve the User_ID and User_Type from the Session_ID
     DECLARE @UserID INT;
-    SELECT @UserID = User_ID
-    FROM [dbo].[User_Session]
-    WHERE Session_ID = @SessionID;
+    DECLARE @UserType VARCHAR(20);
+    SELECT 
+        @UserID = U.User_ID,
+        @UserType = U.User_Type
+    FROM [dbo].[User_Session] US
+    JOIN [dbo].[User] U ON US.User_ID = U.User_ID
+    WHERE US.Session_ID = @SessionID;
 
     -- Ensure a reason is provided for the action
     IF @Reason IS NULL OR LEN(@Reason) = 0
     BEGIN
         THROW 50000, 'Για την ενέργεια αυτή απαιτείται αιτιολόγηση.', 1;
-    END
+    END;
 
     IF @Action = 1
     BEGIN
-        -- Accept: Check if the application is in "checked" status
-        IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'checked')
+        -- Accept Action
+        IF @UserType = 'Admin'
         BEGIN
-            THROW 50001, 'Η αίτηση πρέπει να είναι σε κατάσταση «checked» για να γίνει δεκτή.', 1;
+            -- Admin: Check if the application is in "checked" status
+            IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'checked')
+            BEGIN
+                THROW 50001, 'Η αίτηση πρέπει να είναι σε κατάσταση «checked» για να γίνει δεκτή.', 1;
+            END;
+
+            -- Update the application status to "accepted"
+            UPDATE [dbo].[Application]
+            SET Current_Status = 'accepted'
+            WHERE Application_ID = @ApplicationID;
+
+            -- Log the change
+            INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+            VALUES (GETDATE(), 'accepted', @Reason, @UserID, @ApplicationID);
         END
+        ELSE IF @UserType = 'TOM'
+        BEGIN
+            -- TOM: Check if the application is in "active" status
+            IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'active')
+            BEGIN
+                THROW 50004, 'Η αίτηση πρέπει να είναι σε κατάσταση «active» για να επισημανθεί ως «checked».', 1;
+            END;
 
-        -- Update the application status to "accepted"
-        UPDATE [dbo].[Application]
-        SET Current_Status = 'accepted'
-        WHERE Application_ID = @ApplicationID;
+            -- Update the application status to "checked"
+            UPDATE [dbo].[Application]
+            SET Current_Status = 'checked'
+            WHERE Application_ID = @ApplicationID;
 
-        -- Log the change
-        INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
-        VALUES (GETDATE(), 'accepted', @Reason, @UserID, @ApplicationID);
+            -- Log the change
+            INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+            VALUES (GETDATE(), 'checked', @Reason, @UserID, @ApplicationID);
+        END
+        ELSE
+        BEGIN
+            THROW 50005, 'Μόνο χρήστες με ρόλο «Admin» ή «TOM» μπορούν να αποδεχτούν αιτήσεις.', 1;
+        END;
     END
     ELSE IF @Action = 0
     BEGIN
-        -- Reject: Check if the application is in "active", "ordered", or "checked" status
+        -- Reject Action: Check if the application is in "active", "ordered", or "checked" status
         IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status IN ('active', 'ordered', 'checked'))
         BEGIN
             THROW 50002, 'Η αίτηση πρέπει να είναι σε κατάσταση «active», «ordered» ή «checked» για να απορριφθεί.', 1;
-        END
+        END;
 
         -- Update the application status to "rejected"
         UPDATE [dbo].[Application]
@@ -1079,10 +1111,9 @@ BEGIN
     ELSE
     BEGIN
         THROW 50003, 'Άκυρη ενέργεια.', 1;
-    END
+    END;
 END;
 GO
-
 
 CREATE PROCEDURE dbo.ReactivateApplication
     @ApplicationID INT,       -- ID of the application
@@ -1321,4 +1352,16 @@ BEGIN
         @ApplicationID -- Application associated with the document
     );
 END;
+GO
+
+CREATE PROCEDURE dbo.GetOrderedApplications
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Select only records where Current_Status is 'ordered'
+    SELECT * 
+    FROM [dbo].[Application]
+    WHERE Current_Status = 'ordered';
+END
 GO
