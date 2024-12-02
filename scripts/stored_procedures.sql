@@ -1274,7 +1274,7 @@ BEGIN
     -- Validate if the document exists
     IF NOT EXISTS (SELECT 1 FROM Document WHERE Document_ID = @DocumentID)
     BEGIN
-        THROW 50000, 'No document found for the provided Document ID.', 1;
+        THROW 50000, 'Δεν βρέθηκε κανένα έγγραφο για το παρεχόμενο αναγνωριστικό εγγράφου.', 1;
     END;
 
     -- Retrieve the associated Application_ID and Document_Type for the document
@@ -1291,7 +1291,7 @@ BEGIN
     -- Validate if the associated application exists
     IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
     BEGIN
-        THROW 50001, 'No application found for the associated Application ID.', 1;
+        THROW 50001, 'Δεν βρέθηκε καμία εφαρμογή για το σχετικό αναγνωριστικό αίτησης.', 1;
     END;
 
     -- Retrieve the current status of the application
