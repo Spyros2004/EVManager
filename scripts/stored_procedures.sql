@@ -135,7 +135,7 @@ BEGIN
     -- Check if the user exists
     IF NOT EXISTS (SELECT 1 FROM [dbo].[User] WHERE User_ID = @UserID)
     BEGIN
-        THROW 50001, 'User does not exist.', 1;
+        THROW 50001, 'Ο χρήστης δεν υπάρχει.', 1;
     END
 
     -- Update the user's status based on the @Accept flag
@@ -191,7 +191,7 @@ BEGIN
     -- Ensure the User_ID was found
     IF @UserID IS NULL
     BEGIN
-        THROW 50000, 'Invalid Session ID', 1;
+        THROW 50000, 'Μη έγκυρο Session ID', 1;
         RETURN;
     END
 
@@ -217,7 +217,7 @@ BEGIN
     -- Ensure the User_ID was found
     IF @UserID IS NULL
     BEGIN
-        THROW 50000, 'Invalid Session ID', 1;
+        THROW 50000, 'Μη έγκυρο ID', 1;
         RETURN;
     END
 
@@ -245,7 +245,7 @@ BEGIN
         -- If no session is found to delete, you can raise an error or just proceed
         IF @@ROWCOUNT = 0
         BEGIN
-            THROW 50000, 'No active session found for this session ID.', 1;
+            THROW 50000, 'Δεν βρέθηκε ενεργή session για αυτό το session ID.', 1;
         END
     END TRY
     BEGIN CATCH
@@ -366,20 +366,20 @@ BEGIN
     IF @First_Name IS NULL OR @Last_Name IS NULL OR @Username IS NULL 
         OR @Email IS NULL OR @Password IS NULL OR @User_Type IS NULL
     BEGIN
-        THROW 50005, 'All user fields (First_Name, Last_Name, Username, Email, Password, User_Type) are required.', 1;
+        THROW 50005, 'Όλα τα πεδία χρήστη είναι υποχρεωτικά.', 1;
         RETURN;
     END
 
     -- Check if Username or Email already exists
     IF EXISTS (SELECT 1 FROM [dbo].[User] WHERE [Username] = @Username)
     BEGIN
-        THROW 50001, 'Username already exists. Please choose a different one.', 1;
+        THROW 50001, 'Το όνομα χρήστη υπάρχει ήδη. Παρακαλώ επιλέξτε ένα διαφορετικό.', 1;
         RETURN;
     END
 
     IF EXISTS (SELECT 1 FROM [dbo].[User] WHERE [Email] = @Email)
     BEGIN
-        THROW 50002, 'Email already exists. Please use a different one.', 1;
+        THROW 50002, 'Το email υπάρχει ήδη. Παρακαλώ χρησιμοποιήστε ένα διαφορετικό.', 1;
         RETURN;
     END
 
@@ -390,14 +390,14 @@ BEGIN
         IF @Identification IS NULL OR @Company_Private IS NULL OR @Gender IS NULL 
            OR @BirthDate IS NULL OR @Telephone_Number IS NULL OR @Address IS NULL
         BEGIN
-            THROW 50003, 'For applicants, all fields (Identification, Company_Private, Gender, BirthDate, Telephone_Number, Address) are required.', 1;
+            THROW 50003, 'Για τους αιτούντες, όλα τα πεδία είναι υποχρεωτικά.', 1;
             RETURN;
         END
 
         -- Check if Identification already exists in Applicant table
         IF EXISTS (SELECT 1 FROM [dbo].[Applicant] WHERE [Identification] = @Identification)
         BEGIN
-            THROW 50004, 'Identification already exists for another user. Please provide a different Identification.', 1;
+            THROW 50004, 'Η ταυτότητα υπάρχει ήδη για άλλον χρήστη. Παρακαλούμε δώστε μια διαφορετική ταυτότητα.', 1;
             RETURN;
         END
     END
@@ -465,21 +465,21 @@ BEGIN
         IF @StoredPassword IS NULL
         BEGIN
             -- Throw an error for invalid username
-            THROW 50000, 'Invalid Username', 1;
+            THROW 50000, 'Μη έγκυρο όνομα χρήστη', 1;
         END
 
         -- Check if the user's status is "pending"
         IF @Status = 'pending'
         BEGIN
             -- Throw an error if the user is in "pending" status
-            THROW 50002, 'Account is pending approval. Please wait for admin approval.', 1;
+            THROW 50002, 'Ο λογαριασμός εκκρεμεί προς έγκριση. Παρακαλούμε περιμένετε την έγκριση του φορέα υλοποίησης.', 1;
         END
 
         -- Compare the stored hashed password with the provided password
         IF @StoredPassword != HASHBYTES('SHA2_512', @Password)
         BEGIN
             -- Throw an error for incorrect password
-            THROW 50001, 'Incorrect Password', 1;
+            THROW 50001, 'Λανθασμένος κωδικός πρόσβασης.', 1;
         END
 
         SET @Session_ID = NEWID(); -- Generate unique session ID
@@ -527,7 +527,7 @@ BEGIN
         SELECT 1 FROM Applicant WHERE User_ID = @UserID
     )
     BEGIN
-        THROW 50000, 'User is not an applicant.', 1;
+        THROW 50000, 'Ο χρήστης δεν είναι αιτών.', 1;
     END;
 
     DECLARE @ApplicantID INT;
@@ -548,7 +548,7 @@ BEGIN
         WHERE Applicant_ID = @ApplicantID AND Current_Status = 'expired'
     ) >= 2
     BEGIN
-        THROW 50004, 'Applicant has 2 applications with expired status.', 1;
+        THROW 50004, 'Ο αιτών έχει 2 αιτήσεις που έχουν λήξει.', 1;
     END;
 
     -- Check if the applicant has 2 applications with declined status
@@ -558,7 +558,7 @@ BEGIN
         WHERE Applicant_ID = @ApplicantID AND Current_Status = 'declined'
     ) >= 2
     BEGIN
-        THROW 50005, 'Applicant has 2 applications with declined status.', 1;
+        THROW 50005, 'Ο αιτών έχει 2 απορριφθείσες αιτήσεις.', 1;
     END;
 
     -- Check if the applicant is private and attempting category 1-13 but already has an active/accepted application
