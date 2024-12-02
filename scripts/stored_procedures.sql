@@ -1350,7 +1350,7 @@ BEGIN
     VALUES (
         GETDATE(), -- Current date
         @CurrentStatus, -- Keep the current application status
-        CONCAT('Updated ', @DocumentType, ' by admin'), -- Reason for modification
+        CONCAT('Updated ', @DocumentType, ' by TOM'), -- Reason for modification
         @UserID, -- User performing the update
         @ApplicationID -- Application associated with the document
     );
