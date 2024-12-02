@@ -1075,9 +1075,9 @@ BEGIN
         ELSE IF @UserType = 'TOM'
         BEGIN
             -- TOM: Check if the application is in "active" status
-            IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'active')
+            IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'ordered')
             BEGIN
-                THROW 50004, 'Η αίτηση πρέπει να είναι σε κατάσταση «active» για να επισημανθεί ως «checked».', 1;
+                THROW 50004, 'Η αίτηση πρέπει να είναι σε κατάσταση «ordered» για να επισημανθεί ως «checked».', 1;
             END;
 
             -- Update the application status to "checked"
