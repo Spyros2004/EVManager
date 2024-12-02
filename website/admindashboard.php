@@ -14,11 +14,10 @@ if ($_SESSION['UserTypeNumber'] != 1) {
 
 // Include the database connection file
 include 'connection.php';
-
-// Handle POST requests for managing user approvals/rejections and applications
+// Διαχείριση POST αιτημάτων για έγκριση/απόρριψη χρηστών και αιτήσεων
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['userId']) && isset($_POST['accept'])) {
-        // Handle user approval/rejection
+        // Διαχείριση έγκρισης/απόρριψης χρήστη
         $userId = intval($_POST['userId']);
         $accept = intval($_POST['accept']);
 
@@ -29,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt = sqlsrv_query($conn, $sqlCallProcedure, $params);
 
             if ($stmt === false) {
-                echo "Error updating user status.";
+                echo "Σφάλμα κατά την ενημέρωση της κατάστασης του χρήστη.";
                 die(print_r(sqlsrv_errors(), true));
             } else {
-                echo $accept === 1 ? "User approved successfully." : "User rejected successfully.";
+                echo $accept === 1 ? "Ο χρήστης εγκρίθηκε επιτυχώς." : "Ο χρήστης απορρίφθηκε επιτυχώς.";
             }
 
             sqlsrv_free_stmt($stmt);
@@ -40,38 +39,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit();
         }
     } elseif (isset($_POST['applicationId']) && isset($_POST['action']) && isset($_POST['reason'])) {
-        // Handle application reactivation/approval/rejection
+        // Διαχείριση επανενεργοποίησης/έγκρισης/απόρριψης αιτήσεων
         $applicationId = intval($_POST['applicationId']);
         $action = intval($_POST['action']);
         $reason = $_POST['reason'];
 
-        if ($action === 2) { // Reactivate
+        if ($action === 2) { // Επανενεργοποίηση
             $sqlCallProcedure = "{CALL ReactivateApplication(?, ?, ?)}";
             $params = [$applicationId, $reason, $_SESSION['SessionID']];
 
             $stmt = sqlsrv_query($conn, $sqlCallProcedure, $params);
 
             if ($stmt === false) {
-                echo "Error while reactivating application.";
+                echo "Σφάλμα κατά την επανενεργοποίηση της αίτησης.";
                 die(print_r(sqlsrv_errors(), true));
             } else {
-                echo "The application has been successfully reactivated.";
+                echo "Η αίτηση επανενεργοποιήθηκε επιτυχώς.";
             }
 
             sqlsrv_free_stmt($stmt);
             sqlsrv_close($conn);
             exit();
-        } elseif (in_array($action, [0, 1])) { // Accept or Reject
+        } elseif (in_array($action, [0, 1])) { // Έγκριση ή Απόρριψη
             $sqlCallProcedure = "{CALL AcceptOrRejectApplication(?, ?, ?, ?)}";
             $params = [$applicationId, $action, $reason, $_SESSION['SessionID']];
 
             $stmt = sqlsrv_query($conn, $sqlCallProcedure, $params);
 
             if ($stmt === false) {
-                echo "Error while updating application status.";
+                echo "Σφάλμα κατά την ενημέρωση της κατάστασης της αίτησης.";
                 die(print_r(sqlsrv_errors(), true));
             } else {
-                echo $action === 1 ? "The application has been successfully accepted." : "The application has been successfully rejected.";
+                echo $action === 1 ? "Η αίτηση εγκρίθηκε επιτυχώς." : "Η αίτηση απορρίφθηκε επιτυχώς.";
             }
 
             sqlsrv_free_stmt($stmt);
@@ -80,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    echo "Invalid input.";
+    echo "Μη έγκυρη εισαγωγή.";
     exit();
 }
 
