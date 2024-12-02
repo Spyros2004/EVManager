@@ -112,7 +112,7 @@ while ($app = sqlsrv_fetch_array($stmtApplications, SQLSRV_FETCH_ASSOC)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Account & Application Requests</title>
+    <title>Πίνακας Διαχειριστή - Διαχείριση Λογαριασμών και Αιτήσεων</title>
     <style>
 /* General Styling */
 body {
@@ -439,20 +439,21 @@ function viewDetails(applicationId) {
     </script>
 </head>
 <body>
-    <h1>Welcome to Admin Dashboard</h1>
+    <h1>Καλωσορίσατε στο Admin Dashboard</h1>
     <div class="container">
-        <h2>Pending User Requests</h2>
-        <table>
+    <h2>Εκκρεμή Αιτήματα Χρηστών</h2>
+    <table>
             <thead>
                 <tr>
-                    <th>User ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>User Type</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                <th>Αναγνωριστικο Χρηστη</th>
+                <th>Ονομα</th>
+                <th>Επωνυμο</th>
+                <th>Ονομα Χρηστη</th>
+                <th>Email</th>
+                <th>Τυπος Χρηστη</th>
+                <th>Κατασταση</th>
+                <th>Ενεργειες</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -475,19 +476,20 @@ function viewDetails(applicationId) {
         </table>
     </div>
     <div class="container">
-        <h2>All Applications</h2>
-        <table>
+    <h2>Όλες οι Αιτήσεις</h2>
+    <table>
     <thead>
         <tr>
-            <th>Αναγνωριστικο Αιτησης</th>
-            <th>Αριθμός Αίτησης</th>
-            <th>Ημερομηνία Καταχώρησης</th>
-            <th>Ταυτότητα Αιτητή/Αριθμός Εταιρείας</th>
-            <th>Κατηγορία</th>
-            <th>Κατάσταση</th>
-            <th>Επαναενεργοποίηση</th> <!-- Νέα Στήλη -->
-            <th>Έγκριση/Απόρριψη</th> <!-- Νέα Στήλη -->
-            <th>Έλεγχος</th> <!-- Νέα Στήλη -->
+        <th>Αναγνωριστικο Αιτησης</th>
+        <th>Αριθμος Αιτησης</th>
+        <th>Ημερομηνια Καταχωρησης</th>
+        <th>Ταυτοτητα Αιτητη/Αριθμος Εταιρειας</th>
+        <th>Κατηγορια</th>
+        <th>Κατασταση</th>
+        <th>Επαναενεργοποιηση</th> 
+        <th>Εγκριση/Απορριψη</th> 
+        <th>Ελεγχος</th> 
+
         </tr>
     </thead>
     <tbody>
