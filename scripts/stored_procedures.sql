@@ -1,6 +1,3 @@
-DROP PROCEDURE IF EXISTS PROCEDURE dbo.UpdateDocument
-GO
-	
 DROP PROCEDURE IF EXISTS dbo.GetDocumentsByApplicationID
 GO
 
@@ -248,7 +245,7 @@ BEGIN
         -- If no session is found to delete, you can raise an error or just proceed
         IF @@ROWCOUNT = 0
         BEGIN
-            THROW 50000, 'Δεν βρέθηκε ενεργή session για αυτό το session ID.', 1;
+            THROW 50000, 'Δεν βρέθηκε ενεργό session για αυτό το session ID.', 1;
         END
     END TRY
     BEGIN CATCH
@@ -475,7 +472,7 @@ BEGIN
         IF @Status = 'pending'
         BEGIN
             -- Throw an error if the user is in "pending" status
-            THROW 50002, 'Ο λογαριασμός εκκρεμεί προς έγκριση. Παρακαλούμε περιμένετε την έγκριση του φορέα υλοποίησης.', 1;
+            THROW 50002, 'Ο λογαριασμός εκκρεμεί έγκριση. Παρακαλούμε περιμένετε έγκριση από τον φορέα υλοποίησης.', 1;
         END
 
         -- Compare the stored hashed password with the provided password
@@ -577,7 +574,7 @@ BEGIN
         )
     )
     BEGIN
-        THROW 50006, 'Private applicant cannot submit a category 1-13 application when an active/accepted application already exists.', 1;
+        THROW 50006, 'Φυσικά πρόσωπα δεν μπορούν να υποβάλουν 2η αίτηση κατηγορίας 1-13 όταν υπάρχει ήδη ενεργή/αποδεκτή αίτηση.', 1;
     END;
 
     -- Check if the applicant is private and attempting category 14 but already has an active/accepted application
@@ -593,7 +590,7 @@ BEGIN
         )
     )
     BEGIN
-        THROW 50007, 'Private applicant cannot submit a category 14 application when an active/accepted application already exists.', 1;
+        THROW 50007, 'Φυσικά πρόσωπα δεν μπορούν να υποβάλουν 2η αίτηση κατηγορίας 14 όταν υπάρχει ήδη ενεργή/αποδεκτή αίτηση..', 1;
     END;
 
     -- Check if the applicant is a company and chooses an invalid category (3, 4, 7, 8, 9)
@@ -602,7 +599,7 @@ BEGIN
         AND @CategoryNumber IN (3, 4, 7, 8, 9)
     )
     BEGIN
-        THROW 50008, 'Company applicants cannot apply for categories 3, 4, 7, 8 or 9.', 1;
+        THROW 50008, 'Νομικά πρόσωπα δεν μπορούν να υποβάλουν αίτηση για τις κατηγορίες 3, 4, 7, 8 ή 9.', 1;
     END;
 
     -- Check if the applicant is a company and already has 20 applications of specific categories with active/accepted status
@@ -617,7 +614,7 @@ BEGIN
         ) >= 20
     )
     BEGIN
-        THROW 50009, 'Company applicants cannot have more than 20 applications of categories 1, 2, 5, 6, 10-14 with active/accepted status.', 1;
+        THROW 50009, 'Νομικά πρόσωπα δεν μπορούν να έχουν περισσότερες από 20 αιτήσεις των κατηγοριών 1, 2, 5, 6, 10-14 με ενεργό/αποδεκτό καθεστώς.', 1;
     END;
 
     -- Check if there are available positions in the category
@@ -627,7 +624,7 @@ BEGIN
         WHERE Category_Number = @CategoryNumber AND Remaining_Positions > 0
     )
     BEGIN
-        THROW 50001, 'No remaining positions in this category.', 1;
+        THROW 50001, 'Δεν υπάρχουν υπόλοιπες θέσεις σε αυτή την κατηγορία.', 1;
     END;
 
     -- Validate license plate for categories 1-4
@@ -635,13 +632,13 @@ BEGIN
 	BEGIN
 		IF @LicensePlate IS NULL
 		BEGIN
-			THROW 50002, 'License plate is required for categories 1 through 4.', 1;
+			THROW 50002, 'Για τις κατηγορίες 1 έως 4 απαιτείται αριθμός πινακίδας αυτοκινήτου.', 1;
 		END
 
 		-- Check if the license plate format is valid
 		IF @LicensePlate NOT LIKE '[A-Z][A-Z][A-Z][0-9][0-9][0-9]'
 		BEGIN
-			THROW 50010, 'License plate must consist of 3 capital letters followed by 3 numbers.', 1;
+			THROW 50010, 'Η πινακίδα αυτοκινήτου πρέπει να αποτελείται από 3 κεφαλαία γράμματα ακολουθούμενα από 3 αριθμούς. (π.χ. ABC123)', 1;
 		END
 
 		-- Check if the license plate already exists in the system
@@ -651,14 +648,14 @@ BEGIN
 			WHERE License_Plate = @LicensePlate
 		)
 		BEGIN
-			THROW 50011, 'The license plate is already in the system.', 1;
+			THROW 50011, 'Η πινακίδα αυτοκινήτου υπάρχει ήδη στο σύστημα!', 1;
 		END
 	END
 
     -- Validate required documents for specific categories
     IF (@CategoryNumber = 3 OR @CategoryNumber = 4 OR @CategoryNumber = 7) AND @Document IS NULL
     BEGIN
-        THROW 50003, 'Document is required for these categories.', 1;
+        THROW 50003, 'Απαιτείται ανάρτηση αρχείου για αυτή τη κατηγορία!', 1;
     END;
 
     -- Start transaction for the critical section
@@ -880,7 +877,7 @@ BEGIN
           AND App.Current_Status = 'active'
     )
     BEGIN
-        THROW 50000, 'No active application found for the provided Identification and Tracking Number.', 1;
+        THROW 50000, 'Δεν βρέθηκε καμία ενεργή αίτηση για το συγκεκριμένο ID και Tracking Number.', 1;
     END;
 
     -- Retrieve the required details
@@ -926,17 +923,17 @@ BEGIN
         WHERE Tracking_Number = @TrackingNumber AND Current_Status = 'active'
     )
     BEGIN
-        THROW 50001, 'No active application found for the provided Tracking Number.', 1;
+        THROW 50001, 'Δεν βρέθηκε καμία αίτηση για το συγκεκριμένο Tracking Number.', 1;
     END;
 
 	IF @Document1 IS NULL OR @Document1 = ''
     BEGIN
-        THROW 50005, 'Document1 cannot be NULL or empty.', 1;
+        THROW 50005, 'Το Document1 δεν μπορεί να είναι κενό.', 1;
     END;
 
     IF @Document2 IS NULL OR @Document2 = ''
     BEGIN
-        THROW 50006, 'Document2 cannot be NULL or empty.', 1;
+        THROW 50006, 'Το Document2 δεν μπορεί να είναι κενό.', 1;
     END;
 
     -- Retrieve Application_ID and User_ID
@@ -948,17 +945,17 @@ BEGIN
     -- Validate Vehicle attributes
     IF @VehicleDate < GETDATE()
     BEGIN
-        THROW 50002, 'Vehicle date cannot be earlier than today.', 1;
+        THROW 50002, 'Η ημερομηνία Εγγραφής Αυτοκινήτου δεν μπορεί να είναι νωρίτερα από σήμερα.', 1;
     END;
 
     IF @CO2Emissions > 50
     BEGIN
-        THROW 50003, 'CO2 emissions must be less than or equal to 50.', 1;
+        THROW 50003, 'Οι εκπομπές CO2 πρέπει να είναι μικρότερες ή ίσες με 50.', 1;
     END;
 
     IF @Price > 80000
     BEGIN
-        THROW 50004, 'Vehicle price must be less than or equal to 80,000.', 1;
+        THROW 50004, 'Η τιμή του οχήματος πρέπει να είναι μικρότερη ή ίση με €80.000.', 1;
     END;
 
     -- Start transaction for insert operations
@@ -1039,7 +1036,7 @@ BEGIN
     -- Ensure a reason is provided for the action
     IF @Reason IS NULL OR LEN(@Reason) = 0
     BEGIN
-        THROW 50000, 'A reason is required for this action.', 1;
+        THROW 50000, 'Για την ενέργεια αυτή απαιτείται αιτιολόγηση.', 1;
     END
 
     IF @Action = 1
@@ -1047,7 +1044,7 @@ BEGIN
         -- Accept: Check if the application is in "checked" status
         IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'checked')
         BEGIN
-            THROW 50001, 'The application must be in "checked" status to be accepted.', 1;
+            THROW 50001, 'Η αίτηση πρέπει να είναι σε κατάσταση «checked» για να γίνει δεκτή.', 1;
         END
 
         -- Update the application status to "accepted"
@@ -1064,7 +1061,7 @@ BEGIN
         -- Reject: Check if the application is in "active", "ordered", or "checked" status
         IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status IN ('active', 'ordered', 'checked'))
         BEGIN
-            THROW 50002, 'The application must be in "active", "ordered", or "checked" status to be rejected.', 1;
+            THROW 50002, 'Η αίτηση πρέπει να είναι σε κατάσταση «active», «ordered» ή «checked» για να απορριφθεί.', 1;
         END
 
         -- Update the application status to "rejected"
@@ -1078,7 +1075,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        THROW 50003, 'Invalid action.', 1;
+        THROW 50003, 'Άκυρη ενέργεια.', 1;
     END
 END;
 GO
@@ -1101,13 +1098,13 @@ BEGIN
     -- Ensure a reason is provided for the action
     IF @Reason IS NULL OR LEN(@Reason) = 0
     BEGIN
-        THROW 50000, 'A reason is required for this action.', 1;
+        THROW 50000, 'Για την ενέργεια αυτή απαιτείται αιτιολόγηση.', 1;
     END
 
     -- Reactivate: Check if the application is in "rejected" status
     IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'rejected')
     BEGIN
-        THROW 50001, N'The application must be in "rejected" status to be reactivated.', 1;
+        THROW 50000, N'Η αίτηση πρέπει να βρίσκεται σε κατάσταση «rejected» για να ενεργοποιηθεί εκ νέου.', 1;
     END
 
     -- Ensure the reactivating admin is not the same as the rejecting admin
@@ -1119,7 +1116,7 @@ BEGIN
 
     IF @RejectingUserID = @UserID
     BEGIN
-        THROW 50001, 'You cannot reactivate an application you rejected.', 1;
+        THROW 50001, 'Δεν μπορείτε να ενεργοποιήσετε εκ νέου μια αίτηση που απορρίψατε.', 1;
     END
 
     -- Check if there are available positions in the sponsorship category
@@ -1134,7 +1131,7 @@ BEGIN
         WHERE Category_Number = @CategoryNumber AND Remaining_Positions > 0
     )
     BEGIN
-        THROW 50002, 'There are no available positions in this category.', 1;
+        THROW 50002, 'Δεν υπάρχει διαθέσιμος αριθμός χορηγιών σε αυτή την κατηγορία.', 1;
     END
 
     -- Update the application status to "active"
@@ -1157,7 +1154,7 @@ BEGIN
     -- Validate if the application exists
     IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
     BEGIN
-        THROW 50000, 'No application found for the provided Application ID.', 1;
+        THROW 50000, 'Δεν βρέθηκε καμία αίτηση για το παρεχόμενο Application ID.', 1;
     END;
 
     -- Retrieve full details for the application
@@ -1209,7 +1206,7 @@ BEGIN
     -- Validate if the application exists
     IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
     BEGIN
-        THROW 50000, 'No application found for the provided Application ID.', 1;
+        THROW 50000, 'Δεν βρέθηκε καμία αίτηση για το παρεχόμενο Application ID.', 1;
     END;
 
     -- Retrieve all documents related to the application, including Username
@@ -1237,7 +1234,7 @@ BEGIN
     -- Validate if the application exists
     IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
     BEGIN
-        THROW 50000, 'No application found for the provided Application ID.', 1;
+        THROW 50000, 'Δεν βρέθηκε καμία αίτηση για το παρεχόμενο Application ID.', 1;
     END;
 
     -- Fetch all modifications related to the application, including Username
@@ -1256,69 +1253,5 @@ BEGIN
         M.Application_ID = @ApplicationID
     ORDER BY 
         M.Modification_Date ASC; -- Sort modifications by most recent
-END;
-GO
-
-CREATE PROCEDURE dbo.UpdateDocument
-    @SessionID UNIQUEIDENTIFIER, -- ID of the logged-in user (session)
-    @DocumentID INT -- ID of the document to be updated
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-	DECLARE @UserID INT;
-    SELECT @UserID = User_ID
-    FROM [dbo].[User_Session]
-    WHERE Session_ID = @SessionID;
-
-    -- Validate if the document exists
-    IF NOT EXISTS (SELECT 1 FROM Document WHERE Document_ID = @DocumentID)
-    BEGIN
-        THROW 50000, 'Δεν βρέθηκε κανένα έγγραφο για το παρεχόμενο αναγνωριστικό εγγράφου.', 1;
-    END;
-
-    -- Retrieve the associated Application_ID and Document_Type for the document
-    DECLARE @ApplicationID INT;
-    DECLARE @DocumentType NVARCHAR(100);
-    SELECT 
-        @ApplicationID = Application_ID,
-        @DocumentType = Document_Type
-    FROM 
-        Document
-    WHERE 
-        Document_ID = @DocumentID;
-
-    -- Validate if the associated application exists
-    IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
-    BEGIN
-        THROW 50001, 'Δεν βρέθηκε καμία εφαρμογή για το σχετικό αναγνωριστικό αίτησης.', 1;
-    END;
-
-    -- Retrieve the current status of the application
-    DECLARE @CurrentStatus VARCHAR(20);
-    SELECT @CurrentStatus = Current_Status
-    FROM Application
-    WHERE Application_ID = @ApplicationID;
-
-    -- Update the User_ID for the document to the session user
-    UPDATE Document
-    SET User_ID = @UserID
-    WHERE Document_ID = @DocumentID;
-
-    -- Insert a record into the Modification table
-    INSERT INTO Modification (
-        Modification_Date,
-        New_Status,
-        Reason,
-        User_ID,
-        Application_ID
-    )
-    VALUES (
-        GETDATE(), -- Current date
-        @CurrentStatus, -- Keep the current application status
-        CONCAT('Updated ', @DocumentType, ' by admin'), -- Reason for modification
-        @UserID, -- User performing the update
-        @ApplicationID -- Application associated with the document
-    );
 END;
 GO
