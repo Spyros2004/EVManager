@@ -119,130 +119,133 @@ if (isset($_POST['addOrder'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Αναζήτηση και Προσθήκη Παραγγελίας Αυτοκινήτου</title>
     <style>
-       body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #e6f7ff;
-    margin: 0;
-    padding: 0;
-}
-.form-container, .result-container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 40px auto;
-    background: #ffffff;
-    padding: 30px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    border-radius: 15px;
-}
-h1, h2 {
-    text-align: center;
-    color: #1565c0;
-}
-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-label {
-    font-size: 1em;
-    font-weight: bold;
-    color: #1565c0;
-}
-input[type="text"], input[type="date"], input[type="number"], select, button {
-    width: 100%;
-    max-width: 400px;
-    padding: 10px;
-    font-size: 1em;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    border-color: #1565c0;
-}
-input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus, select:focus {
-    border-color: #1565c0;
-    outline: none;
-    box-shadow: 0 0 5px rgba(21, 101, 192, 0.5);
-}
-button, input[type="submit"] {
-    padding: 10px 20px;
-    font-size: 1em;
-    background-color: #1565c0; /* Πράσινο */
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-button:hover, input[type="submit"]:hover {
-    background-color: #2e7d32; /* Πιο σκούρο πράσινο */
-}
-.error {
-    background-color: #e6f7ff;
-    color: #1565c0;
-    padding: 10px;
-    margin-top: 10px;
-    border-left: 5px solid #1565c0;
-    border-radius: 8px;
-}
-.success {
-    background-color: #e6ffe6; /* Πράσινο φόντο */
-    color: #388e3c; /* Πράσινο κείμενο */
-    padding: 10px;
-    margin-top: 10px;
-    border-left: 5px solid #388e3c; /* Πράσινη γραμμή */
-    border-radius: 8px;
-}
-.file-button-container {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-.file-button-container button {
-    padding: 5px 15px;
-    font-size: 0.9em;
-    background-color: #1565c0;
-    color: white;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-.file-button-container button:hover {
-    background-color: #0d47a1;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    border-radius: 10px;
-    overflow: hidden;
-}
-table, th, td {
-    border: 1px solid #ddd;
-}
-th {
-    background-color: #1565c0;
-    color: white;
-    padding: 15px;
-    text-transform: uppercase;
-    font-size: 1em;
-}
-td {
-    padding: 15px;
-    text-align: center;
-    background-color: #e6f7ff;
-    color: #1565c0;
-}
-
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e6ffe6;
+            margin: 0;
+            padding: 0;
+        }
+        .form-container, .result-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2e7d32;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        label {
+            font-size: 1em;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        input[type="text"], input[type="date"], input[type="number"], select, button {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus, select:focus {
+            border-color: #2e7d32;
+            outline: none;
+            box-shadow: 0 0 5px rgba(46, 125, 50, 0.5);
+        }
+        button, input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #388e3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover, input[type="submit"]:hover {
+            background-color: #2e7d32;
+        }
+        .error {
+            background-color: #ffebe6;
+            color: #d32f2f;
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 5px solid #d32f2f;
+            border-radius: 8px;
+        }
+        .success {
+            background-color: #e6ffe6;
+            color: #388e3c;
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 5px solid #388e3c;
+            border-radius: 8px;
+        }
+        .file-button-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .file-button-container button {
+            padding: 5px 15px;
+            font-size: 0.9em;
+            background-color: #2e7d32;
+            color: white;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .file-button-container button:hover {
+            background-color: #1b5e20;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #388e3c;
+            color: white;
+            padding: 15px;
+            text-transform: uppercase;
+            font-size: 1em;
+        }
+        td {
+            padding: 15px;
+            text-align: center;
+            background-color: #f1fff1;
+            color: #333;
+        }
     </style>
     <script>
         function uploadFile(inputId, outputId) {
-            const outputField = document.getElementById(outputId);
-            const generatedFileName = "G" + <?= htmlspecialchars($applicationDetails['CategoryNumber']) ?>;
-            outputField.value = generatedFileName;
-            alert("File generated: " + generatedFileName);
-        }
+    const outputField = document.getElementById(outputId);
+    if (!outputField) {
+        console.error(`Element with id '${outputId}' not found.`);
+        return;
+    }
+    const generatedFileName = "G" + <?= htmlspecialchars($applicationDetails['CategoryNumber'] ?? '') ?>;
+    outputField.value = generatedFileName;
+    alert("File generated: " + generatedFileName);
+}
+
     </script>
 </head>
 <body>
@@ -299,10 +302,13 @@ td {
             <input type="number" id="price" name="price" min="0" max="80000" required>
 
             <label for="document1">Έγγραφο 1 (Παραγγελία Αυτοκινήτου):</label>
-            <button type="button" onclick="uploadFile('document1', 'document1')">Δημιουργία Εγγράφου 1</button>
+<input type="text" id="document1" name="document1" readonly>
+<button type="button" onclick="uploadFile('document1', 'document1')">Δημιουργία Εγγράφου 1</button>
 
-            <label for="document2">Έγγραφο 2 (Πιστοποιητικό Συμμόρφωσης ΕΚ):</label>
-            <button type="button" onclick="uploadFile('document2', 'document2')">Δημιουργία Εγγράφου 2</button>
+<label for="document2">Έγγραφο 2 (Πιστοποιητικό Συμμόρφωσης ΕΚ):</label>
+<input type="text" id="document2" name="document2" readonly>
+<button type="button" onclick="uploadFile('document2', 'document2')">Δημιουργία Εγγράφου 2</button>
+
 
             <button type="submit" name="addOrder">Υποβολή</button>
         </form>
