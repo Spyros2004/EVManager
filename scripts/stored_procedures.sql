@@ -1373,13 +1373,17 @@ CREATE PROCEDURE dbo.AddDocument
     @SessionID UNIQUEIDENTIFIER, -- ID of the logged-in user (session)
     @ApplicationID INT,          -- ID of the associated application
     @DocumentType NVARCHAR(100), -- Type of the document
-    @URL VARCHAR(255)           -- Path/URL of the document
+    @URL VARCHAR(255)            -- Path/URL of the document
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Retrieve the User_ID from the session
+    -- Declare variables
     DECLARE @UserID INT;
+    DECLARE @DocumentID INT;
+    DECLARE @CurrentStatus NVARCHAR(20); -- To store the current status of the application
+
+    -- Retrieve the User_ID from the session
     SELECT @UserID = User_ID
     FROM [dbo].[User_Session]
     WHERE Session_ID = @SessionID;
@@ -1390,40 +1394,60 @@ BEGIN
         THROW 50000, 'Το session δεν είναι έγκυρο ή ο χρήστης δεν βρέθηκε.', 1;
     END;
 
-    -- Validate if the associated application exists
-    IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
+    -- Validate if the associated application exists and retrieve its current status
+    SELECT @CurrentStatus = Current_Status
+    FROM Application
+    WHERE Application_ID = @ApplicationID;
+
+    IF @CurrentStatus IS NULL
     BEGIN
         THROW 50001, 'Δεν βρέθηκε καμία αίτηση για το παρεχόμενο αναγνωριστικό αίτησης.', 1;
     END;
 
-    -- Insert the new document into the Document table
-    INSERT INTO Document (
-        Application_ID,
-        Document_Type,
-        URL,
-        User_ID
-    )
-    VALUES (
-        @ApplicationID,
-        @DocumentType,
-        @URL,
-        @UserID
-    );
+    -- Start the transaction block
+    BEGIN TRANSACTION;
 
-    -- Insert a record into the Modification table for logging
-    INSERT INTO Modification (
-        Modification_Date,
-        New_Status,
-        Reason,
-        User_ID,
-        Application_ID
-    )
-    VALUES (
-        GETDATE(), -- Current date
-        (SELECT Current_Status FROM Application WHERE Application_ID = @ApplicationID), -- Keep current status
-        CONCAT('Added new document ', @DocumentType, 'by TOM'), -- Reason for modification
-        @UserID, -- User adding the document
-        @ApplicationID -- Associated application
-    );
+    BEGIN TRY
+        -- Insert the document into the Document table
+        INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
+        VALUES ('', @DocumentType, @ApplicationID, @UserID);
+
+        -- Retrieve the newly created Document_ID
+        SET @DocumentID = SCOPE_IDENTITY();
+
+        -- Construct the URL dynamically using the Document_ID
+        SET @URL = CONCAT('Applications/Documents/', @DocumentType, '/document', @DocumentID, '.pdf');
+
+        -- Update the Document record with the constructed URL
+        UPDATE Document
+        SET URL = @URL
+        WHERE Document_ID = @DocumentID;
+
+        -- Insert a record into the Modification table for logging
+        INSERT INTO Modification (
+            Modification_Date,
+            New_Status,
+            Reason,
+            User_ID,
+            Application_ID
+        )
+        VALUES (
+            GETDATE(), -- Current date
+            @CurrentStatus, -- Keep current status
+            CONCAT('Added new document: ', @DocumentType, ' ,by TOM'), -- Reason for modification
+            @UserID, -- User adding the document
+            @ApplicationID -- Associated application
+        );
+
+        -- Commit the transaction
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Rollback the transaction if any error occurs
+        ROLLBACK TRANSACTION;
+
+        -- Re-throw the error
+        THROW;
+    END CATCH;
 END;
 GO
