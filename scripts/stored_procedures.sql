@@ -1209,17 +1209,19 @@ BEGIN
         THROW 50000, 'No application found for the provided Application ID.', 1;
     END;
 
-    -- Retrieve all documents related to the application
+    -- Retrieve all documents related to the application, including Username
     SELECT 
-        Document_ID,
-        URL,
-        Document_Type,
-        Application_ID,
-        User_ID
+        D.Document_ID,
+        D.URL,
+        D.Document_Type,
+        D.Application_ID,
+        U.Username
     FROM 
-        Document
+        Document AS D
+    INNER JOIN 
+        [User] AS U ON D.User_ID = U.User_ID
     WHERE 
-        Application_ID = @ApplicationID;
+        D.Application_ID = @ApplicationID;
 END;
 GO
 
@@ -1235,19 +1237,21 @@ BEGIN
         THROW 50000, 'No application found for the provided Application ID.', 1;
     END;
 
-    -- Fetch all modifications related to the application
+    -- Fetch all modifications related to the application, including Username
     SELECT 
-        Modification_ID,
-        Modification_Date,
-        New_Status,
-        Reason,
-        User_ID,
-        Application_ID
+        M.Modification_ID,
+        M.Modification_Date,
+        M.New_Status,
+        M.Reason,
+        U.Username,
+        M.Application_ID
     FROM 
-        Modification
+        Modification AS M
+    INNER JOIN 
+        [User] AS U ON M.User_ID = U.User_ID
     WHERE 
-        Application_ID = @ApplicationID
+        M.Application_ID = @ApplicationID
     ORDER BY 
-        Modification_Date ASC; -- Sort modifications by most recent
+        M.Modification_Date ASC; -- Sort modifications by most recent
 END;
 GO
