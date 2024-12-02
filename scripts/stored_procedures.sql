@@ -1248,6 +1248,6 @@ BEGIN
     WHERE 
         Application_ID = @ApplicationID
     ORDER BY 
-        Modification_Date DESC; -- Sort modifications by most recent
+        Modification_Date ASC; -- Sort modifications by most recent
 END;
 GO
