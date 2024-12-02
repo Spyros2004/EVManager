@@ -1,6 +1,9 @@
 DROP PROCEDURE IF EXISTS dbo.GetOrderedApplications
 GO
 
+DROP PROCEDURE IF EXISTS dbo.AddDocument
+GO
+
 DROP PROCEDURE IF EXISTS dbo.UpdateDocument
 GO
 
@@ -1364,4 +1367,63 @@ BEGIN
     FROM [dbo].[Application]
     WHERE Current_Status = 'ordered';
 END
+GO
+
+CREATE PROCEDURE dbo.AddDocument
+    @SessionID UNIQUEIDENTIFIER, -- ID of the logged-in user (session)
+    @ApplicationID INT,          -- ID of the associated application
+    @DocumentType NVARCHAR(100), -- Type of the document
+    @URL VARCHAR(255)           -- Path/URL of the document
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Retrieve the User_ID from the session
+    DECLARE @UserID INT;
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- Validate if the user exists
+    IF @UserID IS NULL
+    BEGIN
+        THROW 50000, 'Το session δεν είναι έγκυρο ή ο χρήστης δεν βρέθηκε.', 1;
+    END;
+
+    -- Validate if the associated application exists
+    IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
+    BEGIN
+        THROW 50001, 'Δεν βρέθηκε καμία αίτηση για το παρεχόμενο αναγνωριστικό αίτησης.', 1;
+    END;
+
+    -- Insert the new document into the Document table
+    INSERT INTO Document (
+        Application_ID,
+        Document_Type,
+        URL,
+        User_ID
+    )
+    VALUES (
+        @ApplicationID,
+        @DocumentType,
+        @URL,
+        @UserID
+    );
+
+    -- Insert a record into the Modification table for logging
+    INSERT INTO Modification (
+        Modification_Date,
+        New_Status,
+        Reason,
+        User_ID,
+        Application_ID
+    )
+    VALUES (
+        GETDATE(), -- Current date
+        (SELECT Current_Status FROM Application WHERE Application_ID = @ApplicationID), -- Keep current status
+        CONCAT('Added new document ', @DocumentType, 'by TOM'), -- Reason for modification
+        @UserID, -- User adding the document
+        @ApplicationID -- Associated application
+    );
+END;
 GO
