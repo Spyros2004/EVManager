@@ -1,3 +1,6 @@
+DROP PROCEDURE IF EXISTS PROCEDURE dbo.UpdateDocument
+GO
+
 DROP PROCEDURE IF EXISTS dbo.GetDocumentsByApplicationID
 GO
 
@@ -1253,5 +1256,69 @@ BEGIN
         M.Application_ID = @ApplicationID
     ORDER BY 
         M.Modification_Date ASC; -- Sort modifications by most recent
+END;
+GO
+
+CREATE PROCEDURE dbo.UpdateDocument
+    @SessionID UNIQUEIDENTIFIER, -- ID of the logged-in user (session)
+    @DocumentID INT -- ID of the document to be updated
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	DECLARE @UserID INT;
+    SELECT @UserID = User_ID
+    FROM [dbo].[User_Session]
+    WHERE Session_ID = @SessionID;
+
+    -- Validate if the document exists
+    IF NOT EXISTS (SELECT 1 FROM Document WHERE Document_ID = @DocumentID)
+    BEGIN
+        THROW 50000, 'Δεν βρέθηκε κανένα έγγραφο για το παρεχόμενο αναγνωριστικό εγγράφου.', 1;
+    END;
+
+    -- Retrieve the associated Application_ID and Document_Type for the document
+    DECLARE @ApplicationID INT;
+    DECLARE @DocumentType NVARCHAR(100);
+    SELECT 
+        @ApplicationID = Application_ID,
+        @DocumentType = Document_Type
+    FROM 
+        Document
+    WHERE 
+        Document_ID = @DocumentID;
+
+    -- Validate if the associated application exists
+    IF NOT EXISTS (SELECT 1 FROM Application WHERE Application_ID = @ApplicationID)
+    BEGIN
+        THROW 50001, 'Δεν βρέθηκε καμία εφαρμογή για το σχετικό αναγνωριστικό αίτησης.', 1;
+    END;
+
+    -- Retrieve the current status of the application
+    DECLARE @CurrentStatus VARCHAR(20);
+    SELECT @CurrentStatus = Current_Status
+    FROM Application
+    WHERE Application_ID = @ApplicationID;
+
+    -- Update the User_ID for the document to the session user
+    UPDATE Document
+    SET User_ID = @UserID
+    WHERE Document_ID = @DocumentID;
+
+    -- Insert a record into the Modification table
+    INSERT INTO Modification (
+        Modification_Date,
+        New_Status,
+        Reason,
+        User_ID,
+        Application_ID
+    )
+    VALUES (
+        GETDATE(), -- Current date
+        @CurrentStatus, -- Keep the current application status
+        CONCAT('Updated ', @DocumentType, ' by admin'), -- Reason for modification
+        @UserID, -- User performing the update
+        @ApplicationID -- Application associated with the document
+    );
 END;
 GO
