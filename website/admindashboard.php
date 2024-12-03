@@ -361,81 +361,183 @@ button {
         width: 90%;
     }
 }
+.btn-check {
+    background-color: #ffc107;
+    color: #333;
+    padding: 10px 15px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+.btn-check:hover {
+    background-color: #e0a800;
+    transform: scale(1.05);
+}
+
 
     </style>
-    <script>
-        function handleRequest(applicationId, action) {
-            const reason = action !== 2 ? prompt("Παρακαλώ εισάγετε έναν λόγο για αυτή την ενέργεια:") : null;
-            if (!reason && action !== 2) {
-                alert("Πρέπει να παρέχετε έναν λόγο.");
-                return;
-            }
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    alert(xhr.responseText);
-                    location.reload();
-                }
-            };
-            xhr.send(`applicationId=${applicationId}&action=${action}&reason=${encodeURIComponent(reason || '')}`);
-        }
-        function handleRequest(applicationId, action) {
-    const reason = action !== 2 ? prompt("Please enter a reason for this action:") : prompt("Please enter a reason for reactivating:");
-    if (!reason) {
-        alert("You must provide a reason.");
+ <script>
+   function handleRequest(applicationId, action) {
+    const password = prompt("Παρακαλώ εισάγετε τον κωδικό σας για επαλήθευση:");
+    if (!password) {
+        alert("Πρέπει να παρέχετε έναν κωδικό.");
         return;
     }
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            alert(xhr.responseText);
-            location.reload();
+    
+    // Δημιουργία AJAX αιτήματος για επαλήθευση κωδικού
+    const xhrVerify = new XMLHttpRequest();
+    xhrVerify.open("POST", "verifyPassword.php", true); // Χρησιμοποιούμε ασύγχρονο αίτημα για επαλήθευση
+    xhrVerify.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    
+    xhrVerify.onreadystatechange = function () {
+        if (xhrVerify.readyState === 4) {
+            if (xhrVerify.status === 200 && xhrVerify.responseText === "success") {
+                // Αν ο κωδικός είναι σωστός, συνεχίζουμε με την αρχική ενέργεια
+                const reason = prompt("Παρακαλώ εισάγετε έναν λόγο για αυτή την ενέργεια:");
+                if (!reason) {
+                    alert("Πρέπει να παρέχετε έναν λόγο.");
+                    return;
+                }
+
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        alert(xhr.responseText);
+                        location.reload();
+                    }
+                };
+                xhr.send("applicationId=" + applicationId + "&action=" + action + "&reason=" + encodeURIComponent(reason));
+            } else {
+                // Ο κωδικός είναι λάθος
+                alert("Ο κωδικός είναι λανθασμένος.");
+            }
         }
     };
-    xhr.send(`applicationId=${applicationId}&action=${action}&reason=${encodeURIComponent(reason)}`);
+
+    xhrVerify.send("password=" + encodeURIComponent(password));
 }
 
 function handleUserRequest(userId, accept) {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            alert(xhr.responseText);
-            location.reload();
+    const password = prompt("Παρακαλώ εισάγετε τον κωδικό σας για επαλήθευση:");
+    if (!password) {
+        alert("Πρέπει να παρέχετε έναν κωδικό.");
+        return;
+    }
+
+    // Δημιουργία AJAX αιτήματος για επαλήθευση κωδικού
+    const xhrVerify = new XMLHttpRequest();
+    xhrVerify.open("POST", "verifyPassword.php", true);
+    xhrVerify.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhrVerify.onreadystatechange = function () {
+        if (xhrVerify.readyState === 4) {
+            if (xhrVerify.status === 200 && xhrVerify.responseText === "success") {
+                // Αν ο κωδικός είναι σωστός, συνεχίζουμε με την αρχική ενέργεια
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        alert(xhr.responseText);
+                        location.reload();
+                    }
+                };
+                xhr.send(`userId=${userId}&accept=${accept}`);
+            } else {
+                // Ο κωδικός είναι λάθος
+                alert("Ο κωδικός είναι λανθασμένος.");
+            }
         }
     };
-    xhr.send(`userId=${userId}&accept=${accept}`);
+
+    xhrVerify.send("password=" + encodeURIComponent(password));
 }
 
 function viewDetails(applicationId) {
-        // AJAX call to fetch application details
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "getApplicationDetails.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    const password = prompt("Παρακαλώ εισάγετε τον κωδικό σας για επαλήθευση:");
+    if (!password) {
+        alert("Πρέπει να παρέχετε έναν κωδικό.");
+        return;
+    }
 
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                // Display details in the modal
-                document.getElementById("modal-content").innerHTML = xhr.responseText;
-                document.getElementById("modal").style.display = "block";
+    // Δημιουργία AJAX αιτήματος για επαλήθευση κωδικού
+    const xhrVerify = new XMLHttpRequest();
+    xhrVerify.open("POST", "verifyPassword.php", true);
+    xhrVerify.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhrVerify.onreadystatechange = function () {
+        if (xhrVerify.readyState === 4) {
+            if (xhrVerify.status === 200 && xhrVerify.responseText === "success") {
+                // Αν ο κωδικός είναι σωστός, συνεχίζουμε με την αρχική ενέργεια
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "getApplicationDetails.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        // Display details in the modal
+                        document.getElementById("modal-content").innerHTML = xhr.responseText;
+                        document.getElementById("modal").style.display = "block";
+                    }
+                };
+
+                xhr.send(`applicationId=${applicationId}`);
+            } else {
+                // Ο κωδικός είναι λάθος
+                alert("Ο κωδικός είναι λανθασμένος.");
             }
-        };
+        }
+    };
 
-        xhr.send(`applicationId=${applicationId}`);
+    xhrVerify.send("password=" + encodeURIComponent(password));
+}
+
+// Close the modal
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+}
+
+function checkExpired() {
+    const password = prompt("Παρακαλώ εισάγετε τον κωδικό σας για επαλήθευση:");
+    if (!password) {
+        alert("Πρέπει να παρέχετε έναν κωδικό.");
+        return;
     }
 
-    // Close the modal
-    function closeModal() {
-        document.getElementById("modal").style.display = "none";
-    }
+    // Δημιουργία AJAX αιτήματος για επαλήθευση κωδικού
+    const xhrVerify = new XMLHttpRequest();
+    xhrVerify.open("POST", "verifyPassword.php", true);
+    xhrVerify.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
+    xhrVerify.onreadystatechange = function () {
+        if (xhrVerify.readyState === 4) {
+            if (xhrVerify.status === 200 && xhrVerify.responseText === "success") {
+                // Αν ο κωδικός είναι σωστός, συνεχίζουμε με την αρχική ενέργεια
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "checkExpired.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        alert(xhr.responseText);
+                        location.reload(); // Reload the page to reflect changes
+                    }
+                };
+                xhr.send();
+            } else {
+                // Ο κωδικός είναι λάθος
+                alert("Ο κωδικός είναι λανθασμένος.");
+            }
+        }
+    };
 
-    </script>
+    xhrVerify.send("password=" + encodeURIComponent(password));
+}
+</script>
+
 </head>
 <body>
     <h1>Καλωσορίσατε στο Admin Dashboard</h1>
@@ -476,6 +578,10 @@ function viewDetails(applicationId) {
     </div>
     <div class="container">
     <h2>Όλες οι Αιτήσεις</h2>
+    <!-- Check for Expired Button -->
+    <div style="text-align: right; margin-bottom: 10px;">
+        <button class="btn-check" onclick="checkExpired()">Check for Expired</button>
+    </div>
     <table>
     <thead>
         <tr>
