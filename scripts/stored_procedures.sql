@@ -1692,8 +1692,6 @@ GO
     GO
 
     CREATE PROCEDURE dbo.Report1
-    @StartDate DATE = NULL,
-    @EndDate DATE = NULL,
     @TimeGrouping VARCHAR(9) = NULL,       -- 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'
     @GroupByApplicantType BIT = 0,         -- 1 to group by Company_Private, 0 otherwise
     @SortBy VARCHAR(8) = 'Amount',         -- 'Amount' or 'Category'
@@ -1725,6 +1723,7 @@ BEGIN
     FROM #FilteredReport fr
     INNER JOIN Sponsorship_Category sc ON fr.Category_Number = sc.Category_Number
     INNER JOIN Applicant ap ON fr.Applicant_ID = ap.Applicant_ID
+	WHERE fr.Current_Status = 'approved'
     GROUP BY 
         fr.Category_Number,
         CASE 
@@ -1744,15 +1743,12 @@ BEGIN
 END;
 GO
 
-    CREATE PROCEDURE dbo.Report2
-    @CategoryFilter INT = NULL,       -- Sponsorship Category to filter
+     CREATE PROCEDURE dbo.Report2
     @SortBy VARCHAR(8) = 'Amount',    -- 'Amount' or 'Category'
     @SortOrder VARCHAR(4) = 'ASC'     -- 'ASC' or 'DESC'
 AS
 BEGIN
     SET NOCOUNT ON;
-
- 
 
     -- Check for existence of the #FilteredReport table
     IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
@@ -1762,19 +1758,18 @@ BEGIN
 
     -- Query using the filtered report and approved applications
     SELECT 
-        fr.Category_Number,
+        sc.Category_Number,
         (sc.Total_Positions - COUNT(CASE WHEN fr.Current_Status = 'approved' THEN fr.Application_ID END)) * sc.Amount AS Remaining_Amount
-    FROM #FilteredReport fr
-    INNER JOIN Sponsorship_Category sc ON fr.Category_Number = sc.Category_Number
-    WHERE (@CategoryFilter IS NULL OR sc.Category_Number = @CategoryFilter)
-    GROUP BY fr.Category_Number, sc.Total_Positions, sc.Amount
+    FROM Sponsorship_Category sc
+    LEFT JOIN #FilteredReport fr ON sc.Category_Number = fr.Category_Number
+    GROUP BY sc.Category_Number, sc.Total_Positions, sc.Amount
     ORDER BY 
         CASE WHEN @SortBy = 'Amount' AND @SortOrder = 'ASC' THEN 
             (sc.Total_Positions - COUNT(CASE WHEN fr.Current_Status = 'approved' THEN fr.Application_ID END)) * sc.Amount END ASC,
         CASE WHEN @SortBy = 'Amount' AND @SortOrder = 'DESC' THEN 
             (sc.Total_Positions - COUNT(CASE WHEN fr.Current_Status = 'approved' THEN fr.Application_ID END)) * sc.Amount END DESC,
-        CASE WHEN @SortBy = 'Category' AND @SortOrder = 'ASC' THEN fr.Category_Number END ASC,
-        CASE WHEN @SortBy = 'Category' AND @SortOrder = 'DESC' THEN fr.Category_Number END DESC;
+        CASE WHEN @SortBy = 'Category' AND @SortOrder = 'ASC' THEN sc.Category_Number END ASC,
+        CASE WHEN @SortBy = 'Category' AND @SortOrder = 'DESC' THEN sc.Category_Number END DESC;
 END;
 GO
 
