@@ -113,14 +113,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .container {
-            width: 90%;
-            max-width: 600px;
-            background: #ffffff;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
+    width: 90%;
+    max-width: 800px; /* Αυξήστε το μέγιστο πλάτος */
+    background: #ffffff;
+    padding: 40px 50px; /* Αυξήστε τα περιθώρια */
+    border-radius: 15px; /* Ελαφρώς μεγαλύτερες γωνίες */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Εντονότερη σκίαση */
+    text-align: center;
+}
+
 
         h2 {
             color: #0056b3;
@@ -141,12 +142,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         input[type="submit"] {
-            background: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+    background: #007bff; /* Μπλε χρώμα */
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
 
+input[type="submit"]:hover {
+    background: #0056b3; /* Σκούρο μπλε κατά την αιώρηση */
+    transform: translateY(-2px);
+}
         button {
             background: #007bff;
             color: white;
@@ -262,7 +272,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             // Simulate document creation
-            documentField.value = "G" + category;
+            documentField.value = "G" + category + "_" + Date.now() + ".pdf";
             alert("Το αρχείο δημιουργήθηκε: " + documentField.value);
         }
     </script>
