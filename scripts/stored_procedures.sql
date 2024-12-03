@@ -1,3 +1,6 @@
+DROP PROCEDURE IF EXISTS dbo.GenerateReport
+GO
+
 DROP PROCEDURE IF EXISTS dbo.VerifyPasswordBySession
 GO
 
@@ -1507,7 +1510,6 @@ BEGIN
 END;
 GO
 
-
 CREATE PROCEDURE dbo.GenerateReport
     @StartDate DATE = NULL,
     @EndDate DATE = NULL,
@@ -1569,13 +1571,13 @@ BEGIN
         THROW 50008, 'Report Type 4 does not allow filtering by category or grouping by category.', 1;
     END;
 
-    IF @ReportType = 6 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
+    IF @ReportType = 6 AND (@TimeGrouping IS NULL OR @StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
     BEGIN
         THROW 50009, 'Report Type 6 does not allow filtering by time or grouping by category or applicant type.', 1;
     END;
 
     -- Create temporary table
-    CREATE TABLE #TempReport (
+    CREATE TABLE #FilteredReport (
         [Application_ID] INT,
         [Tracking_Number] NCHAR(8),
         [Application_Date] DATE,
@@ -1583,7 +1585,7 @@ BEGIN
         [Applicant_ID] INT,
         [Category_Number] INT
     );
-	INSERT INTO #TempReport (Application_ID, Tracking_Number, Application_Date, Current_Status, Applicant_ID, Category_Number)
+	INSERT INTO #FilteredReport (Application_ID, Tracking_Number, Application_Date, Current_Status, Applicant_ID, Category_Number)
 	SELECT 
 		a.Application_ID,
 		a.Tracking_Number,
@@ -1603,34 +1605,42 @@ BEGIN
     IF @ReportType = 1
     BEGIN
         -- Logic for Report Type 1: Overview of Total Grants
+		EXEC dbo.Report1 @TimeGrouping , @GroupByCategory, @GroupByApplicantType, @SortBy, @SortOrder
     END
     ELSE IF @ReportType = 2
     BEGIN
         -- Logic for Report Type 2: Remaining Grants Overview
+		EXEC dbo.Report2 @GroupByCategory, @SortBy, @SortOrder
     END
     ELSE IF @ReportType = 3
     BEGIN
         -- Logic for Report Type 3: Application Count Analysis
+		EXEC dbo.Report3 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     END
     ELSE IF @ReportType = 4
     BEGIN
         -- Logic for Report Type 4: Success Rate Analysis
+		EXEC dbo.Report4 @TimeGrouping , @GroupByApplicantType
     END
     ELSE IF @ReportType = 5
     BEGIN
         -- Logic for Report Type 5: High Activity Periods
+		EXEC dbo.Report5 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     END
     ELSE IF @ReportType = 6
     BEGIN
         -- Logic for Report Type 6: Grant Average by Category
+		EXEC dbo.Report6 @TimeGrouping
     END
     ELSE IF @ReportType = 7
     BEGIN
         -- Logic for Report Type 7: Highest and Lowest Grants by Category
+		EXEC dbo.Report7 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     END
     ELSE IF @ReportType = 8
     BEGIN
         -- Logic for Report Type 8: Applicant Performance
+		EXEC dbo.Report8 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     END
     ELSE
     BEGIN
@@ -1639,8 +1649,6 @@ BEGIN
     END;
 
     -- Clean up temp table
-    DROP TABLE IF EXISTS #TempReport;
+    DROP TABLE IF EXISTS #FilteredReport;
 END;
 GO
-
-
