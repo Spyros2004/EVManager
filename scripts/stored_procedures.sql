@@ -2083,7 +2083,29 @@ BEGIN
     DROP TABLE #ApplicationsWithinRange;
 END;
 GO
-    --dbo.Report10 
+
+DROP PROCEDURE IF EXISTS dbo.Report10
+GO
+CREATE PROCEDURE dbo.Report10
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Calculate the start and end dates for the last four months
+    DECLARE @StartDate DATE = DATEADD(MONTH, -3, DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1));
+    DECLARE @EndDate DATE = EOMONTH(GETDATE());
+
+    -- Query for the report
+    SELECT 
+        sc.Category_Number
+    FROM Sponsorship_Category sc
+    INNER JOIN Application a
+        ON sc.Category_Number = a.Category_Number
+    WHERE a.Application_Date BETWEEN @StartDate AND @EndDate
+    GROUP BY sc.Category_Number
+    HAVING COUNT(DISTINCT FORMAT(a.Application_Date, 'yyyy-MM')) = 4
+    ORDER BY sc.Category_Number;
+END;
 
 CREATE PROCEDURE dbo.Report11
     @X INT    -- Minimum number of applications threshold
@@ -2249,4 +2271,3 @@ CREATE PROCEDURE dbo.GenerateReport
         DROP TABLE IF EXISTS #FilteredReport;
     END;
     GO
-
