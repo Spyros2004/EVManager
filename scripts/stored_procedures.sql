@@ -1587,154 +1587,6 @@ GO
     END;
     GO
 
-   CREATE PROCEDURE dbo.GenerateReport
-        @StartDate DATE = NULL,
-        @EndDate DATE = NULL,
-        @CategoryFilter INT = NULL,
-        @ApplicantType VARCHAR(20) = NULL, -- 'Company', 'Private', or NULL
-        @TimeGrouping VARCHAR(9) = NULL, -- 'daily', 'monthly', 'quarterly', 'yearly'
-        @GroupByCategory BIT = 0,          -- 1 to group by category, 0 otherwise
-        @GroupByApplicantType BIT = 0,     -- 1 to group by applicant type, 0 otherwise
-        @ReportType INT,                   -- Report type (1 to 11)
-        @SortBy VARCHAR(8) = 'Amount',     -- Sort column
-        @SortOrder VARCHAR(4) = 'ASC'     -- Sort order
-    AS
-    BEGIN
-        SET NOCOUNT ON;
-
-        -- Validate CategoryFilter
-        IF @CategoryFilter IS NOT NULL AND @CategoryFilter NOT IN (SELECT Category_Number FROM Sponsorship_Category)
-        BEGIN
-            THROW 50001, 'Invalid CategoryFilter provided. Please choose a valid category.', 1;
-        END;
-
-        -- Validate ApplicantType
-        IF @ApplicantType IS NOT NULL AND @ApplicantType NOT IN ('Company', 'Private')
-        BEGIN
-            THROW 50002, 'Invalid ApplicantType provided. It must be "Company" or "Private".', 1;
-        END;
-
-        -- Validate TimeGrouping
-        IF @TimeGrouping IS NOT NULL AND @TimeGrouping NOT IN ('daily', 'weekly', 'monthly', 'quarterly', 'yearly')
-        BEGIN
-            THROW 50003, 'Invalid TimeGrouping provided. Please choose one of "daily", "weekly", "monthly", "quarterly", or "yearly".', 1;
-        END;
-
-        -- Validate SortBy
-        IF @SortBy NOT IN ('Amount', 'Category')
-        BEGIN
-            THROW 50004, 'Invalid SortBy value. Please choose either "Amount" or "Category".', 1;
-        END;
-
-        -- Validate SortOrder
-        IF @SortOrder NOT IN ('ASC', 'DESC')
-        BEGIN
-            THROW 50005, 'Invalid SortOrder value. Please choose either "ASC" or "DESC".', 1;
-        END;
-
-        -- Validate Specific Conditions Based on ReportType
-        IF (@ReportType NOT IN (1, 2)) AND (@SortBy IS NOT NULL OR @SortOrder IS NOT NULL)
-        BEGIN
-            THROW 50006, 'SortBy and SortOrder are only valid for Report Types 1 and 2.', 1;
-        END;
-
-        IF @ReportType = 2 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @ApplicantType IS NOT NULL OR @TimeGrouping IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
-        BEGIN
-            THROW 50007, 'Report Type 2 does not support filtering or grouping by time, category, or applicant type.', 1;
-        END;
-
-        IF @ReportType = 4 AND (@CategoryFilter IS NOT NULL OR @GroupByCategory = 1)
-        BEGIN
-            THROW 50008, 'Report Type 4 does not allow filtering by category or grouping by category.', 1;
-        END;
-
-        IF @ReportType = 6 AND (@TimeGrouping IS NULL OR @StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
-        BEGIN
-            THROW 50009, 'Report Type 6 does not allow filtering by time or grouping by category or applicant type.', 1;
-        END;
-
-        IF (@ReportType IN (1, 2)) AND (@SortBy IS NULL OR @SortOrder IS NULL)
-        BEGIN
-            THROW 50010, 'Report Type 1 and 2 requires ordering', 1;
-        END;
-
-        -- Create temporary table
-        CREATE TABLE #FilteredReport (
-            [Application_ID] INT,
-            [Tracking_Number] NCHAR(8),
-            [Application_Date] DATE,
-            [Current_Status] VARCHAR(20), 
-            [Applicant_ID] INT,
-            [Category_Number] INT
-        );
-        INSERT INTO #FilteredReport (Application_ID, Tracking_Number, Application_Date, Current_Status, Applicant_ID, Category_Number)
-        SELECT 
-            a.Application_ID,
-            a.Tracking_Number,
-            a.Application_Date,
-            a.Current_Status,
-            a.Applicant_ID,
-            a.Category_Number
-        FROM Application a
-        JOIN Applicant ap ON a.Applicant_ID = ap.Applicant_ID  -- Assuming 'Applicant_ID' is the key
-        WHERE 
-            (@StartDate IS NULL OR a.Application_Date >= @StartDate)
-            AND (@EndDate IS NULL OR a.Application_Date <= @EndDate)
-            AND (@CategoryFilter IS NULL OR a.Category_Number = @CategoryFilter)
-            AND (@ApplicantType IS NULL OR ap.Company_Private = @ApplicantType);
-
-        -- Handle Report Types
-        IF @ReportType = 1
-        BEGIN
-            -- Logic for Report Type 1: Overview of Total Grants
-        EXEC dbo.Report1 @TimeGrouping, @GroupByApplicantType, @SortBy, @SortOrder
-        END
-        ELSE IF @ReportType = 2
-        BEGIN
-            -- Logic for Report Type 2: Remaining Grants Overview
-        EXEC dbo.Report2 @SortBy, @SortOrder
-        END
-        ELSE IF @ReportType = 3
-        BEGIN
-            -- Logic for Report Type 3: Application Count Analysis
-        EXEC dbo.Report3 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
-        END
-        ELSE IF @ReportType = 4
-        BEGIN
-            -- Logic for Report Type 4: % of Total
-        EXEC dbo.Report4 @TimeGrouping , @GroupByApplicantType
-        END
-        ELSE IF @ReportType = 5
-        BEGIN
-            -- Logic for Report Type 5:  Success Rate Analysis
-        EXEC dbo.Report5 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
-        END
-        ELSE IF @ReportType = 6
-        BEGIN
-            -- Logic for Report Type 6: High Activity Periods
-        EXEC dbo.Report6 @TimeGrouping
-        END
-        ELSE IF @ReportType = 7
-        BEGIN
-            -- Logic for Report Type 7: Grant Average by Category
-        EXEC dbo.Report7 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
-        END
-        ELSE IF @ReportType = 8
-        BEGIN
-            -- Logic for Report Type 8: Highest and Lowest Grants by Category
-        EXEC dbo.Report8 @TimeGrouping , @GroupByApplicantType
-        END
-        ELSE
-        BEGIN
-            -- Throw an error for invalid ReportType
-            THROW 50000, 'Invalid Report Type provided. Please choose a valid report type (1-8).', 1;
-        END;
-
-        -- Clean up temp table
-        DROP TABLE IF EXISTS #FilteredReport;
-    END;
-    GO
-
     CREATE PROCEDURE dbo.Report1
     @TimeGrouping VARCHAR(9) = NULL,       -- 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'
     @GroupByApplicantType BIT = 0,         -- 1 to group by Company_Private, 0 otherwise
@@ -2203,3 +2055,152 @@ BEGIN
     HAVING COUNT(a.Application_ID) >= @X
 END;
 GO
+
+CREATE PROCEDURE dbo.GenerateReport
+        @StartDate DATE = NULL,
+        @EndDate DATE = NULL,
+        @CategoryFilter INT = NULL,
+        @ApplicantType VARCHAR(20) = NULL, -- 'Company', 'Private', or NULL
+        @TimeGrouping VARCHAR(9) = NULL, -- 'daily', 'monthly', 'quarterly', 'yearly'
+        @GroupByCategory BIT = 0,          -- 1 to group by category, 0 otherwise
+        @GroupByApplicantType BIT = 0,     -- 1 to group by applicant type, 0 otherwise
+        @ReportType INT,                   -- Report type (1 to 11)
+        @SortBy VARCHAR(8) = 'Amount',     -- Sort column
+        @SortOrder VARCHAR(4) = 'ASC'     -- Sort order
+    AS
+    BEGIN
+        SET NOCOUNT ON;
+
+        -- Validate CategoryFilter
+        IF @CategoryFilter IS NOT NULL AND @CategoryFilter NOT IN (SELECT Category_Number FROM Sponsorship_Category)
+        BEGIN
+            THROW 50001, 'Invalid CategoryFilter provided. Please choose a valid category.', 1;
+        END;
+
+        -- Validate ApplicantType
+        IF @ApplicantType IS NOT NULL AND @ApplicantType NOT IN ('Company', 'Private')
+        BEGIN
+            THROW 50002, 'Invalid ApplicantType provided. It must be "Company" or "Private".', 1;
+        END;
+
+        -- Validate TimeGrouping
+        IF @TimeGrouping IS NOT NULL AND @TimeGrouping NOT IN ('daily', 'weekly', 'monthly', 'quarterly', 'yearly')
+        BEGIN
+            THROW 50003, 'Invalid TimeGrouping provided. Please choose one of "daily", "weekly", "monthly", "quarterly", or "yearly".', 1;
+        END;
+
+        -- Validate SortBy
+        IF @SortBy NOT IN ('Amount', 'Category')
+        BEGIN
+            THROW 50004, 'Invalid SortBy value. Please choose either "Amount" or "Category".', 1;
+        END;
+
+        -- Validate SortOrder
+        IF @SortOrder NOT IN ('ASC', 'DESC')
+        BEGIN
+            THROW 50005, 'Invalid SortOrder value. Please choose either "ASC" or "DESC".', 1;
+        END;
+
+        -- Validate Specific Conditions Based on ReportType
+        IF (@ReportType NOT IN (1, 2)) AND (@SortBy IS NOT NULL OR @SortOrder IS NOT NULL)
+        BEGIN
+            THROW 50006, 'SortBy and SortOrder are only valid for Report Types 1 and 2.', 1;
+        END;
+
+        IF @ReportType = 2 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @ApplicantType IS NOT NULL OR @TimeGrouping IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
+        BEGIN
+            THROW 50007, 'Report Type 2 does not support filtering or grouping by time, category, or applicant type.', 1;
+        END;
+
+        IF @ReportType = 4 AND (@CategoryFilter IS NOT NULL OR @GroupByCategory = 1)
+        BEGIN
+            THROW 50008, 'Report Type 4 does not allow filtering by category or grouping by category.', 1;
+        END;
+
+        IF @ReportType = 6 AND (@TimeGrouping IS NULL OR @StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
+        BEGIN
+            THROW 50009, 'Report Type 6 does not allow filtering by time or grouping by category or applicant type.', 1;
+        END;
+
+        IF (@ReportType IN (1, 2)) AND (@SortBy IS NULL OR @SortOrder IS NULL)
+        BEGIN
+            THROW 50010, 'Report Type 1 and 2 requires ordering', 1;
+        END;
+
+        -- Create temporary table
+        CREATE TABLE #FilteredReport (
+            [Application_ID] INT,
+            [Tracking_Number] NCHAR(8),
+            [Application_Date] DATE,
+            [Current_Status] VARCHAR(20), 
+            [Applicant_ID] INT,
+            [Category_Number] INT
+        );
+        INSERT INTO #FilteredReport (Application_ID, Tracking_Number, Application_Date, Current_Status, Applicant_ID, Category_Number)
+        SELECT 
+            a.Application_ID,
+            a.Tracking_Number,
+            a.Application_Date,
+            a.Current_Status,
+            a.Applicant_ID,
+            a.Category_Number
+        FROM Application a
+        JOIN Applicant ap ON a.Applicant_ID = ap.Applicant_ID  -- Assuming 'Applicant_ID' is the key
+        WHERE 
+            (@StartDate IS NULL OR a.Application_Date >= @StartDate)
+            AND (@EndDate IS NULL OR a.Application_Date <= @EndDate)
+            AND (@CategoryFilter IS NULL OR a.Category_Number = @CategoryFilter)
+            AND (@ApplicantType IS NULL OR ap.Company_Private = @ApplicantType);
+
+        -- Handle Report Types
+        IF @ReportType = 1
+        BEGIN
+            -- Logic for Report Type 1: Overview of Total Grants
+        EXEC dbo.Report1 @TimeGrouping, @GroupByApplicantType, @SortBy, @SortOrder
+        END
+        ELSE IF @ReportType = 2
+        BEGIN
+            -- Logic for Report Type 2: Remaining Grants Overview
+        EXEC dbo.Report2 @SortBy, @SortOrder
+        END
+        ELSE IF @ReportType = 3
+        BEGIN
+            -- Logic for Report Type 3: Application Count Analysis
+        EXEC dbo.Report3 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+        END
+        ELSE IF @ReportType = 4
+        BEGIN
+            -- Logic for Report Type 4: % of Total
+        EXEC dbo.Report4 @TimeGrouping , @GroupByApplicantType
+        END
+        ELSE IF @ReportType = 5
+        BEGIN
+            -- Logic for Report Type 5:  Success Rate Analysis
+        EXEC dbo.Report5 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+        END
+        ELSE IF @ReportType = 6
+        BEGIN
+            -- Logic for Report Type 6: High Activity Periods
+        EXEC dbo.Report6 @TimeGrouping
+        END
+        ELSE IF @ReportType = 7
+        BEGIN
+            -- Logic for Report Type 7: Grant Average by Category
+        EXEC dbo.Report7 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+        END
+        ELSE IF @ReportType = 8
+        BEGIN
+            -- Logic for Report Type 8: Highest and Lowest Grants by Category
+        EXEC dbo.Report8 @TimeGrouping , @GroupByApplicantType
+        END
+        ELSE
+        BEGIN
+            -- Throw an error for invalid ReportType
+            THROW 50000, 'Invalid Report Type provided. Please choose a valid report type (1-8).', 1;
+        END;
+
+        -- Clean up temp table
+        DROP TABLE IF EXISTS #FilteredReport;
+    END;
+    GO
+
