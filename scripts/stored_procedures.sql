@@ -1543,7 +1543,7 @@ GO
     END;
     GO
 
-    CREATE PROCEDURE dbo.GenerateReport
+   CREATE PROCEDURE dbo.GenerateReport
         @StartDate DATE = NULL,
         @EndDate DATE = NULL,
         @CategoryFilter INT = NULL,
@@ -1643,12 +1643,12 @@ GO
         IF @ReportType = 1
         BEGIN
             -- Logic for Report Type 1: Overview of Total Grants
-        EXEC dbo.Report1 @TimeGrouping , @GroupByCategory, @GroupByApplicantType, @SortBy, @SortOrder
+        EXEC dbo.Report1 @TimeGrouping, @GroupByApplicantType, @SortBy, @SortOrder
         END
         ELSE IF @ReportType = 2
         BEGIN
             -- Logic for Report Type 2: Remaining Grants Overview
-        EXEC dbo.Report2 @GroupByCategory, @SortBy, @SortOrder
+        EXEC dbo.Report2 @SortBy, @SortOrder
         END
         ELSE IF @ReportType = 3
         BEGIN
@@ -1657,28 +1657,28 @@ GO
         END
         ELSE IF @ReportType = 4
         BEGIN
-            -- Logic for Report Type 4: Success Rate Analysis
+            -- Logic for Report Type 4: % of Total
         EXEC dbo.Report4 @TimeGrouping , @GroupByApplicantType
         END
         ELSE IF @ReportType = 5
         BEGIN
-            -- Logic for Report Type 5: High Activity Periods
+            -- Logic for Report Type 5:  Success Rate Analysis
         EXEC dbo.Report5 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
         END
         ELSE IF @ReportType = 6
         BEGIN
-            -- Logic for Report Type 6: Grant Average by Category
+            -- Logic for Report Type 6: High Activity Periods
         EXEC dbo.Report6 @TimeGrouping
         END
         ELSE IF @ReportType = 7
         BEGIN
-            -- Logic for Report Type 7: Highest and Lowest Grants by Category
+            -- Logic for Report Type 7: Grant Average by Category
         EXEC dbo.Report7 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
         END
         ELSE IF @ReportType = 8
         BEGIN
-            -- Logic for Report Type 8: Applicant Performance
-        EXEC dbo.Report8 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+            -- Logic for Report Type 8: Highest and Lowest Grants by Category
+        EXEC dbo.Report8 @TimeGrouping , @GroupByApplicantType
         END
         ELSE
         BEGIN
@@ -1690,7 +1690,6 @@ GO
         DROP TABLE IF EXISTS #FilteredReport;
     END;
     GO
-
 
     CREATE PROCEDURE dbo.Report1
     @StartDate DATE = NULL,
