@@ -195,7 +195,7 @@ GO
         -- Update the user's status based on the @Accept flag
         IF @Accept = 1
         BEGIN
-            -- If the user is accepted, set their status to 'approved'
+            -- If the user is approved, set their status to 'approved'
             UPDATE [dbo].[User]
             SET Status = 'approved'
             WHERE User_ID = @UserID;
@@ -615,7 +615,7 @@ GO
             THROW 50005, 'Ο αιτών έχει 2 απορριφθείσες αιτήσεις.', 1;
         END;
 
-        -- Check if the applicant is private and attempting category 1-13 but already has an active/accepted application
+        -- Check if the applicant is private and attempting category 1-13 but already has an active/approved application
         IF (
             @CompanyPrivate = 'Private'
             AND @CategoryNumber BETWEEN 1 AND 13
@@ -624,14 +624,14 @@ GO
                 FROM Application 
                 WHERE Applicant_ID = @ApplicantID 
                 AND Category_Number BETWEEN 1 AND 13
-                AND Current_Status IN ('active', 'accepted')
+                AND Current_Status IN ('active', 'approved')
             )
         )
         BEGIN
             THROW 50006, 'Φυσικά πρόσωπα δεν μπορούν να υποβάλουν 2η αίτηση κατηγορίας 1-13 όταν υπάρχει ήδη ενεργή/αποδεκτή αίτηση.', 1;
         END;
 
-        -- Check if the applicant is private and attempting category 14 but already has an active/accepted application
+        -- Check if the applicant is private and attempting category 14 but already has an active/approved application
         IF (
             @CompanyPrivate = 'Private'
             AND @CategoryNumber = 14
@@ -640,7 +640,7 @@ GO
                 FROM Application 
                 WHERE Applicant_ID = @ApplicantID 
                 AND Category_Number = 14
-                AND Current_Status IN ('active', 'accepted')
+                AND Current_Status IN ('active', 'approved')
             )
         )
         BEGIN
@@ -656,7 +656,7 @@ GO
             THROW 50008, 'Νομικά πρόσωπα δεν μπορούν να υποβάλουν αίτηση για τις κατηγορίες 3, 4, 7, 8 ή 9.', 1;
         END;
 
-        -- Check if the applicant is a company and already has 20 applications of specific categories with active/accepted status
+        -- Check if the applicant is a company and already has 20 applications of specific categories with active/approved status
         IF (
             @CompanyPrivate = 'Company'
             AND (
@@ -664,7 +664,7 @@ GO
                 FROM Application 
                 WHERE Applicant_ID = @ApplicantID 
                 AND Category_Number IN (1, 2, 5, 6, 10, 11, 12, 13, 14)
-                AND Current_Status IN ('active', 'accepted')
+                AND Current_Status IN ('active', 'approved')
             ) >= 20
         )
         BEGIN
@@ -1107,18 +1107,18 @@ BEGIN
     -- Handle action logic
     IF @Action = 1
     BEGIN
-        -- Accept action (checked → accepted)
+        -- Accept action (checked → approved)
         IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] A WHERE A.Application_ID = @ApplicationID AND A.Current_Status = 'checked')
         BEGIN
             THROW 50001, 'Η αίτηση πρέπει να είναι σε κατάσταση «checked» για να γίνει δεκτή.', 1;
         END;
 
         UPDATE [dbo].[Application]
-        SET Current_Status = 'accepted'
+        SET Current_Status = 'approved'
         WHERE Application_ID = @ApplicationID;
 
         INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
-        VALUES (GETDATE(), 'accepted', @Reason, @UserID, @ApplicationID);
+        VALUES (GETDATE(), 'approved', @Reason, @UserID, @ApplicationID);
     END
     ELSE
     BEGIN
