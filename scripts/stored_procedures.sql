@@ -1,3 +1,15 @@
+DROP PROCEDURE IF EXISTS dbo.Report8
+GO
+
+DROP PROCEDURE IF EXISTS dbo.Report7
+GO
+
+DROP PROCEDURE IF EXISTS dbo.Report6
+GO
+
+DROP PROCEDURE IF EXISTS dbo.Report5;
+GO
+
 DROP PROCEDURE IF EXISTS dbo.GenerateReport
 GO
 
@@ -1663,10 +1675,269 @@ dbo.Report1 @TimeGrouping , @GroupByCategory, @GroupByApplicantType, @SortBy, @S
 dbo.Report2 @GroupByCategory, @SortBy, @SortOrder
 dbo.Report3 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
 dbo.Report4 @TimeGrouping , @GroupByApplicantType
-dbo.Report5 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
-dbo.Report6 @TimeGrouping
-dbo.Report7 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
-dbo.Report8 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+
+CREATE PROCEDURE dbo.Report5
+    @TimeGrouping VARCHAR(9),           -- 'daily', 'weekly', 'monthly', 'quarterly', or 'yearly'
+    @GroupByCategory BIT = 0,           -- 1 to group by category, 0 otherwise
+    @GroupByApplicantType BIT = 0       -- 1 to group by applicant type, 0 otherwise
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
+    BEGIN
+        THROW 50010, '#FilteredReport does not exist. Please ensure the table is created before running the report.', 1;
+    END;
+
+    -- Base query structure
+    SELECT
+        -- Time grouping based on @TimeGrouping input
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(Application_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN CONCAT(YEAR(Application_Date), ' Week ', DATEPART(WEEK, Application_Date))
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(Application_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(Application_Date), ' Q', DATEPART(QUARTER, Application_Date))
+            WHEN @TimeGrouping = 'yearly' THEN CAST(YEAR(Application_Date) AS NVARCHAR) -- Convert to NVARCHAR for consistency
+            ELSE NULL
+        END AS TimePeriod,
+
+        -- Optionally group by Category if @GroupByCategory = 1
+        CASE WHEN @GroupByCategory = 1 THEN SC.Category_Number ELSE NULL END AS Category,
+
+        -- Optionally group by ApplicantType if @GroupByApplicantType = 1
+        CASE WHEN @GroupByApplicantType = 1 THEN A.Company_Private ELSE NULL END AS ApplicantType,
+
+        -- Success rate calculation
+        CAST(SUM(CASE WHEN F.Current_Status = 'approved' THEN 1 ELSE 0 END) AS DECIMAL(10, 2)) / COUNT(*) * 100 AS SuccessRate
+
+    FROM
+        #FilteredReport F
+    -- Joining with Applicant and Sponsorship_Category tables to get details
+    JOIN Applicant A ON F.Applicant_ID = A.Applicant_ID
+    JOIN Sponsorship_Category SC ON F.Category_Number = SC.Category_Number
+
+    -- Grouping the results based on the inputs
+    GROUP BY 
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(Application_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN CONCAT(YEAR(Application_Date), ' Week ', DATEPART(WEEK, Application_Date))
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(Application_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(Application_Date), ' Q', DATEPART(QUARTER, Application_Date))
+            WHEN @TimeGrouping = 'yearly' THEN CAST(YEAR(Application_Date) AS NVARCHAR) -- Convert to NVARCHAR for consistency
+            ELSE NULL
+        END,
+
+        -- Group by Category if needed
+        CASE WHEN @GroupByCategory = 1 THEN SC.Category_Number ELSE NULL END,
+
+        -- Group by Applicant Type if needed
+        CASE WHEN @GroupByApplicantType = 1 THEN A.Company_Private ELSE NULL END;
+END;
+GO
+
+CREATE PROCEDURE dbo.Report6
+    @TimeGrouping VARCHAR(9) -- 'daily', 'weekly', 'monthly', 'quarterly', or 'yearly'
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if #FilteredReport exists
+    IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
+    BEGIN
+        THROW 50010, '#FilteredReport does not exist. Please ensure the table is created before running the report.', 1;
+    END;
+
+    -- Generate report for high activity periods based on the modification table
+    SELECT
+        -- Time grouping based on @TimeGrouping input
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(M.Modification_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN CONCAT(YEAR(M.Modification_Date), ' Week ', DATEPART(WEEK, M.Modification_Date))
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(M.Modification_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(M.Modification_Date), ' Q', DATEPART(QUARTER, M.Modification_Date))
+            WHEN @TimeGrouping = 'yearly' THEN CAST(YEAR(Application_Date) AS NVARCHAR)
+            ELSE NULL
+        END AS TimePeriod,
+
+        -- Count of modifications for each period
+        COUNT(*) AS TotalModifications
+
+    FROM
+        #FilteredReport F
+    INNER JOIN 
+        Modification M
+        ON F.Application_ID = M.Application_ID
+
+    -- Grouping by the selected time period
+    GROUP BY 
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(M.Modification_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN CONCAT(YEAR(M.Modification_Date), ' Week ', DATEPART(WEEK, M.Modification_Date))
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(M.Modification_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(M.Modification_Date), ' Q', DATEPART(QUARTER, M.Modification_Date))
+            WHEN @TimeGrouping = 'yearly' THEN CAST(YEAR(Application_Date) AS NVARCHAR)
+            ELSE NULL
+        END
+
+    -- Sorting by TotalModifications in descending order
+    ORDER BY TotalModifications DESC;
+
+END;
+GO
+
+CREATE PROCEDURE dbo.Report7
+    @TimeGrouping VARCHAR(9),           -- 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'
+    @GroupByCategory BIT = 1,           -- 1 to group by category (mandatory)
+    @GroupByApplicantType BIT = 0       -- 1 to group by applicant type, 0 otherwise
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if #FilteredReport exists
+    IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
+    BEGIN
+        THROW 50010, '#FilteredReport temporary table not found. Ensure filtering step is completed before running this report.', 1;
+    END;
+
+    -- Query to calculate the average grant amount
+    SELECT 
+        -- Time grouping based on @TimeGrouping
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(f.Application_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN CONCAT(YEAR(f.Application_Date), ' Week ', DATEPART(WEEK, f.Application_Date))
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(f.Application_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(f.Application_Date), ' Q', DATEPART(QUARTER, f.Application_Date))
+            WHEN @TimeGrouping = 'yearly' THEN CAST(YEAR(f.Application_Date) AS NVARCHAR)
+        END AS TimePeriod,
+
+        -- Category grouping
+        CASE 
+            WHEN @GroupByCategory = 1 THEN f.Category_Number
+            ELSE NULL
+        END AS CategoryNumber,
+
+        -- Applicant type grouping (company or private)
+        CASE 
+            WHEN @GroupByApplicantType = 1 THEN a.Company_Private
+            ELSE NULL
+        END AS ApplicantType,
+
+        -- Average grant amount
+        AVG(c.Amount) AS AvgGrantAmount
+    FROM 
+        #FilteredReport f
+    INNER JOIN 
+        Application app ON f.Application_ID = app.Application_ID AND app.Current_Status = 'approved' -- Approved applications only
+    INNER JOIN 
+        Sponsorship_Category c ON f.Category_Number = c.Category_Number -- Join with category for grant amounts
+    INNER JOIN 
+        Applicant a ON f.Applicant_ID = a.Applicant_ID -- Join with applicant for type grouping
+    GROUP BY 
+        -- Time grouping
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(f.Application_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN CONCAT(YEAR(f.Application_Date), ' Week ', DATEPART(WEEK, f.Application_Date))
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(f.Application_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(f.Application_Date), ' Q', DATEPART(QUARTER, f.Application_Date))
+            WHEN @TimeGrouping = 'yearly' THEN CAST(YEAR(f.Application_Date) AS NVARCHAR)
+        END,
+        -- Category grouping
+        CASE 
+            WHEN @GroupByCategory = 1 THEN f.Category_Number
+        END,
+        -- Applicant type grouping
+        CASE 
+            WHEN @GroupByApplicantType = 1 THEN a.Company_Private
+        END
+END;
+GO
+
+
+CREATE PROCEDURE dbo.Report8
+    @TimeGrouping VARCHAR(9) = NULL,      -- 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'
+    @GroupByCategory BIT = 0,             -- 1 to group by category, 0 otherwise
+    @GroupByApplicantType BIT = 0         -- 1 to group by applicant type, 0 otherwise
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check for existence of the #FilteredReport table
+    IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
+    BEGIN
+        THROW 50010, '#FilteredReport table not found. Please ensure it is created and populated.', 1;
+    END;
+
+    -- Temporary table to store calculated amounts
+    CREATE TABLE #GrantTotals (
+        TimePeriod VARCHAR(20) NULL,
+        Category_Number INT,
+        Applicant_Type NVARCHAR(10) NULL,
+        Total_Grant DECIMAL(15, 2)
+    );
+
+    -- Insert calculated amounts into the temp table
+    INSERT INTO #GrantTotals (TimePeriod, Category_Number, Applicant_Type, Total_Grant)
+    SELECT 
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(fr.Application_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN FORMAT(DATEADD(DAY, -DATEPART(WEEKDAY, fr.Application_Date) + 1, fr.Application_Date), 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(fr.Application_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(fr.Application_Date), '-Q', DATEPART(QUARTER, fr.Application_Date))
+            WHEN @TimeGrouping = 'yearly' THEN FORMAT(fr.Application_Date, 'yyyy')
+            ELSE NULL
+        END AS TimePeriod,
+        fr.Category_Number,
+        CASE WHEN @GroupByApplicantType = 1 THEN ap.Company_Private ELSE NULL END AS Applicant_Type,
+        sc.Amount AS Total_Grant
+    FROM #FilteredReport fr
+    INNER JOIN Sponsorship_Category sc ON fr.Category_Number = sc.Category_Number
+    INNER JOIN Applicant ap ON fr.Applicant_ID = ap.Applicant_ID
+    WHERE fr.Current_Status = 'approved' -- Only approved applications
+    GROUP BY 
+		fr.Category_Number,
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(fr.Application_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN FORMAT(DATEADD(DAY, -DATEPART(WEEKDAY, fr.Application_Date) + 1, fr.Application_Date), 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(fr.Application_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(fr.Application_Date), '-Q', DATEPART(QUARTER, fr.Application_Date))
+            WHEN @TimeGrouping = 'yearly' THEN FORMAT(fr.Application_Date, 'yyyy')
+            ELSE NULL
+        END,
+        CASE WHEN @GroupByApplicantType = 1 THEN ap.Company_Private ELSE NULL END,
+		sc.Amount;
+
+    -- Select the highest and lowest grant categories
+    SELECT * FROM 
+    (
+        SELECT TOP 1 WITH TIES
+            'Highest' AS GrantType,
+            Category_Number,
+			TimePeriod,
+            Applicant_Type,
+            Total_Grant
+        FROM #GrantTotals
+        ORDER BY Total_Grant DESC
+    ) AS HighestGrants
+
+    UNION ALL
+
+    SELECT * FROM 
+    (
+        SELECT TOP 1 WITH TIES
+            'Lowest' AS GrantType,
+            Category_Number,
+			TimePeriod,
+            Applicant_Type,
+            Total_Grant
+        FROM #GrantTotals
+        ORDER BY Total_Grant ASC
+    ) AS LowestGrants;
+
+    -- Clean up temporary table
+    DROP TABLE IF EXISTS #GrantTotals;
+END;
+GO
+	
 dbo.Report9 @StartDate , @EndDate
 dbo.Report10 
 dbo.Report11 @X
