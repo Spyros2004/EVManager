@@ -244,6 +244,7 @@ ul li a:hover {
 }
 
     </style>
+    
 </head>
 <body>
     <header>
@@ -292,43 +293,76 @@ ul li a:hover {
 
             <!-- Application Details -->
             <div class="application-details">
-                <?php if (isset($applicationDetails)): ?>
-                    <div class="details-box">
-                        <h2>Λεπτομέρειες Αίτησης</h2>
-                        <table>
-                            <tr>
-                                <th>Κωδικός Αίτησης:</th>
-                                <td><?= htmlspecialchars($applicationDetails['Application_ID']) ?></td>
-                            </tr>
-                            <tr>
-                                <th>Όνομα Χρήστη:</th>
-                                <td><?= htmlspecialchars($applicationDetails['Username']) ?></td>
-                            </tr>
-                            <!-- Add more fields as needed -->
-                        </table>
-                    </div>
-                    <div class="details-box">
-                        <h2>Έγγραφα</h2>
-                        <ul>
-                            <?php foreach ($documents as $doc): ?>
-                                <li>
-                                    <?= htmlspecialchars($doc['Document_Type']) ?>: 
-                                    <a href="<?= htmlspecialchars($doc['URL']) ?>" target="_blank">Προβολή</a>
-                                    <form method="POST" style="display: inline;">
-                                        <input type="hidden" name="documentId" value="<?= htmlspecialchars($doc['Document_ID']) ?>">
-                                        <button class="action-btn" name="updateDocument">Ενημέρωση</button>
-                                    </form>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                    <form method="POST" style="margin-top: 20px;">
-                        <input type="hidden" name="applicationId" value="<?= htmlspecialchars($applicationDetails['Application_ID']) ?>">
-                        <label for="documentType">Τύπος Εγγράφου:</label>
-                        <input type="text" id="documentType" name="documentType" required>
-                        <button class="action-btn" name="addDocument">Προσθήκη Εγγράφου</button>
+            <?php if (isset($applicationDetails)): ?>
+    <div class="details-box">
+        <h2>Λεπτομέρειες Αίτησης</h2>
+        <table>
+            <?php foreach ($applicationDetails as $key => $value): ?>
+                <tr>
+                    <th>
+                        <?php 
+                        // Μετατροπή αγγλικών τίτλων σε ελληνικούς
+                        $titles = [
+                            'Application_ID' => 'Κωδικός Αίτησης',
+                            'Username' => 'Όνομα Χρήστη',
+                            'First_Name' => 'Όνομα',
+                            'Last_Name' => 'Επώνυμο',
+                            'Email' => 'Ηλεκτρονική Διεύθυνση',
+                            'Applicant_ID' => 'Κωδικός Υποψήφιου',
+                            'Identification' => 'Αριθμός Ταυτότητας',
+                            'Company_Private' => 'Ιδιότητα',
+                            'Gender' => 'Φύλο',
+                            'BirthDate' => 'Ημερομηνία Γέννησης',
+                            'Telephone_Number' => 'Τηλέφωνο',
+                            'Address' => 'Διεύθυνση',
+                            'Tracking_Number' => 'Αριθμός Παρακολούθησης',
+                            'Application_Date' => 'Ημερομηνία Υποβολής',
+                            'Current_Status' => 'Κατάσταση',
+                            'Category_Number' => 'Αριθμός Κατηγορίας',
+                            'Discarded_Car_License_Plate' => 'Πινακίδα Απορριφθέντος Οχήματος',
+                        ];
+                        echo htmlspecialchars($titles[$key] ?? $key); 
+                        ?>:
+                    </th>
+                    <td>
+                        <?php 
+                        // Έλεγχος αν η τιμή είναι αντικείμενο DateTime
+                        if ($value instanceof DateTime) {
+                            echo htmlspecialchars($value->format('d-m-Y')); // Εμφάνιση ως ΗΗ-ΜΜ-ΕΕΕΕ
+                        } else {
+                            echo htmlspecialchars($value); // Εμφάνιση της τιμής
+                        }
+                        ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
+    <div class="details-box">
+        <h2>Έγγραφα</h2>
+        <ul>
+            <?php foreach ($documents as $doc): ?>
+                <li>
+                    <?= htmlspecialchars($doc['Document_Type']) ?>: 
+                    <a href="<?= htmlspecialchars($doc['URL']) ?>" target="_blank">Προβολή</a>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="documentId" value="<?= htmlspecialchars($doc['Document_ID']) ?>">
+                        <button class="action-btn" name="updateDocument">Ενημέρωση</button>
                     </form>
-                <?php endif; ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <form method="POST" style="margin-top: 20px;">
+        <input type="hidden" name="applicationId" value="<?= htmlspecialchars($applicationDetails['Application_ID']) ?>">
+        <label for="documentType">Τύπος Εγγράφου:</label>
+        <input type="text" id="documentType" name="documentType" required>
+        <button class="action-btn" name="addDocument">Προσθήκη Εγγράφου</button>
+    </form>
+<?php endif; ?>
+
+
+
             </div>
         </div>
     </div>
