@@ -37,39 +37,41 @@ if ($stmt === false) {
         }
 
         .header {
-            background: #4CAF50;
-            padding: 10px 0;
-            text-align: center;
-            color: #fff;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            font-size: 1.2em;
-        }
+    background: #0056b3; /* Μπλε χρώμα */
+    padding: 10px 0;
+    text-align: center;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    font-size: 1.2em;
+}
 
-        .menu-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background: #4CAF50;
-            position: fixed;
-            width: 100%;
-            top: 100px;
-            z-index: 1000;
-            flex-wrap: wrap; /* Εξασφαλίζει ότι τα links θα προσαρμόζονται σε μικρές οθόνες */
-        }
 
-        .menu-bar a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #fff;
-            font-size: 1.2em;
-            font-weight: 500;
-            text-align: center;
-            display: inline-block;
-        }
+.menu-bar {
+    display: flex;
+    justify-content: center; /* Κεντράρει τα στοιχεία οριζόντια */
+    align-items: center; /* Κεντράρει τα στοιχεία κάθετα */
+    padding: 20px;
+    background: #0056b3; /* Χρώμα μπλε */
+    position: fixed;
+    width: 100%;
+    top: 100px;
+    z-index: 1000;
+    flex-wrap: wrap; /* Εξασφαλίζει ότι τα links θα προσαρμόζονται σε μικρές οθόνες */
+}
+
+.menu-bar a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: 500;
+    text-align: center;
+    display: inline-block;
+}
+
 
         .menu-bar a:hover {
             color: #ffeb3b;
@@ -122,11 +124,11 @@ if ($stmt === false) {
         }
 
         th {
-            background: #4CAF50;
-            color: #fff;
-            text-transform: uppercase;
-            padding: 15px;
-        }
+    background: #0056b3; /* Μπλε χρώμα */
+    color: #fff;
+    text-transform: uppercase;
+    padding: 15px;
+}
 
         td {
             padding: 15px;
@@ -138,15 +140,14 @@ if ($stmt === false) {
         }
 
         tr:hover {
-            background: #e8f5e9;
+            background: #e9f5ff;
         }
-
         footer {
-            background: #4CAF50;
-            color: #fff;
-            padding: 20px;
-            text-align: left;
-        }
+    background: #0056b3; /* Μπλε χρώμα */
+    color: #fff;
+    padding: 20px;
+    text-align: left;
+}
 
         footer a {
             color: #ffeb3b;
@@ -233,7 +234,7 @@ if ($stmt === false) {
                 <?php
                 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                     echo "<tr>";
-                    echo "<td>" . htmlspecialchars($row['Category_Number']) . "</td>";
+                    echo "<td>" . htmlspecialchars('Γ' . $row['Category_Number']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['Description']) . "</td>";
                     echo "<td>" . htmlspecialchars(number_format($row['Amount'], 2)) . "</td>";
                     echo "<td>" . htmlspecialchars($row['Remaining_Positions']) . "</td>";
@@ -253,3 +254,6 @@ if ($stmt === false) {
 </body>
 
 </html>
+
+
+
