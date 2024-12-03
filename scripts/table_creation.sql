@@ -72,7 +72,7 @@ CREATE TABLE [dbo].[Application]
     [Application_ID] INT NOT NULL IDENTITY(1,1),
     [Tracking_Number] NCHAR(8) NOT NULL DEFAULT N'ΓΧΧ.ΥΥΥΥ',
     [Application_Date] DATE NOT NULL DEFAULT GETDATE(),
-    [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('active', 'ordered', 'checked', 'rejected', 'approved')) DEFAULT 'active', 
+    [Current_Status] VARCHAR(20) NOT NULL CHECK ([Current_Status] IN ('active', 'ordered', 'checked', 'rejected', 'approved', 'expired')) DEFAULT 'active', 
     [Applicant_ID] INT NOT NULL,
     [Category_Number] INT NOT NULL,
     CONSTRAINT [PK_APPLICATION] PRIMARY KEY ([Application_ID] ASC)
@@ -92,7 +92,7 @@ CREATE TABLE [dbo].[Modification]
 (
     [Modification_ID] INT NOT NULL IDENTITY(1,1),
     [Modification_Date] DATE NOT NULL DEFAULT GETDATE(),
-    [New_Status] VARCHAR(20) NOT NULL CHECK ([New_Status] IN ('active', 'ordered', 'checked', 'rejected', 'approved')),
+    [New_Status] VARCHAR(20) NOT NULL CHECK ([New_Status] IN ('active', 'ordered', 'checked', 'rejected', 'approved', 'expired')),
     [Reason] NVARCHAR(255) NOT NULL, 
     [User_ID] INT NOT NULL,
     [Application_ID] INT NOT NULL,
