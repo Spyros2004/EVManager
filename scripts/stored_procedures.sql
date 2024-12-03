@@ -1072,136 +1072,137 @@ GO
     END;
     GO
 
-    CREATE PROCEDURE dbo.AcceptOrRejectApplication
-        @ApplicationID INT,       -- ID of the application
-        @Action INT,              -- Action: 0 = Reject, 1 = Accept
-        @Reason NVARCHAR(255),    -- Reason for the action
-        @SessionID UNIQUEIDENTIFIER -- Session ID of the user performing the action
-    AS
+   CREATE PROCEDURE dbo.AcceptOrRejectApplication
+    @ApplicationID INT,       -- ID of the application
+    @Action INT,              -- Action: 0 = Reject, 1 = Accept
+    @Reason NVARCHAR(255),    -- Reason for the action
+    @SessionID UNIQUEIDENTIFIER -- Session ID of the user performing the action
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate parameters
+    IF @Action NOT IN (0, 1)
     BEGIN
-        SET NOCOUNT ON;
-
-        -- Retrieve the User_ID from the Session_ID
-        DECLARE @UserID INT;
-
-        SELECT 
-            @UserID = U.User_ID
-        FROM [dbo].[User_Session] US
-        JOIN [dbo].[User] U ON US.User_ID = U.User_ID
-        WHERE US.Session_ID = @SessionID;
-
-        -- Ensure a reason is provided for the action
-        IF @Reason IS NULL OR LEN(@Reason) = 0
-        BEGIN
-            THROW 50000, 'Για την ενέργεια αυτή απαιτείται αιτιολόγηση.', 1;
-        END;
-
-        IF @Action = 1
-        BEGIN
-			-- Admin: Check if the application is in "checked" status
-            IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'checked')
-            BEGIN
-				THROW 50001, 'Η αίτηση πρέπει να είναι σε κατάσταση «checked» για να γίνει δεκτή.', 1;
-            END;
-
-            -- Update the application status to "accepted"
-            UPDATE [dbo].[Application]
-            SET Current_Status = 'accepted'
-            WHERE Application_ID = @ApplicationID;
-
-            -- Log the change
-            INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
-            VALUES (GETDATE(), 'accepted', @Reason, @UserID, @ApplicationID);
-		END
-        ELSE IF @Action = 0
-        BEGIN
-            -- Reject Action: Check if the application is in "active", "ordered", or "checked" status
-            IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status IN ('active', 'ordered', 'checked'))
-            BEGIN
-                THROW 50002, 'Η αίτηση πρέπει να είναι σε κατάσταση «active», «ordered» ή «checked» για να απορριφθεί.', 1;
-            END;
-
-            -- Update the application status to "rejected"
-            UPDATE [dbo].[Application]
-            SET Current_Status = 'rejected'
-            WHERE Application_ID = @ApplicationID;
-
-            -- Log the change
-            INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
-            VALUES (GETDATE(), 'rejected', @Reason, @UserID, @ApplicationID);
-        END
-        ELSE
-        BEGIN
-            THROW 50003, 'Άκυρη ενέργεια.', 1;
-        END;
+        THROW 50003, 'Άκυρη ενέργεια.', 1;
     END;
-    GO
 
-
-	CREATE PROCEDURE dbo.AcceptOrRejectApplicationTOM
-        @ApplicationID INT,       -- ID of the application
-        @Action INT,              -- Action: 0 = Reject, 1 = Accept
-        @Reason NVARCHAR(255),    -- Reason for the action
-        @SessionID UNIQUEIDENTIFIER -- Session ID of the user performing the action
-    AS
+    IF @Reason IS NULL OR LEN(@Reason) = 0
     BEGIN
-        SET NOCOUNT ON;
-
-        -- Retrieve the User_ID and User_Type from the Session_ID
-        DECLARE @UserID INT;
-
-        SELECT 
-            @UserID = U.User_ID
-        FROM [dbo].[User_Session] US
-        JOIN [dbo].[User] U ON US.User_ID = U.User_ID
-        WHERE US.Session_ID = @SessionID;
-
-        -- Ensure a reason is provided for the action
-        IF @Reason IS NULL OR LEN(@Reason) = 0
-        BEGIN
-            THROW 50000, 'Για την ενέργεια αυτή απαιτείται αιτιολόγηση.', 1;
-        END;
-
-        IF @Action = 1
-        BEGIN
-			-- TOM: Check if the application is in "active" status
-            IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status = 'ordered')
-            BEGIN
-                THROW 50004, 'Η αίτηση πρέπει να είναι σε κατάσταση «ordered» για να επισημανθεί ως «checked».', 1;
-            END;
-
-            -- Update the application status to "checked"
-            UPDATE [dbo].[Application]
-            SET Current_Status = 'checked'
-            WHERE Application_ID = @ApplicationID;
-
-            -- Log the change
-            INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
-            VALUES (GETDATE(), 'checked', @Reason, @UserID, @ApplicationID);
-        END
-        ELSE IF @Action = 0
-        BEGIN
-            -- Reject Action: Check if the application is in "active", "ordered", or "checked" status
-            IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] WHERE Application_ID = @ApplicationID AND Current_Status IN ('active', 'ordered', 'checked'))
-            BEGIN
-                THROW 50002, 'Η αίτηση πρέπει να είναι σε κατάσταση «active», «ordered» ή «checked» για να απορριφθεί.', 1;
-            END;
-
-            -- Update the application status to "rejected"
-            UPDATE [dbo].[Application]
-            SET Current_Status = 'rejected'
-            WHERE Application_ID = @ApplicationID;
-
-            -- Log the change
-            INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
-            VALUES (GETDATE(), 'rejected', @Reason, @UserID, @ApplicationID);
-        END
-        ELSE
-        BEGIN
-            THROW 50003, 'Άκυρη ενέργεια.', 1;
-        END;
+        THROW 50000, 'Για την ενέργεια αυτή απαιτείται αιτιολόγηση.', 1;
     END;
-    GO
+
+    -- Retrieve User_ID
+    DECLARE @UserID INT;
+    SELECT @UserID = U.User_ID
+    FROM [dbo].[User_Session] US
+    JOIN [dbo].[User] U ON US.User_ID = U.User_ID
+    WHERE US.Session_ID = @SessionID;
+
+    IF @UserID IS NULL
+    BEGIN
+        THROW 50005, 'Μη έγκυρη συνεδρία.', 1;
+    END;
+
+    -- Handle action logic
+    IF @Action = 1
+    BEGIN
+        -- Accept action (checked → accepted)
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] A WHERE A.Application_ID = @ApplicationID AND A.Current_Status = 'checked')
+        BEGIN
+            THROW 50001, 'Η αίτηση πρέπει να είναι σε κατάσταση «checked» για να γίνει δεκτή.', 1;
+        END;
+
+        UPDATE [dbo].[Application]
+        SET Current_Status = 'accepted'
+        WHERE Application_ID = @ApplicationID;
+
+        INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+        VALUES (GETDATE(), 'accepted', @Reason, @UserID, @ApplicationID);
+    END
+    ELSE
+    BEGIN
+        -- Reject action (active, ordered, or checked → rejected)
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] A WHERE A.Application_ID = @ApplicationID AND A.Current_Status IN ('active', 'ordered', 'checked'))
+        BEGIN
+            THROW 50002, 'Η αίτηση πρέπει να είναι σε κατάσταση «active», «ordered» ή «checked» για να απορριφθεί.', 1;
+        END;
+
+        UPDATE [dbo].[Application]
+        SET Current_Status = 'rejected'
+        WHERE Application_ID = @ApplicationID;
+
+        INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+        VALUES (GETDATE(), 'rejected', @Reason, @UserID, @ApplicationID);
+    END;
+END;
+GO
+
+CREATE PROCEDURE dbo.AcceptOrRejectApplicationTOM
+    @ApplicationID INT,
+    @Action INT,
+    @Reason NVARCHAR(255),
+    @SessionID UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate parameters
+    IF @Action NOT IN (0, 1)
+    BEGIN
+        THROW 50003, 'Άκυρη ενέργεια.', 1;
+    END;
+
+    IF @Reason IS NULL OR LEN(@Reason) = 0
+    BEGIN
+        THROW 50000, 'Για την ενέργεια αυτή απαιτείται αιτιολόγηση.', 1;
+    END;
+
+    -- Retrieve User_ID
+    DECLARE @UserID INT;
+    SELECT @UserID = U.User_ID
+    FROM [dbo].[User_Session] US
+    JOIN [dbo].[User] U ON US.User_ID = U.User_ID
+    WHERE US.Session_ID = @SessionID;
+
+    IF @UserID IS NULL
+    BEGIN
+        THROW 50005, 'Μη έγκυρη συνεδρία.', 1;
+    END;
+
+    -- Handle action logic
+    IF @Action = 1
+    BEGIN
+        -- Mark as checked (ordered → checked)
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] A WHERE A.Application_ID = @ApplicationID AND A.Current_Status = 'ordered')
+        BEGIN
+            THROW 50004, 'Η αίτηση πρέπει να είναι σε κατάσταση «ordered» για να επισημανθεί ως «checked».', 1;
+        END;
+
+        UPDATE [dbo].[Application]
+        SET Current_Status = 'checked'
+        WHERE Application_ID = @ApplicationID;
+
+        INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+        VALUES (GETDATE(), 'checked', @Reason, @UserID, @ApplicationID);
+    END
+    ELSE
+    BEGIN
+        -- Reject (ordered → rejected)
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Application] A WHERE A.Application_ID = @ApplicationID AND A.Current_Status = 'ordered')
+        BEGIN
+            THROW 50002, 'Η αίτηση πρέπει να είναι σε κατάσταση «ordered» για να απορριφθεί.', 1;
+        END;
+
+        UPDATE [dbo].[Application]
+        SET Current_Status = 'rejected'
+        WHERE Application_ID = @ApplicationID;
+
+        INSERT INTO [dbo].[Modification] (Modification_Date, New_Status, Reason, User_ID, Application_ID)
+        VALUES (GETDATE(), 'rejected', @Reason, @UserID, @ApplicationID);
+    END;
+END;
+GO
 
     CREATE PROCEDURE dbo.ReactivateApplication
         @ApplicationID INT,       -- ID of the application
@@ -2185,4 +2186,20 @@ GO
         
     --dbo.Report9 @StartDate , @EndDate
     --dbo.Report10 
-    --dbo.Report11 @X
+
+CREATE PROCEDURE dbo.Report11
+    @X INT    -- Minimum number of applications threshold
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Report on categories with at least @X applications in any calendar year
+    SELECT 
+        YEAR(a.Application_Date) AS Calendar_Year,
+        a.Category_Number,
+        COUNT(a.Application_ID) AS Total_Applications
+    FROM Application a
+    GROUP BY YEAR(a.Application_Date), a.Category_Number
+    HAVING COUNT(a.Application_ID) >= @X
+END;
+GO
