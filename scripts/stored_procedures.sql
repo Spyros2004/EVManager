@@ -1671,7 +1671,59 @@
     GO
 
 
-    --dbo.Report1 @TimeGrouping , @GroupByCategory, @GroupByApplicantType, @SortBy, @SortOrder
+    CREATE PROCEDURE dbo.Report1
+    @StartDate DATE = NULL,
+    @EndDate DATE = NULL,
+    @TimeGrouping VARCHAR(9) = NULL,       -- 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'
+    @GroupByApplicantType BIT = 0,         -- 1 to group by Company_Private, 0 otherwise
+    @SortBy VARCHAR(8) = 'Amount',         -- 'Amount' or 'Category'
+    @SortOrder VARCHAR(4) = 'ASC'          -- 'ASC' or 'DESC'
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if #FilteredReport exists
+    IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
+    BEGIN
+        -- If the table doesn't exist, throw an error
+        THROW 50010, 'The temporary filter table #FilteredReport is required but does not exist.', 1;
+    END;
+
+    -- Use #FilteredReport for calculations
+    SELECT 
+        fr.Category_Number,
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(fr.Application_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN FORMAT(DATEADD(DAY, -DATEPART(WEEKDAY, fr.Application_Date) + 1, fr.Application_Date), 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(fr.Application_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(fr.Application_Date), '-Q', DATEPART(QUARTER, fr.Application_Date))
+            WHEN @TimeGrouping = 'yearly' THEN FORMAT(fr.Application_Date, 'yyyy')
+            ELSE NULL
+        END AS TimePeriod,
+        CASE WHEN @GroupByApplicantType = 1 THEN ap.Company_Private ELSE NULL END AS ApplicantType,
+        SUM(sc.Amount) AS Total_Amount
+    FROM #FilteredReport fr
+    INNER JOIN Sponsorship_Category sc ON fr.Category_Number = sc.Category_Number
+    INNER JOIN Applicant ap ON fr.Applicant_ID = ap.Applicant_ID
+    GROUP BY 
+        fr.Category_Number,
+        CASE 
+            WHEN @TimeGrouping = 'daily' THEN FORMAT(fr.Application_Date, 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'weekly' THEN FORMAT(DATEADD(DAY, -DATEPART(WEEKDAY, fr.Application_Date) + 1, fr.Application_Date), 'yyyy-MM-dd')
+            WHEN @TimeGrouping = 'monthly' THEN FORMAT(fr.Application_Date, 'yyyy-MM')
+            WHEN @TimeGrouping = 'quarterly' THEN CONCAT(YEAR(fr.Application_Date), '-Q', DATEPART(QUARTER, fr.Application_Date))
+            WHEN @TimeGrouping = 'yearly' THEN FORMAT(fr.Application_Date, 'yyyy')
+            ELSE NULL
+        END,
+        CASE WHEN @GroupByApplicantType = 1 THEN ap.Company_Private ELSE NULL END
+    ORDER BY 
+        CASE WHEN @SortBy = 'Amount' AND @SortOrder = 'ASC' THEN SUM(sc.Amount) END ASC,
+        CASE WHEN @SortBy = 'Amount' AND @SortOrder = 'DESC' THEN SUM(sc.Amount) END DESC,
+        CASE WHEN @SortBy = 'Category' AND @SortOrder = 'ASC' THEN fr.Category_Number END ASC,
+        CASE WHEN @SortBy = 'Category' AND @SortOrder = 'DESC' THEN fr.Category_Number END DESC;
+END;
+GO
+
     --dbo.Report2 @GroupByCategory, @SortBy, @SortOrder
     --dbo.Report3 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     --dbo.Report4 @TimeGrouping , @GroupByApplicantType
