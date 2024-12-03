@@ -1553,21 +1553,25 @@ BEGIN
         THROW 50005, 'Invalid SortOrder value. Please choose either "ASC" or "DESC".', 1;
     END;
 
-    -- Validate Report Type and Input Combination using CASE
-    DECLARE @ReportTypeError INT;
-
-    SET @ReportTypeError = 
-        CASE 
-            WHEN (@ReportType != 1 AND @ReportType != 2) AND (@SortBy IS NOT NULL OR @SortOrder IS NOT NULL) THEN 50006
-            WHEN @ReportType = 2 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @ApplicantType IS NOT NULL OR @TimeGrouping IS NOT NULL OR @GroupByCategory IS NOT NULL OR @GroupByApplicantType IS NOT NULL) THEN 50007
-            WHEN @ReportType = 4 AND (@CategoryFilter IS NOT NULL OR @GroupByCategory IS NOT NULL) THEN 50008
-            WHEN @ReportType = 6 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @GroupByCategory IS NOT NULL OR @GroupByApplicantType IS NOT NULL) THEN 50009
-            ELSE 0
-        END;
-
-    IF @ReportTypeError != 0
+    -- Validate Specific Conditions Based on ReportType
+    IF (@ReportType NOT IN (1, 2)) AND (@SortBy IS NOT NULL OR @SortOrder IS NOT NULL)
     BEGIN
-        THROW @ReportTypeError, 'Invalid input combination for the selected report type.', 1;
+        THROW 50006, 'SortBy and SortOrder are only valid for Report Types 1 and 2.', 1;
+    END;
+
+    IF @ReportType = 2 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @ApplicantType IS NOT NULL OR @TimeGrouping IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
+    BEGIN
+        THROW 50007, 'Report Type 2 does not support filtering or grouping by time, category, or applicant type.', 1;
+    END;
+
+    IF @ReportType = 4 AND (@CategoryFilter IS NOT NULL OR @GroupByCategory = 1)
+    BEGIN
+        THROW 50008, 'Report Type 4 does not allow filtering by category or grouping by category.', 1;
+    END;
+
+    IF @ReportType = 6 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
+    BEGIN
+        THROW 50009, 'Report Type 6 does not allow filtering by time or grouping by category or applicant type.', 1;
     END;
 
     -- Create temporary table
@@ -1579,51 +1583,64 @@ BEGIN
         [Applicant_ID] INT,
         [Category_Number] INT
     );
+	INSERT INTO #TempReport (Application_ID, Tracking_Number, Application_Date, Current_Status, Applicant_ID, Category_Number)
+	SELECT 
+		a.Application_ID,
+		a.Tracking_Number,
+		a.Application_Date,
+		a.Current_Status,
+		a.Applicant_ID,
+		a.Category_Number
+	FROM Applications a
+	JOIN Applicant ap ON a.Applicant_ID = ap.Applicant_ID  -- Assuming 'Applicant_ID' is the key
+	WHERE 
+		(@StartDate IS NULL OR a.Application_Date >= @StartDate)
+		AND (@EndDate IS NULL OR a.Application_Date <= @EndDate)
+		AND (@CategoryFilter IS NULL OR a.Category_Number = @CategoryFilter)
+		AND (@ApplicantType IS NULL OR ap.ApplicantType = @ApplicantType);
 
-    -- Handle Report Types using CASE
+    -- Handle Report Types
+    IF @ReportType = 1
     BEGIN
-        CASE
-            WHEN @ReportType = 1
-                BEGIN
-                    -- Logic for Report Type 1: Overview of Total Grants
-                END
-            WHEN @ReportType = 2
-                BEGIN
-                    -- Logic for Report Type 2: Remaining Grants Overviaew
-                END
-            WHEN @ReportType = 3
-                BEGIN
-                    -- Logic for Report Type 3: Application Count Analysis
-                END
-            WHEN @ReportType = 4
-                BEGIN
-                    -- Logic for Report Type 4: Success Rate Analysis
-                END
-            WHEN @ReportType = 5
-                BEGIN
-                    -- Logic for Report Type 5: High Activity Periods
-                END
-            WHEN @ReportType = 6
-                BEGIN
-                    -- Logic for Report Type 6: Grant Average by Category
-                END
-            WHEN @ReportType = 7
-                BEGIN
-                    -- Logic for Report Type 7: Highest and Lowest Grants by Category
-                END
-            WHEN @ReportType = 8
-                BEGIN
-                    -- Logic for Report Type 8: Applicant Performance
-                END
-            ELSE
-                BEGIN
-                    THROW 50000, 'Invalid Report Type provided. Please choose a valid report type (1-11).', 1;
-                END
-        END
+        -- Logic for Report Type 1: Overview of Total Grants
     END
+    ELSE IF @ReportType = 2
+    BEGIN
+        -- Logic for Report Type 2: Remaining Grants Overview
+    END
+    ELSE IF @ReportType = 3
+    BEGIN
+        -- Logic for Report Type 3: Application Count Analysis
+    END
+    ELSE IF @ReportType = 4
+    BEGIN
+        -- Logic for Report Type 4: Success Rate Analysis
+    END
+    ELSE IF @ReportType = 5
+    BEGIN
+        -- Logic for Report Type 5: High Activity Periods
+    END
+    ELSE IF @ReportType = 6
+    BEGIN
+        -- Logic for Report Type 6: Grant Average by Category
+    END
+    ELSE IF @ReportType = 7
+    BEGIN
+        -- Logic for Report Type 7: Highest and Lowest Grants by Category
+    END
+    ELSE IF @ReportType = 8
+    BEGIN
+        -- Logic for Report Type 8: Applicant Performance
+    END
+    ELSE
+    BEGIN
+        -- Throw an error for invalid ReportType
+        THROW 50000, 'Invalid Report Type provided. Please choose a valid report type (1-8).', 1;
+    END;
 
     -- Clean up temp table
     DROP TABLE IF EXISTS #TempReport;
 END;
 GO
+
 
