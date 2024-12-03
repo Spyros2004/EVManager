@@ -1520,7 +1520,7 @@ CREATE PROCEDURE dbo.GenerateReport
     @GroupByApplicantType BIT = 0,     -- 1 to group by applicant type, 0 otherwise
     @ReportType INT,                   -- Report type (1 to 11)
     @SortBy VARCHAR(8) = 'Amount',     -- Sort column
-    @SortOrder NVARCHAR(4) = 'ASC'     -- Sort order
+    @SortOrder VARCHAR(4) = 'ASC'     -- Sort order
 AS
 BEGIN
     SET NOCOUNT ON;
