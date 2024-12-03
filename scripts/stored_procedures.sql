@@ -1576,6 +1576,11 @@ BEGIN
         THROW 50009, 'Report Type 6 does not allow filtering by time or grouping by category or applicant type.', 1;
     END;
 
+	IF (@ReportType IN (1, 2)) AND (@SortBy IS NULL OR @SortOrder IS NULL)
+	BEGIN
+		THROW 50010, 'Report Type 1 and 2 requires ordering', 1;
+	END;
+
     -- Create temporary table
     CREATE TABLE #FilteredReport (
         [Application_ID] INT,
