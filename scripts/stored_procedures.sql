@@ -1598,13 +1598,13 @@ BEGIN
 		a.Current_Status,
 		a.Applicant_ID,
 		a.Category_Number
-	FROM Applications a
+	FROM Application a
 	JOIN Applicant ap ON a.Applicant_ID = ap.Applicant_ID  -- Assuming 'Applicant_ID' is the key
 	WHERE 
 		(@StartDate IS NULL OR a.Application_Date >= @StartDate)
 		AND (@EndDate IS NULL OR a.Application_Date <= @EndDate)
 		AND (@CategoryFilter IS NULL OR a.Category_Number = @CategoryFilter)
-		AND (@ApplicantType IS NULL OR ap.ApplicantType = @ApplicantType);
+		AND (@ApplicantType IS NULL OR ap.Company_Private = @ApplicantType);
 
     -- Handle Report Types
     IF @ReportType = 1
@@ -1657,6 +1657,7 @@ BEGIN
     DROP TABLE IF EXISTS #FilteredReport;
 END;
 GO
+
 
 dbo.Report1 @TimeGrouping , @GroupByCategory, @GroupByApplicantType, @SortBy, @SortOrder
 dbo.Report2 @GroupByCategory, @SortBy, @SortOrder
