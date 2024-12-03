@@ -101,16 +101,17 @@ sqlsrv_close($conn);
     <title>Σύνδεση για Αιτήσεις Επιχορηγήσεων</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(to right, #e6ffe6, #f0fff0);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #fff;
-            margin: 0;
-        }
+       body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to right, #d6eaff, #e3f2fd); /* Απαλό μπλε */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    margin: 0;
+}
+
         .login-container {
             background: #ffffff;
             padding: 60px;
@@ -139,7 +140,7 @@ sqlsrv_close($conn);
             width: 100%;
             padding: 18px;
             margin-top: 30px; /* Προστέθηκε μεγαλύτερο κενό πάνω από το κουμπί */
-            background: #28a745;
+            background: #0056b3;
             color: white;
             border: none;
             border-radius: 12px;
@@ -149,7 +150,7 @@ sqlsrv_close($conn);
             box-sizing: border-box;
         }
         input[type="submit"]:hover {
-            background: #218838;
+            background: #0056b3;
         }
         .error-message {
             color: #ff4d4d;
