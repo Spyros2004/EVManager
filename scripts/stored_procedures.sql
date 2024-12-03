@@ -1506,3 +1506,124 @@ BEGIN
     END CATCH
 END;
 GO
+
+
+CREATE PROCEDURE dbo.GenerateReport
+    @StartDate DATE = NULL,
+    @EndDate DATE = NULL,
+    @CategoryFilter INT = NULL,
+    @ApplicantType VARCHAR(20) = NULL, -- 'Company', 'Private', or NULL
+    @TimeGrouping VARCHAR(9) = NULL, -- 'daily', 'monthly', 'quarterly', 'yearly'
+    @GroupByCategory BIT = 0,          -- 1 to group by category, 0 otherwise
+    @GroupByApplicantType BIT = 0,     -- 1 to group by applicant type, 0 otherwise
+    @ReportType INT,                   -- Report type (1 to 11)
+    @SortBy VARCHAR(8) = 'Amount',     -- Sort column
+    @SortOrder NVARCHAR(4) = 'ASC'     -- Sort order
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate CategoryFilter
+    IF @CategoryFilter IS NOT NULL AND @CategoryFilter NOT IN (SELECT Category_Number FROM Sponsorship_Category)
+    BEGIN
+        THROW 50001, 'Invalid CategoryFilter provided. Please choose a valid category.', 1;
+    END;
+
+    -- Validate ApplicantType
+    IF @ApplicantType IS NOT NULL AND @ApplicantType NOT IN ('Company', 'Private')
+    BEGIN
+        THROW 50002, 'Invalid ApplicantType provided. It must be "Company" or "Private".', 1;
+    END;
+
+    -- Validate TimeGrouping
+    IF @TimeGrouping IS NOT NULL AND @TimeGrouping NOT IN ('daily', 'weekly', 'monthly', 'quarterly', 'yearly')
+    BEGIN
+        THROW 50003, 'Invalid TimeGrouping provided. Please choose one of "daily", "weekly", "monthly", "quarterly", or "yearly".', 1;
+    END;
+
+    -- Validate SortBy
+    IF @SortBy NOT IN ('Amount', 'Category')
+    BEGIN
+        THROW 50004, 'Invalid SortBy value. Please choose either "Amount" or "Category".', 1;
+    END;
+
+    -- Validate SortOrder
+    IF @SortOrder NOT IN ('ASC', 'DESC')
+    BEGIN
+        THROW 50005, 'Invalid SortOrder value. Please choose either "ASC" or "DESC".', 1;
+    END;
+
+    -- Validate Report Type and Input Combination using CASE
+    DECLARE @ReportTypeError INT;
+
+    SET @ReportTypeError = 
+        CASE 
+            WHEN (@ReportType != 1 AND @ReportType != 2) AND (@SortBy IS NOT NULL OR @SortOrder IS NOT NULL) THEN 50006
+            WHEN @ReportType = 2 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @ApplicantType IS NOT NULL OR @TimeGrouping IS NOT NULL OR @GroupByCategory IS NOT NULL OR @GroupByApplicantType IS NOT NULL) THEN 50007
+            WHEN @ReportType = 4 AND (@CategoryFilter IS NOT NULL OR @GroupByCategory IS NOT NULL) THEN 50008
+            WHEN @ReportType = 6 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @GroupByCategory IS NOT NULL OR @GroupByApplicantType IS NOT NULL) THEN 50009
+            ELSE 0
+        END;
+
+    IF @ReportTypeError != 0
+    BEGIN
+        THROW @ReportTypeError, 'Invalid input combination for the selected report type.', 1;
+    END;
+
+    -- Create temporary table
+    CREATE TABLE #TempReport (
+        [Application_ID] INT,
+        [Tracking_Number] NCHAR(8),
+        [Application_Date] DATE,
+        [Current_Status] VARCHAR(20), 
+        [Applicant_ID] INT,
+        [Category_Number] INT
+    );
+
+    -- Handle Report Types using CASE
+    BEGIN
+        CASE
+            WHEN @ReportType = 1
+                BEGIN
+                    -- Logic for Report Type 1: Overview of Total Grants
+                END
+            WHEN @ReportType = 2
+                BEGIN
+                    -- Logic for Report Type 2: Remaining Grants Overviaew
+                END
+            WHEN @ReportType = 3
+                BEGIN
+                    -- Logic for Report Type 3: Application Count Analysis
+                END
+            WHEN @ReportType = 4
+                BEGIN
+                    -- Logic for Report Type 4: Success Rate Analysis
+                END
+            WHEN @ReportType = 5
+                BEGIN
+                    -- Logic for Report Type 5: High Activity Periods
+                END
+            WHEN @ReportType = 6
+                BEGIN
+                    -- Logic for Report Type 6: Grant Average by Category
+                END
+            WHEN @ReportType = 7
+                BEGIN
+                    -- Logic for Report Type 7: Highest and Lowest Grants by Category
+                END
+            WHEN @ReportType = 8
+                BEGIN
+                    -- Logic for Report Type 8: Applicant Performance
+                END
+            ELSE
+                BEGIN
+                    THROW 50000, 'Invalid Report Type provided. Please choose a valid report type (1-11).', 1;
+                END
+        END
+    END
+
+    -- Clean up temp table
+    DROP TABLE IF EXISTS #TempReport;
+END;
+GO
+
