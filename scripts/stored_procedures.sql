@@ -2036,7 +2036,53 @@ GO
     END;
     GO
         
-    --dbo.Report9 @StartDate , @EndDate
+CREATE PROCEDURE dbo.Report9
+    @StartDate DATE,
+    @EndDate DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Temporary table to store applications within the specified period
+    IF OBJECT_ID('tempdb..#ApplicationsWithinRange') IS NOT NULL
+        DROP TABLE #ApplicationsWithinRange;
+
+    SELECT 
+        a.Applicant_ID,
+        a.Identification,
+        fr.Category_Number,
+        fr.Current_Status
+    INTO #ApplicationsWithinRange
+    FROM Application fr
+    INNER JOIN Applicant a ON fr.Applicant_ID = a.Applicant_ID
+    WHERE a.Company_Private = 'company' -- Filter only company applicants
+      AND fr.Application_Date BETWEEN @StartDate AND @EndDate
+      AND fr.Category_Number NOT IN (3, 4, 7, 8); -- Exclude categories G3, G4, G7, G8
+
+    -- Query for company applicants that applied in each category
+    SELECT 
+        sc.Category_Number,
+        a.Applicant_ID,
+        a.Identification,
+        CASE 
+            WHEN COUNT(CASE WHEN awr.Current_Status = 'approved' THEN 1 END) > 0 THEN 'Successful'
+            ELSE 'Unsuccessful'
+        END AS Application_Status
+    FROM Sponsorship_Category sc
+    CROSS JOIN (SELECT * FROM Applicant WHERE Company_Private = 'company') a
+    LEFT JOIN #ApplicationsWithinRange awr
+        ON sc.Category_Number = awr.Category_Number AND a.Applicant_ID = awr.Applicant_ID
+    WHERE sc.Category_Number NOT IN (3, 4, 7, 8) -- Ensure excluded categories are removed
+    GROUP BY sc.Category_Number, a.Applicant_ID, a.Identification
+    ORDER BY 
+        Application_Status ASC, -- 'Successful' first
+        sc.Category_Number, 
+        a.Identification;
+
+    -- Clean up
+    DROP TABLE #ApplicationsWithinRange;
+END;
+GO
     --dbo.Report10 
 
 CREATE PROCEDURE dbo.Report11
