@@ -1605,42 +1605,42 @@ BEGIN
     IF @ReportType = 1
     BEGIN
         -- Logic for Report Type 1: Overview of Total Grants
-		EXEC dbo.Report1 @TimeGrouping , @GroupByCategory, @GroupByApplicantType, @SortBy, @SortOrder
+	EXEC dbo.Report1 @TimeGrouping , @GroupByCategory, @GroupByApplicantType, @SortBy, @SortOrder
     END
     ELSE IF @ReportType = 2
     BEGIN
         -- Logic for Report Type 2: Remaining Grants Overview
-		EXEC dbo.Report2 @GroupByCategory, @SortBy, @SortOrder
+	EXEC dbo.Report2 @GroupByCategory, @SortBy, @SortOrder
     END
     ELSE IF @ReportType = 3
     BEGIN
         -- Logic for Report Type 3: Application Count Analysis
-		EXEC dbo.Report3 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+	EXEC dbo.Report3 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     END
     ELSE IF @ReportType = 4
     BEGIN
         -- Logic for Report Type 4: Success Rate Analysis
-		EXEC dbo.Report4 @TimeGrouping , @GroupByApplicantType
+	EXEC dbo.Report4 @TimeGrouping , @GroupByApplicantType
     END
     ELSE IF @ReportType = 5
     BEGIN
         -- Logic for Report Type 5: High Activity Periods
-		EXEC dbo.Report5 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+	EXEC dbo.Report5 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     END
     ELSE IF @ReportType = 6
     BEGIN
         -- Logic for Report Type 6: Grant Average by Category
-		EXEC dbo.Report6 @TimeGrouping
+	EXEC dbo.Report6 @TimeGrouping
     END
     ELSE IF @ReportType = 7
     BEGIN
         -- Logic for Report Type 7: Highest and Lowest Grants by Category
-		EXEC dbo.Report7 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+	EXEC dbo.Report7 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     END
     ELSE IF @ReportType = 8
     BEGIN
         -- Logic for Report Type 8: Applicant Performance
-		EXEC dbo.Report8 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+	EXEC dbo.Report8 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
     END
     ELSE
     BEGIN
@@ -1652,3 +1652,15 @@ BEGIN
     DROP TABLE IF EXISTS #FilteredReport;
 END;
 GO
+
+dbo.Report1 @TimeGrouping , @GroupByCategory, @GroupByApplicantType, @SortBy, @SortOrder
+dbo.Report2 @GroupByCategory, @SortBy, @SortOrder
+dbo.Report3 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+dbo.Report4 @TimeGrouping , @GroupByApplicantType
+dbo.Report5 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+dbo.Report6 @TimeGrouping
+dbo.Report7 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+dbo.Report8 @TimeGrouping , @GroupByCategory, @GroupByApplicantType
+dbo.Report9 @StartDate , @EndDate
+dbo.Report10 
+dbo.Report11 @X
