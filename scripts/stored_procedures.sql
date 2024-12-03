@@ -1,3 +1,6 @@
+DROP PROCEDURE IF EXISTS dbo.VerifyPasswordBySession
+GO
+
 DROP PROCEDURE IF EXISTS dbo.UpdateExpiredApplications
 GO
 
@@ -1463,5 +1466,43 @@ BEGIN
     SET [Current_Status] = 'expired'
     WHERE [Current_Status] = 'active'
       AND DATEDIFF(DAY, [Application_Date], GETDATE()) > 14;
+END;
+GO
+
+
+
+CREATE PROCEDURE dbo.VerifyPasswordBySession
+    @SessionID UNIQUEIDENTIFIER,
+    @InputPassword NVARCHAR(255)
+AS
+BEGIN
+    DECLARE @StoredPassword VARBINARY(512);
+
+    BEGIN TRY
+        -- Fetch the stored password for the user associated with the Session_ID
+        SELECT @StoredPassword = U.Password
+        FROM [dbo].[User] U
+        INNER JOIN [dbo].[User_Session] US
+        ON U.User_ID = US.User_ID
+        WHERE US.Session_ID = @SessionID;
+
+        -- If no password is found, throw an error
+        IF @StoredPassword IS NULL
+        BEGIN
+            THROW 50001, 'Δεν βρέθηκε κωδικός για τον συνδεδεμένο χρήστη.', 1;
+        END
+
+        -- Compare the input password with the stored password
+        IF HASHBYTES('SHA2_512', @InputPassword) != @StoredPassword
+        BEGIN
+            THROW 50002, 'Ο κωδικός σας είναι λανθασμένος.', 1;
+        END
+
+        -- If the password is correct, return without any output
+    END TRY
+    BEGIN CATCH
+        -- Re-throw any caught errors
+        THROW;
+    END CATCH
 END;
 GO
