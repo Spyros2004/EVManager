@@ -78,12 +78,12 @@ sqlsrv_close($conn);
     <title>Select Table and View Records</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e6ffe6;
-            margin: 0;
-            padding: 0;
-        }
+       body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e6f7ff; /* Απαλό μπλε φόντο */
+    margin: 0;
+    padding: 0;
+}
         .container {
             width: 90%;
             max-width: 1200px;
@@ -94,9 +94,9 @@ sqlsrv_close($conn);
             border-radius: 15px;
         }
         h2 {
-            text-align: center;
-            color: #2e7d32;
-        }
+    text-align: center;
+    color: #007bff; /* Μπλε τίτλοι */
+}
         form {
             text-align: center;
             margin-bottom: 30px;
@@ -109,18 +109,18 @@ sqlsrv_close($conn);
             margin-right: 10px;
         }
         input[type="submit"] {
-            padding: 10px 20px;
-            font-size: 1em;
-            background-color: #388e3c;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #007bff; /* Μπλε κουμπί υποβολής */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
         input[type="submit"]:hover {
-            background-color: #2e7d32;
-        }
+    background-color: #0056b3; /* Σκούρο μπλε κατά την αιώρηση */
+}
         table {
             width: 100%;
             border-collapse: collapse;
@@ -132,21 +132,22 @@ sqlsrv_close($conn);
             border: 1px solid #ddd;
         }
         th {
-            background-color: #388e3c;
-            color: white;
-            padding: 15px;
-            text-transform: uppercase;
-            font-size: 1em;
-        }
-        td {
-            padding: 15px;
-            text-align: center;
-            background-color: #f1fff1;
-            color: #333;
-            word-wrap: break-word; /* Breaks words that are too long for the cell width */
-            word-break: break-all; /* Forces the password to break lines if necessary */
-            max-width: 150px; /* Adjusted width for cells containing passwords */
-        }
+    background-color: #007bff; /* Μπλε κεφαλίδες */
+    color: white;
+    padding: 15px;
+    text-transform: uppercase;
+    font-size: 1em;
+}
+
+td {
+    padding: 15px;
+    text-align: center;
+    background-color: #f1faff; /* Απαλό μπλε για τα δεδομένα */
+    color: #333;
+    word-wrap: break-word; /* Διάσπαση λέξεων */
+    word-break: break-all; /* Αναγκαστική διάσπαση μεγάλων λέξεων */
+    max-width: 150px; /* Μέγιστο πλάτος κελιών */
+}
     </style>
 </head>
 <body>
