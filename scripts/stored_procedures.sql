@@ -1,3 +1,6 @@
+DROP PROCEDURE IF EXISTS dbo.UpdateExpiredApplications
+GO
+
 DROP PROCEDURE IF EXISTS dbo.GetOrderedApplications
 GO
 
@@ -1449,5 +1452,16 @@ BEGIN
         -- Re-throw the error
         THROW;
     END CATCH;
+END;
+GO
+
+CREATE PROCEDURE dbo.UpdateExpiredApplications
+AS
+BEGIN
+    -- Update applications where the current status is 'active' and the date difference is greater than 14 days
+    UPDATE [dbo].[Application]
+    SET [Current_Status] = 'expired'
+    WHERE [Current_Status] = 'active'
+      AND DATEDIFF(DAY, [Application_Date], GETDATE()) > 14;
 END;
 GO
