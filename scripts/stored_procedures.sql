@@ -1892,7 +1892,6 @@ BEGIN
         END AS TimePeriod,
         fr.Category_Number AS Category,
         CASE WHEN @GroupByApplicantType = 1 THEN ap.Company_Private ELSE NULL END AS Applicant_Type,
-        COUNT(*) AS Total_Applications,
         ROUND(
             COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY 
                 CASE 
