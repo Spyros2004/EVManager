@@ -1,5 +1,14 @@
-    DROP PROCEDURE IF EXISTS dbo.Report8
-    GO
+DROP PROCEDURE IF EXISTS dbo.Report11;
+GO
+
+DROP PROCEDURE IF EXISTS dbo.Report10;
+GO
+
+DROP PROCEDURE IF EXISTS dbo.Report9;
+GO
+    
+DROP PROCEDURE IF EXISTS dbo.Report8
+GO
 
     DROP PROCEDURE IF EXISTS dbo.Report7
     GO
@@ -8,6 +17,18 @@
     GO
 
     DROP PROCEDURE IF EXISTS dbo.Report5;
+    GO
+    
+    DROP PROCEDURE IF EXISTS dbo.Report4;
+    GO
+
+    DROP PROCEDURE IF EXISTS dbo.Report3;
+    GO
+
+    DROP PROCEDURE IF EXISTS dbo.Report2;
+    GO
+
+    DROP PROCEDURE IF EXISTS dbo.Report1;
     GO
 
     DROP PROCEDURE IF EXISTS dbo.GenerateReport
