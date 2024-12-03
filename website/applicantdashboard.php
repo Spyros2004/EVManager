@@ -68,21 +68,22 @@ if ($stmtApplications === false) {
     <title>Το Προφίλ Σου</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
-            margin: 0;
-            padding: 0;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background-color: #28a745; /* Changed to green */
-            color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+       body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(to bottom, #e1efff, #d0e4f8); /* Απαλό μπλε gradient */
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #0056b3; /* Μπλε */
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
         .welcome {
             font-size: 22px;
             font-weight: 700;
@@ -91,27 +92,32 @@ if ($stmtApplications === false) {
             display: flex;
             gap: 10px;
         }
-        .btn {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            text-decoration: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .btn:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-        .btn.logout {
-            background-color: #dc3545;
-        }
-        .btn.logout:hover {
-            background-color: #c82333;
-        }
+       
+.btn {
+    padding: 10px 20px;
+    background-color: #0056b3; /* Μπλε */
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    background-color: #004494; /* Σκούρο μπλε */
+    transform: translateY(-2px);
+}
+
+.btn.logout {
+    background-color: #c82333; /* Κόκκινο παραμένει ως αποσύνδεση */
+}
+
+.btn.logout:hover {
+    background-color: #a71d2a; /* Σκούρο κόκκινο */
+}
+
         h1, h2 {
             text-align: center;
             color: #333;
