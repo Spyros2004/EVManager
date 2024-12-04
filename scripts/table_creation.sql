@@ -1,5 +1,4 @@
-/*USE COMPANY --name of your database
-GO*/
+
 
 SET ANSI_NULLS ON
 GO
@@ -119,6 +118,14 @@ CREATE TABLE [dbo].[User_Session]
     [Login_Time] DATETIME NOT NULL DEFAULT GETDATE(),
     CONSTRAINT [PK_USER_SESSION] PRIMARY KEY ([Session_ID] ASC)
 )
+
+--CREATE THE INDEXES
+CREATE UNIQUE NONCLUSTERED INDEX IX_Application_TrackingNumber 
+ON Application (Tracking_Number);
+
+CREATE INDEX IX_Application_Status_Category 
+ON Application (Current_Status, Category_Number);
+
 
 --CREATE FOREIGN KEY CONSTRAINTS
 ALTER TABLE [dbo].[Discarded_Car] WITH CHECK ADD CONSTRAINT [FK_DISCARDED_CAR_APPLICATION]
