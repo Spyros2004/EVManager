@@ -117,17 +117,6 @@ CREATE TABLE [dbo].[User_Session]
     CONSTRAINT [PK_USER_SESSION] PRIMARY KEY ([Session_ID] ASC)
 )
 
---CREATE THE INDEXES
-CREATE UNIQUE NONCLUSTERED INDEX IX_Application_TrackingNumber ON Application (Tracking_Number);
-
-CREATE INDEX IX_Application_Status_Category ON Application (Current_Status, Category_Number);
-
-CREATE INDEX IX_Application_ApplicationDate ON Application (Application_Date);
-
-CREATE INDEX IX_Applicant_UserID_CompanyPrivate ON Applicant (User_ID, Company_Private);
-
-CREATE INDEX IX_Application_Status_Date ON Application (Current_Status, Application_Date);
-
 --CREATE FOREIGN KEY CONSTRAINTS
 ALTER TABLE [dbo].[Discarded_Car] WITH CHECK ADD CONSTRAINT [FK_DISCARDED_CAR_APPLICATION]
 FOREIGN KEY ([Application_ID]) REFERENCES [dbo].[Application] ([Application_ID])
