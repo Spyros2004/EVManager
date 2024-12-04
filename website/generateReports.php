@@ -23,9 +23,9 @@ $categoryFilter = isset($_POST['categoryFilter']) && !empty($_POST['categoryFilt
 $applicantType = isset($_POST['applicantType']) && in_array($_POST['applicantType'], ['Company', 'Private']) ? $_POST['applicantType'] : null;
 $timeGrouping = isset($_POST['timeGrouping']) && in_array($_POST['timeGrouping'], ['daily', 'weekly', 'monthly', 'quarterly', 'yearly']) ? $_POST['timeGrouping'] : null;
 
-// Determine grouping parameters
-$groupByCategory = isset($_POST['groupByCategory']) && $_POST['groupByCategory'] === '1' ? 1 : 0;
-$groupByApplicantType = isset($_POST['groupByApplicantType']) && $_POST['groupByApplicantType'] === '1' ? 1 : 0;
+// Determine grouping parameters from dropdowns
+$groupByCategory = isset($_POST['groupByCategoryInput']) && $_POST['groupByCategoryInput'] === 'Yes' ? 1 : 0;
+$groupByApplicantType = isset($_POST['groupByApplicantType']) && $_POST['groupByApplicantType'] === 'Yes' ? 1 : 0;
 
 // Set default values for Sort By and Sort Order
 $sortBy = null;
@@ -35,10 +35,10 @@ $sortOrder = null;
 if ($reportType === 1 || $reportType === 2) {
     $sortBy = isset($_POST['sortBy']) ? $_POST['sortBy'] : 'Amount';
     $sortOrder = isset($_POST['sortOrder']) ? $_POST['sortOrder'] : 'ASC';
-} 
+}
 
 // Construct and execute the query based on report type
-if ($reportType >= 1 && $reportType <= 8 ) {
+if ($reportType >= 1 && $reportType <= 8) {
     $sql = "EXEC GenerateReport ?, ?, ?, ?, ?, ?, ?, ?, ?, ?;";
     $params = [
         $startDate,
@@ -156,6 +156,21 @@ if (sqlsrv_has_rows($stmt) === false) {
 
     echo "</tbody></table>";
 }
+// Add a button to redirect back to the reports page
+echo '<div style="text-align: center; margin-top: 20px;">
+        <form action="reports.php" method="get">
+            <button type="submit" style="
+                background-color: #007bff; 
+                color: white; 
+                padding: 10px 20px; 
+                border: none; 
+                border-radius: 5px; 
+                font-size: 16px; 
+                cursor: pointer;">
+                Start New Report
+            </button>
+        </form>
+      </div>';
 
 // Free statement and close connection
 sqlsrv_free_stmt($stmt);
