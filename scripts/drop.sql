@@ -1,13 +1,18 @@
 -- DROP CONSTRAINTS
 DROP INDEX IX_Application_TrackingNumber ON Application;
+GO
 
 DROP INDEX IX_Application_Status_Category ON Application;
+GO
 
 DROP INDEX IX_Application_ApplicationDate ON Application;
+GO
 
 DROP INDEX IX_Applicant_UserID_CompanyPrivate ON Applicant;
+GO
 
 DROP INDEX IX_Application_Status_Date ON Application;
+GO
 
 -- Drop foreign key constraints
 ALTER TABLE [dbo].[Discarded_Car] DROP CONSTRAINT [FK_DISCARDED_CAR_APPLICATION];
