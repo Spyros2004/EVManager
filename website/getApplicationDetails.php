@@ -200,10 +200,11 @@ sqlsrv_free_stmt($stmtDocuments);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .popup-content h2 {
-            margin-top: 20px;
-            color: #2e7d32;
-        }
+       /* Popup Content Headings */
+.popup-content h2 {
+    margin-top: 20px;
+    color: #0056b3; /* Blue */
+}
 
         /* Document Entry Styling */
 .document-entry {
@@ -215,11 +216,6 @@ sqlsrv_free_stmt($stmtDocuments);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Popup Content Headings */
-.popup-content h2 {
-    margin-top: 20px;
-    color: #2e7d32;
-}
 
 
     </style>
