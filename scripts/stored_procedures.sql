@@ -415,8 +415,70 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-
-        -- Check for NULL values in essential fields for User
+		SET @First_Name = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@First_Name, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		SET @Last_Name = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Last_Name, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		SET @Username = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Username, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+        SET @Password = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Password, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		SET @User_Type = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@User_Type, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		SET @Identification = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Identification, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		SET @Company_Private = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Company_Private, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		-- Check for NULL values in essential fields for User
         IF @First_Name IS NULL OR @Last_Name IS NULL OR @Username IS NULL 
             OR @Email IS NULL OR @Password IS NULL OR @User_Type IS NULL
         BEGIN
@@ -503,7 +565,25 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-        BEGIN TRY
+		SET @Username = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Username, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+        SET @Password = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Password, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		BEGIN TRY
             -- Declare variables to hold the stored password hash, status, user ID, and user type
             DECLARE @StoredPassword VARBINARY(512);
             DECLARE @Status VARCHAR(20);
@@ -569,8 +649,25 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-
-        -- Retrieve User_ID from the session
+		SET @LicensePlate = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@LicensePlate, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+        SET @Document = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Document, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		-- Retrieve User_ID from the session
         DECLARE @UserID INT;
         SELECT @UserID = User_ID
         FROM User_Session
@@ -920,8 +1017,16 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-
-        -- Validate if the application exists for the given identification, tracking number, and active status
+		SET @Identification = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Identification, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		-- Validate if the application exists for the given identification, tracking number, and active status
         IF NOT EXISTS (
             SELECT 1
             FROM Application AS App
@@ -960,7 +1065,24 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-
+		SET @Document1 = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Document1, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+		SET @Document2 = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Document2, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
         -- Declare variables to store retrieved Application_ID and User_ID
         DECLARE @ApplicationID INT;
         DECLARE @UserID INT;
@@ -1080,7 +1202,15 @@ GO
 AS
 BEGIN
     SET NOCOUNT ON;
-
+	SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Reason, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
     -- Validate parameters
     IF @Action NOT IN (0, 1)
     BEGIN
@@ -1146,7 +1276,15 @@ CREATE PROCEDURE dbo.AcceptOrRejectApplicationTOM
 AS
 BEGIN
     SET NOCOUNT ON;
-
+	SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Reason, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
     -- Validate parameters
     IF @Action NOT IN (0, 1)
     BEGIN
@@ -1211,6 +1349,15 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
+		SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@Reason, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
 
         -- Retrieve the User_ID from the Session_ID
         DECLARE @UserID INT;
@@ -1463,6 +1610,24 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
+		SET @DocumentType = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@DocumentType, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', '');
+		SET @URL = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@URL, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
 
         -- Declare variables
         DECLARE @UserID INT;
@@ -1556,6 +1721,15 @@ GO
         @InputPassword NVARCHAR(255)
     AS
     BEGIN
+		SET @InputPassword = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                                REPLACE(REPLACE(REPLACE(REPLACE(@InputPassword, '@', ''), '#', ''), '%', ''),
+                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
+                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
+                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
+                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
         DECLARE @StoredPassword VARBINARY(512);
 
         BEGIN TRY
