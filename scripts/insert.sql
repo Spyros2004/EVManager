@@ -1,5 +1,6 @@
 INSERT INTO [dbo].[User] ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status])
 VALUES ('Admin', 'Admin', 'admin', 'admin@example.com', HASHBYTES('SHA2_512', '1234'), 'Admin', 'approved');
+GO
 
 INSERT INTO Sponsorship_Category (Description, Amount, Total_Positions)
 VALUES
@@ -19,6 +20,7 @@ VALUES
 (N'Χορηγία για αγορά καινούργιου οχήματος μηδενικών εκπομπών CO2 κατηγορίας L (εξαιρουμένων των οχημάτων κατηγορίας L6e (υποκατηγορία "Β") και L7e (υποκατηγορία "Β και C"))', 1500, 893),
 (N'Χορηγία για αγορά καινούργιου ηλεκτρικού ποδήλατου (υποβοηθούμενης ποδηλάτησης) χωρίς περιορισμό για τη θέση του κινητήρα ή της μπαταρίας', 500, 933),
 (N'Απόσυρση έναντι παροχής δωρεάν εισιτηρίων αξίας €250 για χρήση στις τακτικές γραμμές λεωφορείων και του εφάπαξ ποσού των €500', 750, 72);
+GO
 
 INSERT INTO [dbo].[Criterion] ([Title], [Description])
 VALUES
@@ -32,6 +34,7 @@ VALUES
 ('Multiple Dependents', N'Ο αιτητής πρέπει να είναι πολύτεκνος με τουλάχιστον 4 εξαρτώμενα παιδιά'),
 ('Disabled Accessibility', N'Ο αιτητής πρέπει να είναι άτομο με αναπηρίες'),
 ('New Vehicle Requirement', N'Το όχημα πρέπει να είναι καινούργιο και να μην έχει καταχωρηθεί προγενέστερα')
+  GO
 
 -- Γ1: Απόσυρση και αντικατάσταση με καινούργιο όχημα ιδιωτικής χρήσης χαμηλών εκπομπών CO2
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -40,6 +43,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (1, 3), -- Purchase Price
 (1, 4), -- CO2 Emissions
 (1, 10); -- New Vehicle Requirement
+GO
 
 -- Γ2: Απόσυρση και αντικατάσταση με καινούργιο όχημα ταξί χαμηλών εκπομπών CO2
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -49,6 +53,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (2, 4), -- CO2 Emissions
 (2, 6), -- Taxi Use
 (2, 10); -- New Vehicle Requirement
+GO
 
 -- Γ3: Απόσυρση και αντικατάσταση με καινούργιο όχημα χαμηλών εκπομπών CO2 για δικαιούχο αναπηρικού οχήματος
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -58,6 +63,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (3, 4), -- CO2 Emissions
 (3, 9), -- Disabled Accessibility
 (3, 10); -- New Vehicle Requirement
+GO
 
 -- Γ4: Απόσυρση και αντικατάσταση με καινούργιο όχημα χαμηλών εκπομπών CO2 πολύτεκνης οικογένειας
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -67,6 +73,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (4, 4), -- CO2 Emissions
 (4, 8), -- Multiple Dependents
 (4, 10); -- New Vehicle Requirement
+GO
 
 -- Γ5: Χορηγία για αγορά καινούργιου οχήματος ιδιωτικής χρήσης μηδενικών εκπομπών CO2
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -75,6 +82,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (5, 5), -- Electric Vehicle
 (5, 6), -- Ownership Restriction
 (5, 10); -- New Vehicle Requirement
+GO
 
 -- Γ6: Χορηγία για αγορά καινούργιου οχήματος ταξί μηδενικών εκπομπών CO2
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -83,6 +91,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (6, 6), -- Taxi Use
 (6, 7), -- Ownership Restriction
 (6, 10); -- New Vehicle Requirement
+GO
 
 -- Γ7: Χορηγία για αγορά καινούργιου οχήματος μηδενικών εκπομπών CO2 για δικαιούχο αναπηρικού οχήματος
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -91,6 +100,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (7, 6), -- Ownership Restriction
 (7, 9), -- Disabled Accessibility
 (7, 10); -- New Vehicle Requirement
+GO
 
 -- Γ8: Χορηγία για αγορά καινούργιου οχήματος μηδενικών εκπομπών CO2 πολύτεκνης οικογένειας
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -99,6 +109,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (8, 6), -- Ownership Restriction
 (8, 8), -- Multiple Dependents
 (8, 10); -- New Vehicle Requirement
+GO
 
 -- Γ10: Χορηγία για αγορά καινούργιου ηλεκτρικού οχήματος κατηγορίας Ν1
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -106,6 +117,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (10, 5), -- Electric Vehicle
 (10, 6), -- Ownership Restriction
 (10, 10); -- New Vehicle Requirement
+GO
 
 -- Γ11: Χορηγία για αγορά καινούργιου ηλεκτρικού οχήματος κατηγορίας Ν2
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -113,6 +125,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (11, 5), -- Electric Vehicle
 (11, 6), -- Ownership Restriction
 (11, 10); -- New Vehicle Requirement
+GO
 
 -- Γ12: Χορηγία για αγορά καινούργιου οχήματος κατηγορίας M2
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -120,6 +133,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (12, 5), -- Electric Vehicle
 (12, 6), -- Ownership Restriction
 (12, 10); -- New Vehicle Requirement
+GO
 
 -- Γ13: Χορηγία για αγορά καινούργιου οχήματος μηδενικών εκπομπών CO2 κατηγορίας L6e/L7e
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -127,6 +141,7 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (13, 5), -- Electric Vehicle
 (13, 6), -- Ownership Restriction
 (13, 10); -- New Vehicle Requirement
+GO
 
 -- Γ14: Χορηγία για αγορά καινούργιου οχήματος κατηγορίας L
 INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number]) VALUES
@@ -134,3 +149,4 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (14, 5), -- Electric Vehicle
 (14, 6), -- Ownership Restriction
 (14, 10); -- New Vehicle Requirement
+GO
