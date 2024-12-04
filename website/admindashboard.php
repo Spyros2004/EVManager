@@ -380,7 +380,7 @@ button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 40px;
     background-color: #0056b3; /* Μπλε */
     color: white;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -391,7 +391,7 @@ button {
     font-weight: bold;
 }
 .logout-btn {
-    padding: 10px 20px;
+    padding: 10px 15px;
     color: white;
     background-color: #dc3545;
     border: none;
@@ -406,28 +406,24 @@ button {
     background-color: #c82333;
 }
 
-/* Reports Button Container */
-.reports-container {
-    position: absolute;
-    top: 50px; /* Ρυθμίστε το ύψος για να είναι κάτω από το header */
-}
-
-/* Reports Button */
 .reports-btn {
-    padding: 15px 25px;
-    background-color: #004085;
+    background-color: #007bff;
     color: white;
+    padding: 12px 12px;
+    font-size: 1.0em;
+    font-weight: bold;
     border: none;
     border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s;
+    margin-bottom: 10px;
 }
 
 .reports-btn:hover {
     background-color: #0056b3;
+    transform: scale(1.05);
 }
+
 
     </style>
  <script>
@@ -593,21 +589,20 @@ function checkExpired() {
 </head>
 <body>
 <div class="header">
-    <div class="welcome">Καλωσήρθες, Admin</div>
     <a href="logout.php" class="logout-btn">Αποσύνδεση</a>
 </div>
 
-<!-- Το κουμπί για Αναφορές -->
-<div class="reports-container">
-    <a href="reports.php" class="reports-btn">Αναφορές</a>
+<!-- Reports Button -->
+<div class="reports-section" style="text-align: center; margin-bottom: 20px;">
+    <button class="reports-btn" onclick="window.location.href='reports.php'">Δημιουργία Αναφορών</button>
 </div>
 
-
-    <div class="container">
+<!-- Pending User Requests Section -->
+<div class="container">
     <h2>Εκκρεμή Αιτήματα Χρηστών</h2>
     <table>
-            <thead>
-                <tr>
+        <thead>
+            <tr>
                 <th>Αναγνωριστικο Χρηστη</th>
                 <th>Ονομα</th>
                 <th>Επωνυμο</th>
@@ -616,28 +611,28 @@ function checkExpired() {
                 <th>Τυπος Χρηστη</th>
                 <th>Κατασταση</th>
                 <th>Ενεργειες</th>
-
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($row = sqlsrv_fetch_array($stmtUsers, SQLSRV_FETCH_ASSOC)): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['User_ID']) ?></td>
+                    <td><?= htmlspecialchars($row['First_Name']) ?></td>
+                    <td><?= htmlspecialchars($row['Last_Name']) ?></td>
+                    <td><?= htmlspecialchars($row['Username']) ?></td>
+                    <td><?= htmlspecialchars($row['Email']) ?></td>
+                    <td><?= htmlspecialchars($row['User_Type']) ?></td>
+                    <td><?= htmlspecialchars($row['Status']) ?></td>
+                    <td>
+                        <button class="btn-approve" onclick="handleUserRequest(<?= $row['User_ID'] ?>, 1)">Approve</button>
+                        <button class="btn-reject" onclick="handleUserRequest(<?= $row['User_ID'] ?>, 0)">Reject</button>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-    <?php while ($row = sqlsrv_fetch_array($stmtUsers, SQLSRV_FETCH_ASSOC)): ?>
-        <tr>
-            <td><?= htmlspecialchars($row['User_ID']) ?></td>
-            <td><?= htmlspecialchars($row['First_Name']) ?></td>
-            <td><?= htmlspecialchars($row['Last_Name']) ?></td>
-            <td><?= htmlspecialchars($row['Username']) ?></td>
-            <td><?= htmlspecialchars($row['Email']) ?></td>
-            <td><?= htmlspecialchars($row['User_Type']) ?></td>
-            <td><?= htmlspecialchars($row['Status']) ?></td>
-            <td>
-                <button class="btn-approve" onclick="handleUserRequest(<?= $row['User_ID'] ?>, 1)">Approve</button>
-                <button class="btn-reject" onclick="handleUserRequest(<?= $row['User_ID'] ?>, 0)">Reject</button>
-            </td>
-        </tr>
-    <?php endwhile; ?>
-</tbody>
-        </table>
-    </div>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+</div>
+
     <div class="container">
     <h2>Όλες οι Αιτήσεις</h2>
     <!-- Check for Expired Button -->
