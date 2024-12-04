@@ -376,6 +376,58 @@ button {
     transform: scale(1.05);
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #0056b3; /* Μπλε */
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.welcome {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+.logout-btn {
+    padding: 10px 20px;
+    color: white;
+    background-color: #dc3545;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+/* Reports Button Container */
+.reports-container {
+    position: absolute;
+    top: 50px; /* Ρυθμίστε το ύψος για να είναι κάτω από το header */
+}
+
+/* Reports Button */
+.reports-btn {
+    padding: 15px 25px;
+    background-color: #004085;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.reports-btn:hover {
+    background-color: #0056b3;
+}
 
     </style>
  <script>
@@ -540,7 +592,17 @@ function checkExpired() {
 
 </head>
 <body>
-    <h1>Καλωσορίσατε στο Admin Dashboard</h1>
+<div class="header">
+    <div class="welcome">Καλωσήρθες, Admin</div>
+    <a href="logout.php" class="logout-btn">Αποσύνδεση</a>
+</div>
+
+<!-- Το κουμπί για Αναφορές -->
+<div class="reports-container">
+    <a href="reports.php" class="reports-btn">Αναφορές</a>
+</div>
+
+
     <div class="container">
     <h2>Εκκρεμή Αιτήματα Χρηστών</h2>
     <table>
