@@ -114,13 +114,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 .container {
     width: 90%;
-    max-width: 600px;
+    max-width: 800px;
     background: #ffffff;
-    padding: 20px 30px;
+    padding: 25px 35px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
+
 
 h2 {
     color: #0056b3;
