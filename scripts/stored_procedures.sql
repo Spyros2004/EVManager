@@ -1600,7 +1600,7 @@ BEGIN
     IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
     BEGIN
         -- If the table doesn't exist, throw an error
-        THROW 50010, 'The temporary filter table #FilteredReport is required but does not exist.', 1;
+        THROW 50011, 'Πρέπει πρώτα να εκτελέσετε τη διαδικασία GenerateReport.', 1;
     END;
 
     -- Use #FilteredReport for calculations
@@ -1649,7 +1649,7 @@ BEGIN
     -- Check for existence of the #FilteredReport table
     IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
     BEGIN
-        THROW 50010, '#FilteredReport table not found. Please ensure it is created and populated.', 1;
+        THROW 50011, 'Πρέπει πρώτα να εκτελέσετε τη διαδικασία GenerateReport.', 1;
     END;
 
     -- Query using the filtered report and approved applications
@@ -1677,16 +1677,10 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Validate inputs
-    IF @TimeGrouping IS NOT NULL AND @TimeGrouping NOT IN ('daily', 'weekly', 'monthly', 'quarterly', 'yearly')
-    BEGIN
-        THROW 50010, 'Invalid TimeGrouping value. Please choose "daily", "weekly", "monthly", "quarterly", or "yearly".', 1;
-    END;
-
     -- Check for existence of the #FilteredReport table
     IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
     BEGIN
-        THROW 50002, '#FilteredReport table not found. Please ensure it is created and populated.', 1;
+        THROW 50011, 'Πρέπει πρώτα να εκτελέσετε τη διαδικασία GenerateReport.', 1;
     END;
 
     -- Perform Application Count Analysis
@@ -1730,7 +1724,7 @@ BEGIN
     -- Check for existence of the #FilteredReport table
     IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
     BEGIN
-        THROW 50010, '#FilteredReport table not found. Please ensure it is created and populated.', 1;
+        THROW 50011, 'Πρέπει πρώτα να εκτελέσετε τη διαδικασία GenerateReport.', 1;
     END;
 
     -- Perform Success Rate Analysis
@@ -1784,7 +1778,7 @@ GO
 
         IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
         BEGIN
-            THROW 50010, '#FilteredReport does not exist. Please ensure the table is created before running the report.', 1;
+            THROW 50011, 'Πρέπει πρώτα να εκτελέσετε τη διαδικασία GenerateReport.', 1;
         END;
 
         -- Base query structure
@@ -1842,7 +1836,7 @@ GO
         -- Check if #FilteredReport exists
         IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
         BEGIN
-            THROW 50010, '#FilteredReport does not exist. Please ensure the table is created before running the report.', 1;
+            THROW 50011, 'Πρέπει πρώτα να εκτελέσετε τη διαδικασία GenerateReport.', 1;
         END;
 
         -- Generate report for high activity periods based on the modification table
@@ -1894,7 +1888,7 @@ GO
         -- Check if #FilteredReport exists
         IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
         BEGIN
-            THROW 50010, '#FilteredReport temporary table not found. Ensure filtering step is completed before running this report.', 1;
+            THROW 50011, 'Πρέπει πρώτα να εκτελέσετε τη διαδικασία GenerateReport.', 1;
         END;
 
         -- Query to calculate the average grant amount
@@ -1962,7 +1956,7 @@ GO
         -- Check for existence of the #FilteredReport table
         IF OBJECT_ID('tempdb..#FilteredReport') IS NULL
         BEGIN
-            THROW 50010, '#FilteredReport table not found. Please ensure it is created and populated.', 1;
+            THROW 50011, 'Πρέπει πρώτα να εκτελέσετε τη διαδικασία GenerateReport.', 1;
         END;
 
         -- Temporary table to store calculated amounts
@@ -2141,57 +2135,57 @@ CREATE PROCEDURE dbo.GenerateReport
         -- Validate CategoryFilter
         IF @CategoryFilter != 0 AND @CategoryFilter NOT IN (SELECT Category_Number FROM Sponsorship_Category)
         BEGIN
-            THROW 50001, 'Invalid Category Filter provided. Please choose a valid category.', 1;
+            THROW 50001, 'Μη έγκυρο φίλτρο κατηγορίας. Παρακαλώ επιλέξτε μια έγκυρη κατηγορία.', 1;
         END;
 
         -- Validate ApplicantType
         IF  @ApplicantType IS NOT NULL AND @ApplicantType NOT IN ('Company', 'Private')
         BEGIN
-            THROW 50002, 'Invalid Applicant Type provided. It must be "Company" or "Private".', 1;
+            THROW 50002, 'Μη έγκυρος τύπος αιτούντος. Πρέπει να είναι «Εταιρεία» ή «Ιδιώτης».', 1;
         END;
 
         -- Validate TimeGrouping
         IF @TimeGrouping IS NOT NULL AND @TimeGrouping NOT IN ('daily', 'weekly', 'monthly', 'quarterly', 'yearly')
         BEGIN
-            THROW 50003, 'Invalid Time Grouping provided. Please choose one of "daily", "weekly", "monthly", "quarterly", or "yearly".', 1;
+            THROW 50003, 'Παρέχεται μη έγκυρη ομαδοποίηση χρόνου. Παρακαλούμε επιλέξτε ένα από τα εξής: «καθημερινά», «εβδομαδιαία», «μηνιαία», «τριμηνιαία» ή «ετήσια».', 1;
         END;
 
         -- Validate Specific Conditions Based on ReportType
         IF (@ReportType NOT IN (1, 2)) AND (@SortBy IS NOT NULL OR @SortOrder IS NOT NULL)
         BEGIN
-            THROW 50006, 'Sort By and Sort Order are only valid for Report Types 1 and 2.', 1;
+            THROW 50006, 'Η Ταξινόμηση κατά και η Ταξινόμηση κατά σειρά ισχύουν μόνο για τις αναφορές 1 και 2.', 1;
         END;
 
 		 -- Validate SortBy
         IF @SortBy IS NOT NULL AND @SortBy NOT IN ('Amount', 'Category')
         BEGIN
-            THROW 50004, 'Invalid Sort By value. Please choose either "Amount" or "Category".', 1;
+            THROW 50004, 'Μη έγκυρη τιμή Sort By. Παρακαλούμε επιλέξτε είτε «Ποσό» είτε «Κατηγορία».', 1;
         END;
 
         -- Validate SortOrder
         IF @SortOrder IS NOT NULL AND @SortOrder NOT IN ('ASC', 'DESC')
         BEGIN
-            THROW 50005, 'Invalid Sort Order value. Please choose either "ASC" or "DESC".', 1;
+            THROW 50005, 'Μη έγκυρη τιμή Ταξινόμηση. Παρακαλούμε επιλέξτε είτε «ASC» είτε «DESC».', 1;
         END;
 
         IF @ReportType = 2 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @ApplicantType IS NOT NULL OR @TimeGrouping IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
         BEGIN
-            THROW 50007, 'Report Type 2 does not support filtering or grouping by time, category, or applicant type.', 1;
+            THROW 50007, 'Η αναφορά 2 δεν υποστηρίζει φιλτράρισμα ή ομαδοποίηση ανά χρόνο, κατηγορία ή τύπο αιτούντος.', 1;
         END;
 
         IF @ReportType = 4 AND (@CategoryFilter != 0 OR @GroupByCategory = 1)
         BEGIN
-            THROW 50008, 'Report Type 4 does not allow filtering by category or grouping by category.', 1;
+            THROW 50008, 'Η αναφορά 4 δεν επιτρέπει το φιλτράρισμα ανά κατηγορία ή την ομαδοποίηση ανά κατηγορία.', 1;
         END;
 
         IF @ReportType = 6 AND (@TimeGrouping IS NULL OR @StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
         BEGIN
-            THROW 50009, 'Report Type 6 does not allow filtering by time or grouping by category or applicant type.', 1;
+            THROW 50009, 'Η αναφορά 6 δεν επιτρέπει το φιλτράρισμα με βάση το χρόνο ή την ομαδοποίηση με βάση την κατηγορία ή τον τύπο αιτούντος.', 1;
         END;
 
         IF (@ReportType IN (1, 2)) AND (@SortBy IS NULL OR @SortOrder IS NULL)
         BEGIN
-            THROW 50010, 'Report Type 1 and 2 requires ordering', 1;
+            THROW 50011, 'Οι αναφορές 1 και 2 απαιτούν ordering', 1;
         END;
 
         -- Create temporary table
@@ -2263,7 +2257,7 @@ CREATE PROCEDURE dbo.GenerateReport
         ELSE
         BEGIN
             -- Throw an error for invalid ReportType
-            THROW 50000, 'Invalid Report Type provided. Please choose a valid report type (1-8).', 1;
+            THROW 50000, 'Μη έγκυρος τύπος αναφοράς παρέχεται. Παρακαλούμε επιλέξτε έναν έγκυρο τύπο αναφοράς (1-8).', 1;
         END;
 
         -- Clean up temp table
