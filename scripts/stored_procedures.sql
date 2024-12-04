@@ -2084,8 +2084,6 @@ BEGIN
 END;
 GO
 
-DROP PROCEDURE IF EXISTS dbo.Report10
-GO
 CREATE PROCEDURE dbo.Report10
 AS
 BEGIN
@@ -2106,6 +2104,7 @@ BEGIN
     HAVING COUNT(DISTINCT FORMAT(a.Application_Date, 'yyyy-MM')) = 4
     ORDER BY sc.Category_Number;
 END;
+GO
 
 CREATE PROCEDURE dbo.Report11
     @X INT    -- Minimum number of applications threshold
@@ -2127,7 +2126,7 @@ GO
 CREATE PROCEDURE dbo.GenerateReport
         @StartDate DATE = NULL,
         @EndDate DATE = NULL,
-        @CategoryFilter INT = NULL,
+        @CategoryFilter INT = 0,
         @ApplicantType VARCHAR(20) = NULL, -- 'Company', 'Private', or NULL
         @TimeGrouping VARCHAR(9) = NULL, -- 'daily', 'monthly', 'quarterly', 'yearly'
         @GroupByCategory BIT = 0,          -- 1 to group by category, 0 otherwise
@@ -2140,39 +2139,39 @@ CREATE PROCEDURE dbo.GenerateReport
         SET NOCOUNT ON;
 
         -- Validate CategoryFilter
-        IF @CategoryFilter IS NOT NULL AND @CategoryFilter NOT IN (SELECT Category_Number FROM Sponsorship_Category)
+        IF @CategoryFilter != 0 AND @CategoryFilter NOT IN (SELECT Category_Number FROM Sponsorship_Category)
         BEGIN
-            THROW 50001, 'Invalid CategoryFilter provided. Please choose a valid category.', 1;
+            THROW 50001, 'Invalid Category Filter provided. Please choose a valid category.', 1;
         END;
 
         -- Validate ApplicantType
-        IF @ApplicantType IS NOT NULL AND @ApplicantType NOT IN ('Company', 'Private')
+        IF  @ApplicantType IS NOT NULL AND @ApplicantType NOT IN ('Company', 'Private')
         BEGIN
-            THROW 50002, 'Invalid ApplicantType provided. It must be "Company" or "Private".', 1;
+            THROW 50002, 'Invalid Applicant Type provided. It must be "Company" or "Private".', 1;
         END;
 
         -- Validate TimeGrouping
         IF @TimeGrouping IS NOT NULL AND @TimeGrouping NOT IN ('daily', 'weekly', 'monthly', 'quarterly', 'yearly')
         BEGIN
-            THROW 50003, 'Invalid TimeGrouping provided. Please choose one of "daily", "weekly", "monthly", "quarterly", or "yearly".', 1;
-        END;
-
-        -- Validate SortBy
-        IF @SortBy NOT IN ('Amount', 'Category')
-        BEGIN
-            THROW 50004, 'Invalid SortBy value. Please choose either "Amount" or "Category".', 1;
-        END;
-
-        -- Validate SortOrder
-        IF @SortOrder NOT IN ('ASC', 'DESC')
-        BEGIN
-            THROW 50005, 'Invalid SortOrder value. Please choose either "ASC" or "DESC".', 1;
+            THROW 50003, 'Invalid Time Grouping provided. Please choose one of "daily", "weekly", "monthly", "quarterly", or "yearly".', 1;
         END;
 
         -- Validate Specific Conditions Based on ReportType
         IF (@ReportType NOT IN (1, 2)) AND (@SortBy IS NOT NULL OR @SortOrder IS NOT NULL)
         BEGIN
-            THROW 50006, 'SortBy and SortOrder are only valid for Report Types 1 and 2.', 1;
+            THROW 50006, 'Sort By and Sort Order are only valid for Report Types 1 and 2.', 1;
+        END;
+
+		 -- Validate SortBy
+        IF @SortBy IS NOT NULL AND @SortBy NOT IN ('Amount', 'Category')
+        BEGIN
+            THROW 50004, 'Invalid Sort By value. Please choose either "Amount" or "Category".', 1;
+        END;
+
+        -- Validate SortOrder
+        IF @SortOrder IS NOT NULL AND @SortOrder NOT IN ('ASC', 'DESC')
+        BEGIN
+            THROW 50005, 'Invalid Sort Order value. Please choose either "ASC" or "DESC".', 1;
         END;
 
         IF @ReportType = 2 AND (@StartDate IS NOT NULL OR @EndDate IS NOT NULL OR @ApplicantType IS NOT NULL OR @TimeGrouping IS NOT NULL OR @GroupByCategory = 1 OR @GroupByApplicantType = 1)
@@ -2180,7 +2179,7 @@ CREATE PROCEDURE dbo.GenerateReport
             THROW 50007, 'Report Type 2 does not support filtering or grouping by time, category, or applicant type.', 1;
         END;
 
-        IF @ReportType = 4 AND (@CategoryFilter IS NOT NULL OR @GroupByCategory = 1)
+        IF @ReportType = 4 AND (@CategoryFilter != 0 OR @GroupByCategory = 1)
         BEGIN
             THROW 50008, 'Report Type 4 does not allow filtering by category or grouping by category.', 1;
         END;
