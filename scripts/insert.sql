@@ -150,3 +150,232 @@ INSERT INTO [dbo].[Category_Has_Criterion] ([Category_Number], [Criterion_Number
 (14, 6), -- Ownership Restriction
 (14, 10); -- New Vehicle Requirement
 GO
+
+SET NOCOUNT ON
+DECLARE @UserID INT = 1;
+
+WHILE @UserID <= 5500
+BEGIN
+    INSERT INTO [dbo].[User] ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status])
+    VALUES (
+        N'FirstName' + CAST(@UserID AS NVARCHAR),
+        N'LastName' + CAST(@UserID AS NVARCHAR),
+        N'username' + CAST(@UserID AS NVARCHAR),
+        N'user' + CAST(@UserID AS NVARCHAR) + N'@example.com',
+        HASHBYTES('SHA2_256', N'password' + CAST(@UserID AS NVARCHAR)),
+        CASE WHEN @UserID <= 5000 THEN N'Applicant' ELSE N'AA' END,
+        CASE WHEN @UserID % 3 = 0 THEN N'approved' ELSE N'pending' END
+    );
+
+    SET @UserID = @UserID + 1;
+END;
+
+-- Step 2: Populate Applicant Table (5,500 applicants)
+DECLARE @ApplicantID INT = 1;
+
+WHILE @ApplicantID <= 5500
+BEGIN
+    INSERT INTO [dbo].[Applicant] ([Identification], [Company_Private], [Gender], [BirthDate], [Telephone_Number], [Address], [User_ID])
+    VALUES (
+        CAST(100000000 + @ApplicantID AS NVARCHAR), -- Identification
+        CASE WHEN @ApplicantID <= 5000 THEN N'private' ELSE N'company' END,
+        CASE WHEN @ApplicantID % 3 = 0 THEN N'M' WHEN @ApplicantID % 3 = 1 THEN N'F' ELSE N'O' END,
+        DATEADD(YEAR, -ABS(CHECKSUM(NEWID())) % 60, GETDATE()), -- Random birth date
+        990000000 + @ApplicantID, -- Telephone number
+        N'Address ' + CAST(@ApplicantID AS NVARCHAR),
+        @ApplicantID -- Link to User_ID
+    );
+
+    SET @ApplicantID = @ApplicantID + 1;
+END;
+
+-- Step 3: Create and Initialize Category Sequence Table
+DECLARE @CategorySequence TABLE (
+    Category_Number INT PRIMARY KEY,
+    Current_Sequence INT
+);
+
+INSERT INTO @CategorySequence (Category_Number, Current_Sequence)
+VALUES
+(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
+(8, 0), (9, 0), (10, 0), (11, 0), (12, 0), (13, 0), (14, 0);
+
+-- Step 4: Reserve Applications for Report 10 (at least 5 per category per month for 4 months)
+DECLARE @CurrentMonth INT = MONTH(GETDATE());
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @FourMonthsAgo DATE = DATEADD(MONTH, -3, DATEFROMPARTS(@CurrentYear, @CurrentMonth, 1));
+DECLARE @MonthCounter INT = 0;
+DECLARE @CategoryToCover INT;
+DECLARE @ApplicationDate DATE;
+DECLARE @ReservedApplicationID INT = 1;
+
+-- Categories to Cover for Report 10
+DECLARE @CategoriesToCover TABLE (Category_Number INT);
+INSERT INTO @CategoriesToCover VALUES (1), (5), (10);
+
+-- Insert Applications for the Last 4 Months
+WHILE @MonthCounter <= 3
+BEGIN
+    SET @ApplicationDate = DATEADD(MONTH, @MonthCounter, @FourMonthsAgo);
+
+    DECLARE @CategoryCursor CURSOR;
+    SET @CategoryCursor = CURSOR FOR SELECT Category_Number FROM @CategoriesToCover;
+
+    OPEN @CategoryCursor;
+    FETCH NEXT FROM @CategoryCursor INTO @CategoryToCover;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- Insert at least 5 applications per category for the current month
+        DECLARE @AppsPerCategory INT = 1;
+        WHILE @AppsPerCategory <= 5
+        BEGIN
+            -- Check Remaining_Positions
+            DECLARE @RemainingPositions INT;
+            SELECT @RemainingPositions = Remaining_Positions
+            FROM [dbo].[Sponsorship_Category]
+            WHERE Category_Number = @CategoryToCover;
+
+            IF @RemainingPositions > 0
+            BEGIN
+                -- Increment Sequence
+                DECLARE @CurrentSequence INT;
+                SELECT @CurrentSequence = Current_Sequence
+                FROM @CategorySequence
+                WHERE Category_Number = @CategoryToCover;
+
+                SET @CurrentSequence = @CurrentSequence + 1;
+
+                -- Update Sequence Table
+                UPDATE @CategorySequence
+                SET Current_Sequence = @CurrentSequence
+                WHERE Category_Number = @CategoryToCover;
+
+                -- Insert Application
+                INSERT INTO [dbo].[Application] ([Tracking_Number], [Application_Date], [Current_Status], [Applicant_ID], [Category_Number])
+                VALUES (
+                    N'Γ' + RIGHT(N'0' + CAST(@CategoryToCover AS NVARCHAR), 2) + N'.' + RIGHT(N'0000' + CAST(@CurrentSequence AS NVARCHAR), 4),
+                    @ApplicationDate,
+                    CASE 
+                        WHEN @CurrentSequence % 5 = 0 THEN N'rejected'
+                        WHEN @CurrentSequence % 3 = 0 THEN N'approved'
+                        ELSE N'active'
+                    END,
+                    (@ReservedApplicationID % 5500) + 1,
+                    @CategoryToCover
+                );
+
+                SET @ReservedApplicationID = @ReservedApplicationID + 1;
+            END;
+
+            SET @AppsPerCategory = @AppsPerCategory + 1;
+        END;
+
+        FETCH NEXT FROM @CategoryCursor INTO @CategoryToCover;
+    END;
+
+    CLOSE @CategoryCursor;
+    DEALLOCATE @CategoryCursor;
+
+    SET @MonthCounter = @MonthCounter + 1;
+END;
+
+-- Step 5: Populate Remaining Applications (Maximize Total Applications)
+DECLARE @ApplicationID INT = @ReservedApplicationID;
+DECLARE @CategoryNumber INT;
+
+
+WHILE EXISTS (SELECT 1 FROM [dbo].[Sponsorship_Category] WHERE Remaining_Positions > 0)
+BEGIN
+    -- Select the next category with available positions
+    SELECT TOP 1 @CategoryNumber = Category_Number, @RemainingPositions = Remaining_Positions
+    FROM [dbo].[Sponsorship_Category]
+    WHERE Remaining_Positions > 0
+    ORDER BY Category_Number;
+
+    -- Increment Sequence
+    SELECT @CurrentSequence = Current_Sequence
+    FROM @CategorySequence
+    WHERE Category_Number = @CategoryNumber;
+
+    SET @CurrentSequence = @CurrentSequence + 1;
+
+    -- Update Sequence Table
+    UPDATE @CategorySequence
+    SET Current_Sequence = @CurrentSequence
+    WHERE Category_Number = @CategoryNumber;
+
+    -- Insert Application
+    INSERT INTO [dbo].[Application] ([Tracking_Number], [Application_Date], [Current_Status], [Applicant_ID], [Category_Number])
+    VALUES (
+        N'Γ' + RIGHT(N'0' + CAST(@CategoryNumber AS NVARCHAR), 2) + N'.' + RIGHT(N'0000' + CAST(@CurrentSequence AS NVARCHAR), 4),
+        DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 30, GETDATE()), -- Random future date
+        CASE 
+            WHEN @ApplicationID % 5 = 0 THEN N'rejected'
+            WHEN @ApplicationID % 3 = 0 THEN N'approved'
+            ELSE N'active'
+        END,
+        (@ApplicationID % 5500) + 1,
+        @CategoryNumber
+    );
+
+    SET @ApplicationID = @ApplicationID + 1;
+END;
+
+-- Step: Populate Modification Table
+DECLARE @MaxModifications INT = 5; -- Maximum modifications per application
+DECLARE @ModificationCount INT;
+DECLARE @RandomDate DATE;
+DECLARE @RandomStatus NVARCHAR(20);
+DECLARE @ModificationID INT = 1
+
+-- Get all Application IDs
+DECLARE ApplicationCursor CURSOR FOR 
+SELECT Application_ID 
+FROM [dbo].[Application];
+
+OPEN ApplicationCursor;
+FETCH NEXT FROM ApplicationCursor INTO @ApplicationID;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Determine how many modifications to add for this application (1 to 5)
+    SET @ModificationCount = ABS(CHECKSUM(NEWID())) % @MaxModifications + 1;
+
+    WHILE @ModificationCount > 0
+    BEGIN
+        -- Generate a random date within the last 365 days
+        SET @RandomDate = DATEADD(DAY, -ABS(CHECKSUM(NEWID())) % 365, GETDATE());
+
+        -- Generate a random status
+        SET @RandomStatus = CASE ABS(CHECKSUM(NEWID())) % 4
+            WHEN 0 THEN N'ordered'
+            WHEN 1 THEN N'checked'
+            WHEN 2 THEN N'rejected'
+            ELSE N'approved'
+        END;
+
+        -- Assign a random User_ID
+        SET @UserID = ABS(CHECKSUM(NEWID())) % 5500 + 1;
+
+        -- Insert the modification
+        INSERT INTO [dbo].[Modification] ([Modification_Date], [New_Status], [Reason], [User_ID], [Application_ID])
+        VALUES (
+            @RandomDate,
+            @RandomStatus,
+            N'Reason for modification ' + CAST(@ModificationID AS NVARCHAR), -- Random reason
+            @UserID,
+            @ApplicationID
+        );
+
+        -- Increment counters
+        SET @ModificationID = @ModificationID + 1;
+        SET @ModificationCount = @ModificationCount - 1;
+    END;
+
+    -- Move to the next application
+    FETCH NEXT FROM ApplicationCursor INTO @ApplicationID;
+END;
+
+CLOSE ApplicationCursor;
+DEALLOCATE ApplicationCursor;
