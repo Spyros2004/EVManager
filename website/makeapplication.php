@@ -163,14 +163,20 @@ input[type="submit"]:hover {
             border: none;
             cursor: pointer;
         }
-
         .back-button {
-            background: #6c757d;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+    display: inline-block;
+    background: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.back-button:hover {
+    background: #5a6268;
+}
 
         .message {
             margin-bottom: 20px;
@@ -190,6 +196,7 @@ input[type="submit"]:hover {
             border: 1px solid #f5c6cb;
         }
     </style>
+   
 </head>
 <body>
     <div class="container">
@@ -208,36 +215,61 @@ input[type="submit"]:hover {
         <?php endif; ?>
 
         <!-- Application Form -->
-        <form method="POST" action="">
-            <label for="category">Επιλέξτε Κατηγορία:</label>
-            <select name="category" id="category" required onchange="toggleFields()">
-                <option value="">-- Επιλέξτε --</option>
-                <?php foreach ($sponsorshipCategories as $category): ?>
-                    <option value="<?php echo $category['Category_Number']; ?>">
-                        <?php echo "Γ" . $category['Category_Number'] . " - " . htmlspecialchars($category['Description']); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <form method="POST" action="" onsubmit="return confirmPasswordBeforeSubmit(this);">
+    <label for="category">Επιλέξτε Κατηγορία:</label>
+    <select name="category" id="category" required onchange="toggleFields()">
+        <option value="">-- Επιλέξτε --</option>
+        <?php foreach ($sponsorshipCategories as $category): ?>
+            <option value="<?php echo $category['Category_Number']; ?>">
+                <?php echo "Γ" . $category['Category_Number'] . " - " . htmlspecialchars($category['Description']); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
 
-            <div id="license-plate-field" style="display: none;">
-                <label for="license_plate">Αριθμός Πινακίδας:</label>
-                <input type="text" name="license_plate" id="license_plate" maxlength="6">
-            </div>
+    <div id="license-plate-field" style="display: none;">
+        <label for="license_plate">Αριθμός Πινακίδας:</label>
+        <input type="text" name="license_plate" id="license_plate" maxlength="6">
+    </div>
 
-            <div id="upload-file-field" style="display: none;">
-                <button type="button" onclick="uploadFile()">Δημιουργία Αρχείου</button>
-                <input type="hidden" name="document" id="document">
-            </div>
+    <div id="upload-file-field" style="display: none;">
+        <button type="button" onclick="confirmWithPassword(uploadFile)">Δημιουργία Αρχείου</button>
+        <input type="hidden" name="document" id="document">
+    </div>
 
-            <input type="submit" value="Υποβολή Αίτησης">
-        </form>
+    <input type="submit" value="Υποβολή Αίτησης">
+</form>
 
-        <!-- Back to Dashboard Button -->
-        <form action="applicantdashboard.php" method="get">
-            <button type="submit" class="back-button">Πίσω στον Πίνακα Ελέγχου</button>
-        </form>
+
+<a href="applicantdashboard.php" class="back-button">Πίσω στον Πίνακα Ελέγχου</a>
+
     </div>
     <script>
+ function confirmPasswordBeforeSubmit(form) {
+    const password = prompt("Παρακαλώ εισάγετε τον κωδικό σας:");
+
+    if (!password) {
+        alert("Δεν εισαγάγατε κωδικό. Η ενέργεια ακυρώθηκε.");
+        return false; // Ακυρώνει την υποβολή
+    }
+
+    // AJAX αίτημα για επαλήθευση του κωδικού
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "verifyPassword.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onload = function () {
+        if (xhr.responseText === "success") {
+            form.submit(); // Υποβάλλει τη φόρμα αν ο κωδικός είναι σωστός
+        } else {
+            alert("Λάθος κωδικός. Παρακαλώ δοκιμάστε ξανά.");
+        }
+    };
+    xhr.send("password=" + encodeURIComponent(password));
+
+    return false; // Περιμένουμε το αποτέλεσμα του AJAX και ακυρώνουμε την υποβολή
+}
+
+
+
         function toggleFields() {
             const categorySelect = document.getElementById("category");
             const licensePlateField = document.getElementById("license-plate-field");
