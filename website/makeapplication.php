@@ -101,47 +101,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Υποβολή Αίτησης</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #e6f7ff, #ffffff);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+       body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #e6f7ff, #ffffff);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
 
-        .container {
+.container {
     width: 90%;
-    max-width: 800px; /* Αυξήστε το μέγιστο πλάτος */
+    max-width: 600px;
     background: #ffffff;
-    padding: 40px 50px; /* Αυξήστε τα περιθώρια */
-    border-radius: 15px; /* Ελαφρώς μεγαλύτερες γωνίες */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Εντονότερη σκίαση */
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
+h2 {
+    color: #0056b3;
+    margin-bottom: 20px;
+}
 
-        h2 {
-            color: #0056b3;
-            margin-bottom: 20px;
-        }
+select, input[type="text"], input[type="submit"], button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
 
-        select, input[type="text"], input[type="submit"], button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-        }
+select {
+    background: #f9f9f9;
+}
 
-        select {
-            background: #f9f9f9;
-        }
-
-        input[type="submit"] {
+input[type="submit"] {
     background: #007bff; /* Μπλε χρώμα */
     color: white;
     border: none;
@@ -150,53 +149,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     border-radius: 5px;
     font-size: 16px;
     font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Προσθέτει ομαλή μετάβαση */
 }
 
 input[type="submit"]:hover {
-    background: #0056b3; /* Σκούρο μπλε κατά την αιώρηση */
-    transform: translateY(-2px);
+    background: #28a745; /* Πράσινο χρώμα κατά το hover */
+    transform: translateY(-2px); /* Ελαφριά κίνηση */
 }
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .back-button {
-    display: inline-block;
-    background: #6c757d;
+
+button {
+    background: #007bff;
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
-    text-align: center;
+    border: none;
     cursor: pointer;
 }
 
-.back-button:hover {
-    background: #5a6268;
+.back-button {
+    background: #6c757d;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
-        .message {
-            margin-bottom: 20px;
-            padding: 10px;
-            border-radius: 5px;
-        }
+.message {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 5px;
+}
 
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
 
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
     </style>
-   
 </head>
 <body>
     <div class="container">
@@ -232,7 +226,7 @@ input[type="submit"]:hover {
     </div>
 
     <div id="upload-file-field" style="display: none;">
-        <button type="button" onclick="confirmWithPassword(uploadFile)">Δημιουργία Αρχείου</button>
+        <button type="button" onclick="uploadFile()">Δημιουργία Αρχείου</button>
         <input type="hidden" name="document" id="document">
     </div>
 
@@ -240,11 +234,13 @@ input[type="submit"]:hover {
 </form>
 
 
-<a href="applicantdashboard.php" class="back-button">Πίσω στον Πίνακα Ελέγχου</a>
-
+        <!-- Back to Dashboard Button -->
+        <form action="applicantdashboard.php" method="get">
+            <button type="submit" class="back-button">Πίσω στον Πίνακα Ελέγχου</button>
+        </form>
     </div>
     <script>
- function confirmPasswordBeforeSubmit(form) {
+function confirmPasswordBeforeSubmit(form) {
     const password = prompt("Παρακαλώ εισάγετε τον κωδικό σας:");
 
     if (!password) {
@@ -268,45 +264,44 @@ input[type="submit"]:hover {
     return false; // Περιμένουμε το αποτέλεσμα του AJAX και ακυρώνουμε την υποβολή
 }
 
+function toggleFields() {
+    const categorySelect = document.getElementById("category");
+    const licensePlateField = document.getElementById("license-plate-field");
+    const uploadFileField = document.getElementById("upload-file-field");
+    const selectedCategory = parseInt(categorySelect.value);
 
+    // Categories that require a document
+    const requiresDocumentCategories = [3, 5, 7];
 
-        function toggleFields() {
-            const categorySelect = document.getElementById("category");
-            const licensePlateField = document.getElementById("license-plate-field");
-            const uploadFileField = document.getElementById("upload-file-field");
-            const selectedCategory = parseInt(categorySelect.value);
+    // Show/hide license plate field for categories 1-4
+    if (selectedCategory >= 1 && selectedCategory <= 4) {
+        licensePlateField.style.display = "block";
+    } else {
+        licensePlateField.style.display = "none";
+    }
 
-            // Categories that require a document
-            const requiresDocumentCategories = [3, 5, 7];
+    // Show/hide document field for specific categories
+    if (requiresDocumentCategories.includes(selectedCategory)) {
+        uploadFileField.style.display = "block";
+    } else {
+        uploadFileField.style.display = "none";
+    }
+}
 
-            // Show/hide license plate field for categories 1-4
-            if (selectedCategory >= 1 && selectedCategory <= 4) {
-                licensePlateField.style.display = "block";
-            } else {
-                licensePlateField.style.display = "none";
-            }
+function uploadFile() {
+    const documentField = document.getElementById("document");
+    const category = document.getElementById("category").value;
 
-            // Show/hide document field for specific categories
-            if (requiresDocumentCategories.includes(selectedCategory)) {
-                uploadFileField.style.display = "block";
-            } else {
-                uploadFileField.style.display = "none";
-            }
-        }
+    if (!category) {
+        alert("Παρακαλώ επιλέξτε κατηγορία.");
+        return;
+    }
 
-        function uploadFile() {
-            const documentField = document.getElementById("document");
-            const category = document.getElementById("category").value;
+    // Simulate document creation
+    documentField.value = "G" + category;
+    alert("Το αρχείο δημιουργήθηκε: " + documentField.value);
+}
+</script>
 
-            if (!category) {
-                alert("Παρακαλώ επιλέξτε κατηγορία.");
-                return;
-            }
-
-            // Simulate document creation
-            documentField.value = "G" + category + "_" + Date.now() + ".pdf";
-            alert("Το αρχείο δημιουργήθηκε: " + documentField.value);
-        }
-    </script>
 </body>
 </html>
