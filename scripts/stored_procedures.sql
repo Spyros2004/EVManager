@@ -640,7 +640,7 @@ GO
     END
     GO
 
-    CREATE PROCEDURE ApplyForSponsorship
+    CREATE PROCEDURE dbo.ApplyForSponsorship
         @SessionID UNIQUEIDENTIFIER,
         @CategoryNumber INT,
         @LicensePlate CHAR(6) = NULL, -- Optional for non-category 1-4
@@ -779,12 +779,10 @@ GO
         END;
 
         -- Validate license plate for categories 1-4
-        IF @CategoryNumber BETWEEN 1 AND 4
-        BEGIN
-            IF @LicensePlate IS NULL
-            BEGIN
-                THROW 50002, 'Για τις κατηγορίες 1 έως 4 απαιτείται αριθμός πινακίδας αυτοκινήτου.', 1;
-            END
+		IF EXISTS (
+			SELECT 1 FROM Category_Has_Criterion WHERE Category_Number = @CategoryNumber AND Criterion_Number = 1
+		) AND @LicensePlate IS NULL
+			THROW 50002, 'Απαιτείται αριθμός πινακίδας αυτοκινήτου.', 1;
 
             -- Check if the license plate format is valid
             IF @LicensePlate NOT LIKE '[A-Z][A-Z][A-Z][0-9][0-9][0-9]'
@@ -801,13 +799,18 @@ GO
             BEGIN
                 THROW 50011, 'Η πινακίδα αυτοκινήτου υπάρχει ήδη στο σύστημα!', 1;
             END
-        END
 
         -- Validate required documents for specific categories
-        IF (@CategoryNumber = 3 OR @CategoryNumber = 4 OR @CategoryNumber = 7) AND @Document IS NULL
-        BEGIN
-            THROW 50003, 'Απαιτείται ανάρτηση αρχείου για αυτή τη κατηγορία!', 1;
-        END;
+        IF EXISTS (
+			SELECT 1
+			FROM Category_Has_Criterion chc
+			JOIN Criterion c ON chc.Criterion_Number = c.Criterion_Number
+			WHERE chc.Category_Number = @CategoryNumber
+			AND c.Criterion_Number IN (8, 9) -- Check for Criterion 8 or 9
+		) AND @Document IS NULL
+		BEGIN
+			THROW 50003, 'Απαιτείται ανάρτηση αρχείου για αυτή τη κατηγορία!', 1;
+		END;
 
         -- Start transaction for the critical section
         BEGIN TRANSACTION;
@@ -825,25 +828,40 @@ GO
             DECLARE @ApplicationID INT;
             SET @ApplicationID = SCOPE_IDENTITY();
 
-            -- Insert the license plate into Discarded_Car if it's a category 1-4 application
-            IF @CategoryNumber BETWEEN 1 AND 4
-            BEGIN
-                INSERT INTO Discarded_Car (License_Plate, Application_ID)
-                VALUES (@LicensePlate, @ApplicationID);
-            END
+            IF EXISTS (
+				SELECT 1
+			FROM Category_Has_Criterion chc
+			JOIN Criterion c ON chc.Criterion_Number = c.Criterion_Number
+			WHERE chc.Category_Number = @CategoryNumber
+			AND c.Criterion_Number = 1
+			)
+			BEGIN
+				INSERT INTO Discarded_Car (License_Plate, Application_ID)
+				VALUES (@LicensePlate, @ApplicationID);
+			END;
 
-            -- Insert document record with dynamically constructed URL
-            IF @Document IS NOT NULL AND @CategoryNumber IN (3, 5, 7)
-            BEGIN
-                DECLARE @DocumentType NVARCHAR(255);
-                DECLARE @DocumentID INT;
-                DECLARE @URL VARCHAR(255);
+            -- Insert document record with dynamically constructed URL   
+            DECLARE @DocumentType NVARCHAR(255);
+            DECLARE @DocumentID INT;
+            DECLARE @URL VARCHAR(255);
 
-                -- Determine document type based on the category
-                IF @CategoryNumber IN (3, 7)
-                    SET @DocumentType = N'Αρχείο - Βεβαίωση Τμήματος Κοινωνικής Ενσωμάτωσης ατόμων με αναπηρίες';
-                ELSE IF @CategoryNumber = 5
-                    SET @DocumentType = N'Αρχείο - Ταυτότητα Πολυτέκνων';
+				IF EXISTS (
+					SELECT 1 
+					FROM Category_Has_Criterion
+					WHERE Category_Number = @CategoryNumber 
+					AND Criterion_Number = 9 -- Criterion 9
+				)
+				BEGIN
+					SET @DocumentType = N'Αρχείο - Βεβαίωση Τμήματος Κοινωνικής Ενσωμάτωσης ατόμων με αναπηρίες';
+				END
+				ELSE IF EXISTS (
+					SELECT 1 
+					FROM Category_Has_Criterion
+					WHERE Category_Number = @CategoryNumber 
+					AND Criterion_Number = 8 -- Criterion 8
+				)
+				BEGIN
+					SET @DocumentType = N'Αρχείο - Ταυτότητα Πολυτέκνων';
 
                 -- Insert into Document table with a temporary placeholder URL (or an initial dummy value)
                 INSERT INTO Document (URL, Document_Type, Application_ID, User_ID)
@@ -859,7 +877,7 @@ GO
                 UPDATE Document
                 SET URL = @URL
                 WHERE Document_ID = @DocumentID;
-            END
+				END
 
             -- Commit the transaction if all operations succeed
             COMMIT;
@@ -879,7 +897,7 @@ GO
         END CATCH;
     END;
     GO
-
+	    
     CREATE PROCEDURE dbo.CheckIsAA
         @SessionID UNIQUEIDENTIFIER,
         @IsAA BIT OUTPUT
