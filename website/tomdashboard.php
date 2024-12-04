@@ -8,6 +8,18 @@ if (!isset($_SESSION['SessionID']) || $_SESSION['UserTypeNumber'] != 2) {
     exit();
 }
 
+// Function to verify the password before executing actions
+function verifyPassword($conn, $sessionId, $inputPassword) {
+    $sql = "{CALL VerifyPasswordBySession(?, ?)}";
+    $params = [$sessionId, $inputPassword];
+    $stmt = sqlsrv_query($conn, $sql, $params);
+    if ($stmt === false) {
+        return false;
+    }
+    sqlsrv_free_stmt($stmt);
+    return true;
+}
+
 // Fetch ordered applications
 $orderedApplications = [];
 $sql = "{CALL GetOrderedApplications()}";
@@ -22,6 +34,14 @@ sqlsrv_free_stmt($stmt);
 
 // Handle actions (Accept/Reject, Add/Edit Document, View Details)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $sessionId = $_SESSION['SessionID'];
+    $inputPassword = $_POST['password'] ?? null;
+
+    if (!$inputPassword || !verifyPassword($conn, $sessionId, $inputPassword)) {
+        echo "<script>alert('Λανθασμένος κωδικός. Παρακαλώ δοκιμάστε ξανά.');</script>";
+        exit();
+    }
+
     if (isset($_POST['viewDetails'])) {
         $applicationId = $_POST['applicationId'];
 
@@ -50,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['addDocument'])) {
         $applicationId = $_POST['applicationId'];
         $documentType = $_POST['documentType'];
-        $sessionId = $_SESSION['SessionID'];
 
         $sql = "{CALL AddDocument(?, ?, ?, NULL)}";
         $params = [$sessionId, $applicationId, $documentType];
@@ -63,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif (isset($_POST['updateDocument'])) {
         $documentId = $_POST['documentId'];
-        $sessionId = $_SESSION['SessionID'];
 
         $sql = "{CALL UpdateDocument(?, ?)}";
         $params = [$sessionId, $documentId];
@@ -78,9 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $applicationId = $_POST['applicationId'];
         $action = $_POST['action']; // 0 = Reject, 1 = Accept
         $reason = $_POST['reason'];
-        $sessionId = $_SESSION['SessionID'];
 
-        $sql = "{CALL AcceptOrRejectApplication(?, ?, ?, ?)}";
+        $sql = "{CALL AcceptOrRejectApplicationTOM(?, ?, ?, ?)}";
         $params = [$applicationId, $action, $reason, $sessionId];
         $stmt = sqlsrv_query($conn, $sql, $params);
 
@@ -106,15 +123,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     margin: 0;
     padding: 0;
 }
-
-header {
-    background-color: #0056b3; /* Dark blue header */
-    color: white;
-    padding: 20px 30px; /* Increased padding */
-    text-align: center;
-    font-size: 24px; /* Larger header font size */
+.welcome {
+    font-size: 22px;
+    font-weight: 700;
 }
 
+.header {
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    position: relative; /* Allow positioning for logout button */
+    padding: 20px;
+    background-color: #0056b3; /* Blue background */
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    font-size: 36px; /* Larger font size for the title */
+    font-weight: 700; /* Bold text */
+    margin: 0;
+    color: white; /* Ensure title is visible on blue background */
+    text-align: center;
+}
 .container {
     padding: 30px;
     max-width: 1600px; /* Increased max width */
@@ -243,13 +274,67 @@ ul li a:hover {
     text-decoration: underline;
 }
 
+.header-buttons {
+    position: absolute;
+    right: 20px; /* Align logout button to the right */
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center the logout button */
+}
+
+.btn.logout {
+    background-color: #dc3545; /* Red for logout button */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn.logout:hover {
+    background-color: #c82333; /* Darker red on hover */
+    transform: translateY(-2px);
+}
     </style>
+    <script>
+
+function verifyPasswordBeforeSubmit(form) {
+    // Prompt user for password
+    const password = prompt("Παρακαλώ εισάγετε τον κωδικό σας:");
     
+    if (password) {
+        // Create a hidden input field for the password
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'hidden';
+        passwordInput.name = 'password';
+        passwordInput.value = password;
+
+        // Append the password input to the form
+        form.appendChild(passwordInput);
+        return true; // Allow form submission
+    } else {
+        // Alert user if password is not provided
+        alert("Δεν εισαγάγατε κωδικό. Η ενέργεια ακυρώθηκε.");
+        return false; // Prevent form submission
+    }
+}
+</script>
+
 </head>
 <body>
+ 
+<div class="header">
     <header>
         <h1>Πίνακας Ελέγχου TOM</h1>
     </header>
+    <div class="header-buttons">
+        <a href="logout.php" class="btn logout">Αποσύνδεση</a>
+    </div>
+</div>
+
+
     <div class="container">
         <div class="applications-container">
             <!-- List of Ordered Applications -->
@@ -269,21 +354,23 @@ ul li a:hover {
                                 <td><?= htmlspecialchars($application['Application_ID']) ?></td>
                                 <td><?= htmlspecialchars($application['Current_Status']) ?></td>
                                 <td>
-                                    <form method="POST">
-                                        <input type="hidden" name="applicationId" value="<?= htmlspecialchars($application['Application_ID']) ?>">
-                                        <button class="action-btn" name="viewDetails">Προβολή</button>
-                                    </form>
+                                <form method="POST" onsubmit="return verifyPasswordBeforeSubmit(this);">
+                                    <input type="hidden" name="applicationId" value="<?= htmlspecialchars($application['Application_ID']) ?>">
+                                    <button type="submit" class="action-btn" name="viewDetails">Προβολή</button>
+                                </form>
+
                                 </td>
                                 <td>
-                                    <form method="POST" class="form-inline">
-                                        <input type="hidden" name="applicationId" value="<?= htmlspecialchars($application['Application_ID']) ?>">
-                                        <select name="action" required>
-                                            <option value="1">Αποδοχή</option>
-                                            <option value="0">Απόρριψη</option>
-                                        </select>
-                                        <input type="text" name="reason" placeholder="Αιτιολόγηση" required>
-                                        <button class="action-btn" name="acceptReject">Υποβολή</button>
-                                    </form>
+                                <form method="POST" onsubmit="return verifyPasswordBeforeSubmit(this);">
+                                    <input type="hidden" name="applicationId" value="<?= htmlspecialchars($application['Application_ID']) ?>">
+                                    <select name="action" required>
+                                        <option value="1">Αποδοχή</option>
+                                        <option value="0">Απόρριψη</option>
+                                    </select>
+                                    <input type="text" name="reason" placeholder="Αιτιολόγηση" required>
+                                    <button type="submit" class="action-btn" name="acceptReject">Υποβολή</button>
+                                </form>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -344,21 +431,23 @@ ul li a:hover {
             <?php foreach ($documents as $doc): ?>
                 <li>
                     <?= htmlspecialchars($doc['Document_Type']) ?>: 
-                    <a href="<?= htmlspecialchars($doc['URL']) ?>" target="_blank">Προβολή</a>
-                    <form method="POST" style="display: inline;">
+                    <a href="javascript:void(0);" style="color: blue; text-decoration: underline; cursor: default;">Προβολή</a>
+                    <form method="POST" style="display: inline;" onsubmit="return verifyPasswordBeforeSubmit(this);">
                         <input type="hidden" name="documentId" value="<?= htmlspecialchars($doc['Document_ID']) ?>">
-                        <button class="action-btn" name="updateDocument">Ενημέρωση</button>
+                        <button type="submit" class="action-btn" name="updateDocument">Ενημέρωση</button>
                     </form>
+
                 </li>
             <?php endforeach; ?>
         </ul>
     </div>
-    <form method="POST" style="margin-top: 20px;">
+    <form method="POST" style="margin-top: 20px;" onsubmit="return verifyPasswordBeforeSubmit(this);">
         <input type="hidden" name="applicationId" value="<?= htmlspecialchars($applicationDetails['Application_ID']) ?>">
         <label for="documentType">Τύπος Εγγράφου:</label>
         <input type="text" id="documentType" name="documentType" required>
-        <button class="action-btn" name="addDocument">Προσθήκη Εγγράφου</button>
+        <button type="submit" class="action-btn" name="addDocument">Προσθήκη Εγγράφου</button>
     </form>
+
 <?php endif; ?>
 
 
@@ -368,4 +457,3 @@ ul li a:hover {
     </div>
 </body>
 </html>
-
