@@ -170,6 +170,30 @@ if ($stmtApplications === false) {
             text-decoration: underline;
         }
     </style>
+    <script>
+        function confirmWithPassword(actionCallback) {
+    const password = prompt("Παρακαλώ εισάγετε τον κωδικό σας:");
+
+    if (!password) {
+        alert("Δεν εισαγάγατε κωδικό. Η ενέργεια ακυρώθηκε.");
+        return;
+    }
+
+    // AJAX αίτημα για επαλήθευση του κωδικού
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "verifyPassword.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onload = function () {
+        if (xhr.responseText === "success") {
+            actionCallback(); // Εκτέλεση της αρχικής ενέργειας
+        } else {
+            alert("Λάθος κωδικός. Παρακαλώ δοκιμάστε ξανά.");
+        }
+    };
+    xhr.send("password=" + encodeURIComponent(password));
+}
+
+    </script>
 </head>
 <body>
     
@@ -183,7 +207,7 @@ if ($stmtApplications === false) {
     <div class="content">
         <h1 style="font-size: 2.5em;">Το Προφίλ Σου</h1>
         
-        <a href="makeapplication.php" class="btn" style="margin: 20px auto; display: block; width: fit-content; padding: 15px 30px; font-size: 1.2em;">Νέα Αίτηση</a>
+        <a href="javascript:void(0);" class="btn" style="margin: 20px auto; display: block; width: fit-content; padding: 15px 30px; font-size: 1.2em;" onclick="confirmWithPassword(() => window.location.href = 'makeapplication.php');">Νέα Αίτηση</a>
         <br>
         <h1>Οι Αιτήσεις Σου</h1>
         <?php
@@ -212,10 +236,10 @@ if (sqlsrv_has_rows($stmtApplications)) {
       echo "</tr>";
   }
 } else {
-  // No data, display a message in a table row
-  echo '<tr><td colspan="4" class="no-data-message">
-          Δεν έχετε καμία αίτηση ακόμα. <a href="makeapplication.php">Κάνε Αίτηση</a>
-        </td></tr>';
+    echo "<tr><td colspan='4' class='no-data-message'>
+    Δεν έχετε καμία αίτηση ακόμα. <a href='javascript:void(0);' onclick='confirmWithPassword(() => { window.location.href = \"makeapplication.php\"; });'>Κάνε Αίτηση</a>
+  </td></tr>";
+
 }
 
 // Close the table
