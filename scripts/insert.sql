@@ -1,3 +1,15 @@
+ALTER TABLE [dbo].[Discarded_Car] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[User] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Sponsorship_Category] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Applicant] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Criterion] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Category_Has_Criterion] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Application] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Document] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Modification] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Vehicle] NOCHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[User_Session] NOCHECK CONSTRAINT ALL;
+
 INSERT INTO [dbo].[User] ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status])
 VALUES ('Admin', 'Admin', 'admin', 'admin@example.com', HASHBYTES('SHA2_512', N'1234'), 'Admin', 'approved');
 GO
@@ -379,3 +391,15 @@ END;
 
 CLOSE ApplicationCursor;
 DEALLOCATE ApplicationCursor;
+
+ALTER TABLE [dbo].[Discarded_Car] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[User] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Sponsorship_Category] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Applicant] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Criterion] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Category_Has_Criterion] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Application] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Document] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Modification] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[Vehicle] CHECK CONSTRAINT ALL;
+ALTER TABLE [dbo].[User_Session] CHECK CONSTRAINT ALL;
