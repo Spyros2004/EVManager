@@ -1,3 +1,6 @@
+INSERT INTO [dbo].[User] ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status])
+VALUES ('Admin', 'Admin', 'admin', 'admin@example.com', HASHBYTES('SHA2_512', '1234'), 'Admin', 'approved');
+
 INSERT INTO Sponsorship_Category (Description, Amount, Total_Positions)
 VALUES
 (N'Απόσυρση και αντικατάσταση με καινούργιο όχημα ιδιωτικής χρήσης χαμηλών εκπομπών CO2 (μέχρι 50 γρ/χλμ)', 7500, 1228),
