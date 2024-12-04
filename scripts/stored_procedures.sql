@@ -415,7 +415,7 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-		SET @First_Name = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @First_Name = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -424,7 +424,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-		SET @Last_Name = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Last_Name = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -433,7 +433,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-		SET @Username = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Username = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -442,7 +442,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-        SET @Password = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+        SET @Password = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -451,7 +451,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-		SET @User_Type = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @User_Type = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -460,7 +460,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-		SET @Identification = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Identification = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -469,7 +469,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-		SET @Company_Private = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Company_Private = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -565,7 +565,7 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-		SET @Username = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Username = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -574,7 +574,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-        SET @Password = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+        SET @Password = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -649,7 +649,7 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-		SET @LicensePlate = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @LicensePlate = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -658,7 +658,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-        SET @Document = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+        SET @Document = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -1017,7 +1017,7 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-		SET @Identification = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Identification = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -1065,7 +1065,7 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-		SET @Document1 = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Document1 = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -1074,7 +1074,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
-		SET @Document2 = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Document2 = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -1202,15 +1202,16 @@ GO
 AS
 BEGIN
     SET NOCOUNT ON;
-	SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                REPLACE(REPLACE(REPLACE(REPLACE(@Reason, '@', ''), '#', ''), '%', ''),
-                                '!', ''), '$', ''), '^', ''), '&', ''), '*', ''), '(', ''), ')', ''), 
-                                '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
-                                ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
-                                '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', ''); 
+	SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                REPLACE(REPLACE(REPLACE(REPLACE(
+                    @Reason, '@', ''), '#', ''), '%', ''), '!', ''), '$', ''), '^', ''),
+                    '&', ''), '*', ''), '(', ''), ')', ''), '_', ''), '-', ''), '=', ''),
+                    '+', ''), '[', ''), ']', ''), '{', ''), '}', ''), '\\', ''), '|', ''),
+                    ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), '<', ''), '.', ''),
+                    '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', '');
     -- Validate parameters
     IF @Action NOT IN (0, 1)
     BEGIN
@@ -1276,7 +1277,7 @@ CREATE PROCEDURE dbo.AcceptOrRejectApplicationTOM
 AS
 BEGIN
     SET NOCOUNT ON;
-	SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+	SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -1349,7 +1350,7 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-		SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @Reason = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -1610,7 +1611,7 @@ GO
     AS
     BEGIN
         SET NOCOUNT ON;
-		SET @DocumentType = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @DocumentType = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -1619,7 +1620,7 @@ GO
                                 '_', ''), '-', ''), '=', ''), '+', ''), '[', ''), ']', ''), '{', ''), '}',
                                 ''), '\', ''), '|', ''), ';', ''), ':', ''), '''', ''), '"', ''), ',', ''), 
                                 '<', ''), '.', ''), '>', ''), '/', ''), '?', ''), '`', ''), '~', ''), ' ', '');
-		SET @URL = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @URL = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
@@ -1721,7 +1722,7 @@ GO
         @InputPassword NVARCHAR(255)
     AS
     BEGIN
-		SET @InputPassword = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+		SET @InputPassword = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                 REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
