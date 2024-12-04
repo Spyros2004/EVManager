@@ -1,5 +1,5 @@
 INSERT INTO [dbo].[User] ([First_Name], [Last_Name], [Username], [Email], [Password], [User_Type], [Status])
-VALUES ('Admin', 'Admin', 'admin', 'admin@example.com', HASHBYTES('SHA2_512', '1234'), 'Admin', 'approved');
+VALUES ('Admin', 'Admin', 'admin', 'admin@example.com', HASHBYTES('SHA2_512', N'1234'), 'Admin', 'approved');
 GO
 
 INSERT INTO Sponsorship_Category (Description, Amount, Total_Positions)
