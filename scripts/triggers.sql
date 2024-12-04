@@ -133,3 +133,4 @@ BEGIN
     WHERE Category_Number = @CategoryNumber;
 
 END;
+GO
