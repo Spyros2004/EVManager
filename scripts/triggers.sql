@@ -11,7 +11,7 @@ GO
 DROP TRIGGER IF EXISTS [dbo].[InsertModificationAfterApplicationInsert]
 GO
 
-CREATE TRIGGER [dbo].IncrementRemainingPositions
+CREATE TRIGGER [dbo].IncrementSponsorshipPositions
 ON Application
 AFTER UPDATE
 AS
