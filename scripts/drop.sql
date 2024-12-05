@@ -1,17 +1,17 @@
 -- DROP CONSTRAINTS
-DROP INDEX IX_Application_TrackingNumber ON Application;
+DROP INDEX IF EXISTS IX_Application_TrackingNumber ON Application;
 GO
 
-DROP INDEX IX_Application_Status_Category ON Application;
+DROP INDEX IF EXISTS IX_Application_Status_Category ON Application;
 GO
 
-DROP INDEX IX_Application_ApplicationDate ON Application;
+DROP INDEX IF EXISTS IX_Application_ApplicationDate ON Application;
 GO
 
-DROP INDEX IX_Applicant_UserID_CompanyPrivate ON Applicant;
+DROP INDEXIF EXISTS IX_Applicant_UserID_CompanyPrivate ON Applicant;
 GO
 
-DROP INDEX IX_Application_Status_Date ON Application;
+DROP INDEX IF EXISTS IX_Application_Status_Date ON Application;
 GO
 
 -- Drop foreign key constraints
