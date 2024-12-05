@@ -8,7 +8,7 @@ GO
 DROP INDEX IF EXISTS IX_Application_ApplicationDate ON Application;
 GO
 
-DROP INDEXIF EXISTS IX_Applicant_UserID_CompanyPrivate ON Applicant;
+DROP INDEX IF EXISTS IX_Applicant_UserID_CompanyPrivate ON Applicant;
 GO
 
 DROP INDEX IF EXISTS IX_Application_Status_Date ON Application;
