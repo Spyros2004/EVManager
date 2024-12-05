@@ -250,7 +250,7 @@ BEGIN
             FROM [dbo].[Sponsorship_Category]
             WHERE Category_Number = @CategoryToCover;
 
-            IF @RemainingPositions > 0
+            IF @RemainingPositions > 4
             BEGIN
                 -- Increment Sequence
                 DECLARE @CurrentSequence INT;
