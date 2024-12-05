@@ -299,12 +299,12 @@ DECLARE @ApplicationID INT = @ReservedApplicationID;
 DECLARE @CategoryNumber INT;
 
 
-WHILE EXISTS (SELECT 1 FROM [dbo].[Sponsorship_Category] WHERE Remaining_Positions > 0)
+WHILE EXISTS (SELECT 1 FROM [dbo].[Sponsorship_Category] WHERE Remaining_Positions > 4)
 BEGIN
     -- Select the next category with available positions
     SELECT TOP 1 @CategoryNumber = Category_Number, @RemainingPositions = Remaining_Positions
     FROM [dbo].[Sponsorship_Category]
-    WHERE Remaining_Positions > 0
+    WHERE Remaining_Positions > 4
     ORDER BY Category_Number;
 
     -- Increment Sequence
@@ -393,6 +393,63 @@ END;
 
 CLOSE ApplicationCursor;
 DEALLOCATE ApplicationCursor;
+
+DECLARE @Counter INT
+DECLARE @LicensePlate CHAR(6)
+SET @Counter = 1;
+
+WHILE @Counter <= 2000 -- At least 2000 discarded cars
+BEGIN
+    -- Generate a unique license plate: 3 random letters + 3 digits
+    SET @LicensePlate = CONCAT(
+        CHAR(65 + ((@Counter / 26 / 26) % 26)),  -- First letter (A-Z)
+        CHAR(65 + ((@Counter / 26) % 26)),       -- Second letter (A-Z)
+        CHAR(65 + (@Counter % 26)),             -- Third letter (A-Z)
+        FORMAT((@Counter % 1000), '000')        -- Three digits (000-999)
+    );
+
+    SET @ApplicationID = @Counter;
+
+    INSERT INTO [dbo].[Discarded_Car] ([License_Plate], [Application_ID])
+    VALUES (@LicensePlate, @ApplicationID);
+
+    SET @Counter = @Counter + 1;
+END;
+
+DECLARE @URL NVARCHAR(255), @DocumentType NVARCHAR(100)
+SET @Counter = 1;
+
+WHILE @Counter <= 7000 -- At least 7000 documents
+BEGIN
+    SET @URL = CONCAT('Applications/Documents/document', @Counter, '.pdf');
+    SET @DocumentType = CASE WHEN @Counter % 2 = 0 THEN 'Παραγγελία Αυτοκινήτου' ELSE 'Πιστοποιητικό Συμμόρφωσης ΕΚ' END;
+    SET @ApplicationID = @Counter % 7000 + 1;
+    SET @UserID = @Counter % 3000 + 1;
+
+    INSERT INTO [dbo].[Document] ([URL], [Document_Type], [Application_ID], [User_ID])
+    VALUES (@URL, @DocumentType, @ApplicationID, @UserID);
+
+    SET @Counter = @Counter + 1;
+END;
+
+DECLARE @VehicleDate DATE, @VehicleType NVARCHAR(20), @CO2Emissions INT, @Manufacturer NVARCHAR(50), @Model NVARCHAR(50), @Price INT, @DocumentID INT;
+SET @Counter = 1;
+
+WHILE @Counter <= 3000 -- At least 3000 vehicles
+BEGIN
+    SET @VehicleDate = DATEADD(DAY, -(@Counter % 365), GETDATE());
+    SET @VehicleType = CASE WHEN @Counter % 2 = 0 THEN 'pure-electric' ELSE 'hybrid' END;
+    SET @CO2Emissions = (@Counter % 50) + 1;
+    SET @Manufacturer = CONCAT('Manufacturer', @Counter);
+    SET @Model = CONCAT('Model', @Counter);
+    SET @Price = 20000 + (@Counter % 60000);
+    SET @DocumentID = @Counter % 7000 + 1;
+
+    INSERT INTO [dbo].[Vehicle] ([Vehicle_Date], [Vehicle_Type], [CO2_Emissions], [Manufacturer], [Model], [Price], [Document_ID])
+    VALUES (@VehicleDate, @VehicleType, @CO2Emissions, @Manufacturer, @Model, @Price, @DocumentID);
+
+    SET @Counter = @Counter + 1;
+END;
 
 ALTER TABLE [dbo].[Discarded_Car] CHECK CONSTRAINT ALL;
 ALTER TABLE [dbo].[User] CHECK CONSTRAINT ALL;
