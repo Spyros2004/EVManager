@@ -11,7 +11,7 @@ GO
 DROP TRIGGER IF EXISTS [dbo].[InsertModificationAfterApplicationInsert]
 GO
 
-CREATE TRIGGER IncrementRemainingPositions
+CREATE TRIGGER [dbo].IncrementRemainingPositions
 ON Application
 AFTER UPDATE
 AS
@@ -116,21 +116,18 @@ BEGIN
 END;
 GO
 
-CREATE TRIGGER DecrementSponsorshipPositions
+CREATE TRIGGER [dbo].DecrementSponsorshipPositions
 ON Application
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @CategoryNumber INT;
-
-    -- Retrieve the Category Number for the newly inserted application
-    SELECT @CategoryNumber = Category_Number
-    FROM inserted;
-
-    -- Decrement Remaining_Positions in the Sponsorship_Category table for the given category
+    -- Decrement Remaining_Positions only for rows with Status not equal to 'Rejected' or 'Expired'
     UPDATE Sponsorship_Category
     SET Remaining_Positions = Remaining_Positions - 1
-    WHERE Category_Number = @CategoryNumber;
-
+    WHERE Category_Number IN (
+        SELECT Category_Number
+        FROM inserted
+        WHERE Status NOT IN ('rejected', 'expired')
+    );
 END;
 GO
