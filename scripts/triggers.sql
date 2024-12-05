@@ -1,16 +1,3 @@
-DROP TRIGGER IF EXISTS [dbo].[DecrementSponsorshipPositions]
-GO
-DROP TRIGGER IF EXISTS [dbo].[IncrementSponsorshipPositions]
-GO
-DROP TRIGGER IF EXISTS [dbo].[SetTrackingNumber]
-GO
-DROP TRIGGER IF EXISTS [dbo].[UpdateStatusOnUserType]
-GO
-DROP TRIGGER IF EXISTS [dbo].[SetRemainingPositions]
-GO
-DROP TRIGGER IF EXISTS [dbo].[InsertModificationAfterApplicationInsert]
-GO
-
 CREATE TRIGGER [dbo].IncrementSponsorshipPositions
 ON Application
 AFTER UPDATE
