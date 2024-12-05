@@ -127,7 +127,7 @@ BEGIN
     WHERE Category_Number IN (
         SELECT Category_Number
         FROM inserted
-        WHERE Status NOT IN ('rejected', 'expired')
+        WHERE Current_Status NOT IN ('rejected', 'expired')
     );
 END;
 GO
